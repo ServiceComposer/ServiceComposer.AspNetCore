@@ -19,3 +19,15 @@ for:
 
   build_script:
     - cmd: build.cmd release
+
+  deploy:
+    - provider: Environment
+      name: NuGet public feed
+      artifact: .nugets\*.nupkg
+
+    - provider: GitHub    
+      release: $(PackageVersion)
+      description: 'Release v$(PackageVersion)'
+      auth_token:
+        secure: 2ijF4OfPYfIUTunubL/Z04ogADL9sx/gKW1jMRNJnAa1OpHZpSvCKmP0gvNs8C7h
+      artifact: .nugets\*.nupkg, .build\build.zip
