@@ -2,7 +2,6 @@ version: 1.0.{build}
 image: Visual Studio 2017
 
 skip_branch_with_pr: true
-skip_tags: true
 pull_requests:
   do_not_increment_build_number: true
 
