@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputPath>..\..\.build</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -10,7 +9,6 @@
     <Description>Services ViewModel Composition</Description>
     <PackageLicense>https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/license</PackageLicense>
     <PackageTags>Services ViewModel Composition</PackageTags>
-    <PackageOutputPath>..\..\.nugets</PackageOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
