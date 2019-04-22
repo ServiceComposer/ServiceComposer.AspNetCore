@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bullseye" Version="2.2.0" />
+    <PackageReference Include="Colorful.Console" Version="1.2.9" />
+    <PackageReference Include="SimpleExec" Version="4.1.0" />
+  </ItemGroup>
+
+</Project>
