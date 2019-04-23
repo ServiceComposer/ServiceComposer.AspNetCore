@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -10,17 +8,15 @@ internal class Program
     {
         var sdk = new DotnetSdkManager();
 
-        Target("default", DependsOn("verify-OS-is-suppported"),
-            Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
-            solution => Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Debug"));
+        Target("default", DependsOn("test"));
 
-        Target("release", DependsOn("verify-OS-is-suppported"),
+        Target("build",
             Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
             solution => Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release"));
 
-        Target(
-            "verify-OS-is-suppported",
-            () => { if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) throw new InvalidOperationException("Build is supported on Windows only, at this time."); });
+        Target("test", DependsOn("build"),
+            Directory.EnumerateFiles("src", "*.Tests.csproj", SearchOption.AllDirectories),
+            proj => Run(sdk.GetDotnetCliPath(), $"test \"{proj}\" --configuration Release --no-build"));
 
         RunTargets(args);
     }
