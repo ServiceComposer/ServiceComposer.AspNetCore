@@ -16,4 +16,7 @@ build_script:
 artifacts:
 - path: ./**/*.nupkg
 deploy: off
-test: on
+test:
+  assemblies:
+    only:
+      - '**\*.tests.dll'
