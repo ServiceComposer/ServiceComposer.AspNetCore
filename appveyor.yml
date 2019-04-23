@@ -12,7 +12,7 @@ branches:
   - /^\d+\.\d+\.\d+(-\S*)?$/
 
 build_script:
-- cmd: ./build.cmd
+- cmd: ./build.cmd release
 
 test_script:
 - cmd: ./build.cmd test
