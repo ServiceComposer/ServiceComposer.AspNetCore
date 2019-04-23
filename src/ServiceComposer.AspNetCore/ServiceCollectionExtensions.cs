@@ -9,33 +9,53 @@ namespace ServiceComposer.AspNetCore
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddViewModelComposition(this IServiceCollection services) =>
-            AddViewModelComposition(services, "*ViewModelComposition*.dll");
-
-        public static void AddViewModelComposition(this IServiceCollection services, string assemblySearchPattern)
+        public static void AddViewModelComposition(this IServiceCollection services)
         {
-            var fileNames = Directory.GetFiles(AppContext.BaseDirectory, assemblySearchPattern);
+            AddViewModelComposition(services, null);
+        }
 
-            var types = new List<Type>();
-            foreach (var fileName in fileNames)
+        public static void AddViewModelComposition(this IServiceCollection services, Action<ViewModelCompositionOptions> config)
+        {
+            var options = new ViewModelCompositionOptions(services);
+            config?.Invoke(options);
+            if (!options.IsAssemblyScanningDisabled)
             {
-                var temp = AssemblyLoader.Load(fileName)
-                    .GetTypes()
-                    .Where(t =>
+                var fileNames = Directory.GetFiles(AppContext.BaseDirectory);
+                var types = new List<Type>();
+                foreach (var fileName in fileNames)
+                {
+                    types.AddRange(Assembly.LoadFrom(fileName).GetTypesFromAssembly());
+                }
+
+                var platformAssembliesString = (string)AppDomain.CurrentDomain.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
+                if (platformAssembliesString != null)
+                {
+                    var platformAssemblies = platformAssembliesString.Split(Path.PathSeparator);
+                    foreach (var platformAssembly in platformAssemblies)
                     {
-                        var typeInfo = t.GetTypeInfo();
-                        return !typeInfo.IsInterface
-                            && !typeInfo.IsAbstract
-                            && typeof(IInterceptRoutes).IsAssignableFrom(t);
-                    });
+                        types.AddRange(Assembly.LoadFrom(platformAssembly).GetTypesFromAssembly());
+                    }
+                }
 
-                types.AddRange(temp);
+                foreach (var type in types)
+                {
+                    options.RegisterRouteInterceptor(type);
+                }
             }
+        }
 
-            foreach (var type in types)
-            {
-                services.AddSingleton(typeof(IInterceptRoutes), type);
-            }
+        static IEnumerable<Type> GetTypesFromAssembly(this Assembly assembly)
+        {
+            var types = assembly.GetTypes()
+                .Where(t =>
+                {
+                    var typeInfo = t.GetTypeInfo();
+                    return !typeInfo.IsInterface
+                        && !typeInfo.IsAbstract
+                        && typeof(IInterceptRoutes).IsAssignableFrom(t);
+                });
+
+            return types;
         }
     }
 }
