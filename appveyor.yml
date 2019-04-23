@@ -13,6 +13,11 @@ branches:
 
 build_script:
 - cmd: ./build.cmd
+
+test_script:
+- cmd: ./build.cmd test
+
 artifacts:
 - path: ./**/*.nupkg
+
 deploy: off
