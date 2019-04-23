@@ -18,6 +18,10 @@ internal class Program
             Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
             solution => Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release"));
 
+        Target("test", DependsOn("verify-OS-is-suppported"),
+            Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
+            solution => Run(sdk.GetDotnetCliPath(), $"test \"{solution}\" --configuration Debug"));
+
         Target(
             "verify-OS-is-suppported",
             () => { if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) throw new InvalidOperationException("Build is supported on Windows only, at this time."); });
