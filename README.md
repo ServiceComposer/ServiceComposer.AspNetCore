@@ -1,3 +1,5 @@
+<img src="assets/ServiceComposer.png" width="100" />
+
 # ServiceComposer
 
 ServiceComposer, a ViewModel Composition API Gateway
