@@ -12,10 +12,9 @@ branches:
   - /^\d+\.\d+\.\d+(-\S*)?$/
 
 build_script:
-- cmd: ./build.cmd release
+- cmd: ./build.cmd
 
-test_script:
-- cmd: ./build.cmd test
+test: off
 
 artifacts:
 - path: ./**/*.nupkg
