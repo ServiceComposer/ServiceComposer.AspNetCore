@@ -19,8 +19,8 @@ internal class Program
             solution => Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release"));
 
         Target("test", DependsOn("verify-OS-is-suppported"),
-            Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
-            solution => Run(sdk.GetDotnetCliPath(), $"test \"{solution}\" --configuration Debug"));
+            Directory.EnumerateFiles("src", "*.Tests.csproj", SearchOption.AllDirectories),
+            proj => Run(sdk.GetDotnetCliPath(), $"test \"{proj}\" --configuration Debug"));
 
         Target(
             "verify-OS-is-suppported",
