@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
