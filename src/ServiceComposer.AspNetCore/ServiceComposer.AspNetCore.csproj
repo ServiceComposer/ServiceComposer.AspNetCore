@@ -8,6 +8,7 @@
     <Authors>Mauro Servienti</Authors>
     <Description>Services ViewModel Composition</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIconUrl>https://raw.githubusercontent.com/ServiceComposer/ServiceComposer.AspNetCore/assets/ServiceComposer.png</PackageIconUrl>
     <PackageTags>Services ViewModel Composition</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
