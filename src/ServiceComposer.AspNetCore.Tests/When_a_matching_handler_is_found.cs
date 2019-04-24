@@ -9,33 +9,33 @@ using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_no_matching_handlers_are_found
+    public class When_a_matching_handler_is_found
     {
-        class NeverMatchingHandler : IHandleRequests
+        class CatchAllMatchingHandler : IHandleRequests
         {
             public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
             {
-                throw new System.NotImplementedException();
+                return Task.CompletedTask;
             }
 
             public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
             {
-                return false;
+                return true;
             }
         }
 
         [Fact]
-        public async Task Should_return_404()
+        public async Task Should_return_success_code()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_no_matching_handlers_are_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.DisableAssemblyScanning();
-                        options.RegisterRequestsHandler<NeverMatchingHandler>();
+                        options.RegisterRequestsHandler<CatchAllMatchingHandler>();
                     });
                     services.AddRouting();
                 },
@@ -46,10 +46,10 @@ namespace ServiceComposer.AspNetCore.Tests
             ).CreateClient();
 
             // Act
-            var response = await client.GetAsync("/no-matching-handlers/1");
+            var response = await client.GetAsync("/matching-handlers/1");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            response.EnsureSuccessStatusCode();
         }
     }
 }

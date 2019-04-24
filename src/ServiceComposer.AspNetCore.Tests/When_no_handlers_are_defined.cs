@@ -1,48 +1,35 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Gateway;
 using System.Threading.Tasks;
 using Xunit;
-using System.IO;
 using System.Net;
+using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_no_handlers_are_defined : IClassFixture<TestWebApplicationFactory<When_no_handlers_are_defined.Startup>>
+    public class When_no_handlers_are_defined
     {
-        public class Startup
-        {
-            public void ConfigureServices(IServiceCollection services)
-            {
-                services.AddViewModelComposition(options =>
-                {
-                    options.DisableAssemblyScanning();
-                });
-                services.AddRouting();
-            }
-
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
-            {
-                app.RunCompositionGatewayWithDefaultRoutes();
-            }
-        }
-
-        readonly TestWebApplicationFactory<Startup> _factory;
-
-        public When_no_handlers_are_defined(TestWebApplicationFactory<Startup> factory)
-        {
-            _factory = factory;
-        }
-
         [Fact]
         public async Task Should_return_404()
         {
             // Arrange
-            var client = _factory.CreateClient();
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_no_handlers_are_defined>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.DisableAssemblyScanning();
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.RunCompositionGatewayWithDefaultRoutes();
+                }
+            ).CreateClient();
 
             // Act
             var response = await client.GetAsync("/no-handlers-are-registered/1");
