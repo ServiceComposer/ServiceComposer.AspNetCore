@@ -1,37 +1,16 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Gateway;
 using System.Threading.Tasks;
 using Xunit;
-using System.IO;
 using System.Net;
+using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_no_matching_handlers_are_found : IClassFixture<TestWebApplicationFactory<When_no_matching_handlers_are_found.Startup>>
+    public class When_no_matching_handlers_are_found
     {
-        public class Startup
-        {
-            public void ConfigureServices(IServiceCollection services)
-            {
-                services.AddViewModelComposition(options =>
-                {
-                    options.DisableAssemblyScanning();
-                    options.RegisterRequestsHandler<NeverMatchingHandler>();
-                });
-                services.AddRouting();
-            }
-
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
-            {
-                app.RunCompositionGatewayWithDefaultRoutes();
-            }
-        }
-
         class NeverMatchingHandler : IHandleRequests
         {
             public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
@@ -45,18 +24,27 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
 
-        readonly TestWebApplicationFactory<Startup> _factory;
-
-        public When_no_matching_handlers_are_found(TestWebApplicationFactory<Startup> factory)
-        {
-            _factory = factory;
-        }
-
         [Fact]
         public async Task Should_return_404()
         {
             // Arrange
-            var client = _factory.CreateClient();
+            var factory = new SelfContainedWebApplicationFactory()
+            {
+                ConfigureServices = services => 
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.DisableAssemblyScanning();
+                        options.RegisterRequestsHandler<NeverMatchingHandler>();
+                    });
+                    services.AddRouting();
+                },
+                Configure = app => 
+                {
+                    app.RunCompositionGatewayWithDefaultRoutes();
+                }
+            };
+            var client = factory.CreateClient();
 
             // Act
             var response = await client.GetAsync("/no-matching-handlers/1");
