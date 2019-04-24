@@ -1,6 +1,7 @@
 ﻿using ApprovalTests;
 using ApprovalTests.Reporters;
 using PublicApiGenerator;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests.API
@@ -9,6 +10,7 @@ namespace ServiceComposer.AspNetCore.Tests.API
     {
         [Fact]
         [UseReporter(typeof(DiffReporter))]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void Approve_API()
         {
             var publicApi = ApiGenerator.GeneratePublicApi(typeof(IInterceptRoutes).Assembly);
