@@ -26,7 +26,7 @@ namespace ServiceComposer.AspNetCore
             config?.Invoke(options);
             if (!options.IsAssemblyScanningDisabled)
             {
-                var types = new List<Type>();
+                var types = new HashSet<Type>();
                 foreach (var patternToUse in assemblySearchPatternsToUse)
                 {
                     var fileNames = Directory.GetFiles(AppContext.BaseDirectory, patternToUse);
@@ -35,7 +35,14 @@ namespace ServiceComposer.AspNetCore
                         AssemblyValidator.ValidateAssemblyFile(fileName, out var shouldLoad, out var reason);
                         if (shouldLoad)
                         {
-                            types.AddRange(Assembly.LoadFrom(fileName).GetTypesFromAssembly());
+                            var matchingTypes = Assembly.LoadFrom(fileName).GetTypesFromAssembly();
+                            foreach (var type in matchingTypes)
+                            {
+                                if (!types.Contains(type))
+                                {
+                                    types.Add(type);
+                                }
+                            }
                         }
                     }
                 }
@@ -49,7 +56,14 @@ namespace ServiceComposer.AspNetCore
                         AssemblyValidator.ValidateAssemblyFile(platformAssembly, out var shouldLoad, out var reason);
                         if (shouldLoad)
                         {
-                            types.AddRange(Assembly.LoadFrom(platformAssembly).GetTypesFromAssembly());
+                            var matchingTypes = Assembly.LoadFrom(platformAssembly).GetTypesFromAssembly();
+                            foreach (var type in matchingTypes)
+                            {
+                                if (!types.Contains(type))
+                                {
+                                    types.Add(type);
+                                }
+                            }
                         }
                     }
                 }
