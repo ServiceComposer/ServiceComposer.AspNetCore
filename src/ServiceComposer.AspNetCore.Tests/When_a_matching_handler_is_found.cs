@@ -34,7 +34,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
-                        options.DisableAssemblyScanning();
+                        options.AssemblyScanner.Disable();
                         options.RegisterRequestsHandler<CatchAllMatchingHandler>();
                     });
                     services.AddRouting();

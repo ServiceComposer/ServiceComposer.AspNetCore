@@ -21,7 +21,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
-                        options.DisableAssemblyScanning();
+                        options.AssemblyScanner.Disable();
                     });
                     services.AddRouting();
                 },

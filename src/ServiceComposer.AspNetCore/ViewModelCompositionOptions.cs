@@ -8,16 +8,19 @@ namespace ServiceComposer.AspNetCore
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
             Services = services;
+            AssemblyScanner = new AssemblyScanner();
         }
+
+        public AssemblyScanner AssemblyScanner { get; private set; }
 
         public IServiceCollection Services { get; private set; }
-        public bool IsAssemblyScanningDisabled { get; private set; }
-        public void DisableAssemblyScanning()
-        {
-            IsAssemblyScanningDisabled = true;
-        }
 
         public void RegisterRequestsHandler<T>() where T: IHandleRequests
+        {
+            RegisterRouteInterceptor(typeof(T));
+        }
+
+        public void RegisterCompositionEventsSubscriber<T>() where T : ISubscribeToCompositionEvents
         {
             RegisterRouteInterceptor(typeof(T));
         }

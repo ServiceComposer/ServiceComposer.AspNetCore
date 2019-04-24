@@ -1,6 +1,12 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
 namespace ServiceComposer.AspNetCore
 {
+    public class AssemblyScanner
+    {
+        public bool IsDisabled { get; }
+        public void Disable() { }
+        public void RegisterTypeFilter(System.Predicate<System.Type> filter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
+    }
     public class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
@@ -53,9 +59,10 @@ namespace ServiceComposer.AspNetCore
     }
     public class ViewModelCompositionOptions
     {
-        public bool IsAssemblyScanningDisabled { get; }
+        public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
-        public void DisableAssemblyScanning() { }
+        public void RegisterCompositionEventsSubscriber<T>()
+            where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
     }
