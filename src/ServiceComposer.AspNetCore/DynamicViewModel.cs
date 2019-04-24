@@ -32,7 +32,7 @@ namespace ServiceComposer.AspNetCore
                 subscriptions.Add(typeof(TEvent), handlers);
             }
 
-            handlers.Add((pageViewModel, @event, routeData, query) => handler(pageViewModel, (TEvent)@event, routeData, query));
+            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent)@event, routeData, query));
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result) => properties.TryGetValue(binder.Name, out result);
@@ -73,7 +73,7 @@ namespace ServiceComposer.AspNetCore
                 var tasks = new List<Task>();
                 foreach (var handler in handlers)
                 {
-                    tasks.Add(handler.Invoke(this, @event, routeData, query));
+                    tasks.Add(handler.Invoke(requestId, this, @event, routeData, query));
                 }
 
                 return Task.WhenAll(tasks);
