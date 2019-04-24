@@ -1,0 +1,79 @@
+﻿[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+namespace ServiceComposer.AspNetCore
+{
+    public class ComposedRequestIdHeader
+    {
+        public const string Key = "composed-request-id";
+        public ComposedRequestIdHeader() { }
+    }
+    public class static ComposedRequestIdHeaderExtensions
+    {
+        public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
+        public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
+        public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
+    }
+    public class CompositionHandler
+    {
+        public CompositionHandler() { }
+        [return: System.Runtime.CompilerServices.DynamicAttribute(new bool[] {
+                false,
+                false,
+                true,
+                false})]
+        [return: System.Runtime.CompilerServices.TupleElementNamesAttribute(new string[] {
+                "ViewModel",
+                "StatusCode"})]
+        public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+    public delegate System.Threading.Tasks.Task EventHandler<TEvent>([System.Runtime.CompilerServices.DynamicAttribute()] object pageViewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.IQueryCollection query);
+    public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
+    {
+        System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+    }
+    public interface IHandleRequestsErrors : ServiceComposer.AspNetCore.IInterceptRoutes
+    {
+        System.Threading.Tasks.Task OnRequestError(string requestId, System.Exception ex, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+    }
+    public interface IInterceptRoutes
+    {
+        bool Matches(Microsoft.AspNetCore.Routing.RouteData routeData, string httpVerb, Microsoft.AspNetCore.Http.HttpRequest request);
+    }
+    public interface IPublishCompositionEvents
+    {
+        void Subscribe<TEvent>(ServiceComposer.AspNetCore.EventHandler<TEvent> handler);
+    }
+    public interface ISubscribeToCompositionEvents : ServiceComposer.AspNetCore.IInterceptRoutes
+    {
+        void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
+    }
+    public class static ServiceCollectionExtensions
+    {
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config) { }
+    }
+    public class ViewModelCompositionOptions
+    {
+        public bool IsAssemblyScanningDisabled { get; }
+        public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+        public void DisableAssemblyScanning() { }
+        public void RegisterRequestsHandler<T>()
+            where T : ServiceComposer.AspNetCore.IHandleRequests { }
+    }
+}
+namespace ServiceComposer.AspNetCore.Gateway
+{
+    public class static ApplicationBuilderExtensions
+    {
+        public static void RunCompositionGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, System.Action<Microsoft.AspNetCore.Routing.IRouteBuilder> routes = null) { }
+        public static void RunCompositionGatewayWithDefaultRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+    }
+    public class static RouteBuilderExtentions
+    {
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableDelete(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableGet(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePatch(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePost(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePut(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableRoute(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, System.Collections.Generic.IDictionary<string, object> constraints, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+    }
+}
