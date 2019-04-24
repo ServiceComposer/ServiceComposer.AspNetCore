@@ -5,13 +5,12 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
-        private IServiceCollection services;
-
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
-            this.services = services;
+            Services = services;
         }
 
+        public IServiceCollection Services { get; private set; }
         public bool IsAssemblyScanningDisabled { get; private set; }
         public void DisableAssemblyScanning()
         {
@@ -25,7 +24,7 @@ namespace ServiceComposer.AspNetCore
 
         internal void RegisterRouteInterceptor(Type type)
         {
-            services.AddSingleton(typeof(IInterceptRoutes), type);
+            Services.AddSingleton(typeof(IInterceptRoutes), type);
         }
     }
 }
