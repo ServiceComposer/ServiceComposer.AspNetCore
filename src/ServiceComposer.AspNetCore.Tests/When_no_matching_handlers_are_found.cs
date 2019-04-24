@@ -28,9 +28,9 @@ namespace ServiceComposer.AspNetCore.Tests
         public async Task Should_return_404()
         {
             // Arrange
-            var factory = new SelfContainedWebApplicationFactory()
-            {
-                ConfigureServices = services => 
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_no_matching_handlers_are_found>
+            (
+                configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
@@ -39,12 +39,11 @@ namespace ServiceComposer.AspNetCore.Tests
                     });
                     services.AddRouting();
                 },
-                Configure = app => 
+                configure: app =>
                 {
                     app.RunCompositionGatewayWithDefaultRoutes();
                 }
-            };
-            var client = factory.CreateClient();
+            ).CreateClient();
 
             // Act
             var response = await client.GetAsync("/no-matching-handlers/1");
