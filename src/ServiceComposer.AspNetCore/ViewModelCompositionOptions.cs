@@ -11,6 +11,7 @@ namespace ServiceComposer.AspNetCore
         }
 
         public IServiceCollection Services { get; private set; }
+
         public bool IsAssemblyScanningDisabled { get; private set; }
         public void DisableAssemblyScanning()
         {
