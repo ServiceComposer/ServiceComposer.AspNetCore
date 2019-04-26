@@ -6,6 +6,9 @@
 *.suo
 *.user
 
+# mergetool output
+*.orig
+
 # Build dependencies and artifacts
 .dotnet/
 .build/
