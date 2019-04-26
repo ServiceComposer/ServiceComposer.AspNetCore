@@ -23,19 +23,14 @@ namespace ServiceComposer.AspNetCore
 
         List<(Predicate<Type> Filter, Action<IEnumerable<Type>> RegistrationHandler)> typeFilters = new List<(Predicate<Type>, Action<IEnumerable<Type>>)>();
 
-        public bool IsDisabled { get; private set; }
+        public bool IsEnabled { get; private set; } = true;
         public void Disable()
         {
-            IsDisabled = true;
+            IsEnabled = false;
         }
 
         internal void ScanAndRegisterTypes()
         {
-            if (IsDisabled)
-            {
-                throw new InvalidOperationException("Assembly scanning is disabled");
-            }
-
             var assemblies = new List<Assembly>();
             foreach (var patternToUse in assemblySearchPatternsToUse)
             {

@@ -3,7 +3,7 @@ namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
     {
-        public bool IsDisabled { get; }
+        public bool IsEnabled { get; }
         public void Disable() { }
         public void RegisterTypeFilter(System.Predicate<System.Type> filter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
     }

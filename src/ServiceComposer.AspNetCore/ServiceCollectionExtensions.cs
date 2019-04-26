@@ -19,7 +19,7 @@ namespace ServiceComposer.AspNetCore
             var options = new ViewModelCompositionOptions(services);
             config?.Invoke(options);
 
-            if (!options.AssemblyScanner.IsDisabled)
+            if (options.AssemblyScanner.IsEnabled)
             {
                 options.AssemblyScanner.RegisterTypeFilter(
                     filter: type =>
