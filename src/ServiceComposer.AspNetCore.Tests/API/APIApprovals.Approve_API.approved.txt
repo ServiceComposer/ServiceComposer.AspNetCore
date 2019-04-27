@@ -25,14 +25,20 @@ namespace ServiceComposer.AspNetCore
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
-    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object pageViewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.IQueryCollection query);
+    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+    public class static HttpRequestExtensions
+    {
+        public static readonly string ComposedResponseModelKey;
+        [return: System.Runtime.CompilerServices.DynamicAttribute()]
+        public static object GetResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+    }
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
-        System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+        System.Threading.Tasks.Task Handle(string requestId, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
     }
     public interface IHandleRequestsErrors : ServiceComposer.AspNetCore.IInterceptRoutes
     {
-        System.Threading.Tasks.Task OnRequestError(string requestId, System.Exception ex, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+        System.Threading.Tasks.Task OnRequestError(string requestId, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request, System.Exception ex);
     }
     public interface IInterceptRoutes
     {
