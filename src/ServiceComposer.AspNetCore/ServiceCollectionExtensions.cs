@@ -21,8 +21,8 @@ namespace ServiceComposer.AspNetCore
 
             if (options.AssemblyScanner.IsEnabled)
             {
-                options.AssemblyScanner.RegisterTypeFilter(
-                    filter: type =>
+                options.AssemblyScanner.AddTypesScanner(
+                    typesFilter: type =>
                     {
                         var typeInfo = type.GetTypeInfo();
                         return !typeInfo.IsInterface

@@ -21,7 +21,7 @@ namespace ServiceComposer.AspNetCore
 
         }
 
-        List<(Predicate<Type> Filter, Action<IEnumerable<Type>> RegistrationHandler)> typeFilters = new List<(Predicate<Type>, Action<IEnumerable<Type>>)>();
+        List<(Predicate<Type> TypesFilter, Action<IEnumerable<Type>> RegistrationHandler)> typesScanners = new List<(Predicate<Type>, Action<IEnumerable<Type>>)>();
 
         public bool IsEnabled { get; private set; } = true;
         public void Disable()
@@ -60,16 +60,16 @@ namespace ServiceComposer.AspNetCore
             }
 
             var allAssembliesAllTypes = assemblies.SelectMany(a => a.GetTypes());
-            foreach (var filter in typeFilters)
+            foreach (var typesScanner in typesScanners)
             {
-                var filteredTypes = allAssembliesAllTypes.Where(t => filter.Filter(t)).Distinct();
-                filter.RegistrationHandler(filteredTypes);
+                var filteredTypes = allAssembliesAllTypes.Where(t => typesScanner.TypesFilter(t)).Distinct();
+                typesScanner.RegistrationHandler(filteredTypes);
             }
         }
 
-        public void RegisterTypeFilter(Predicate<Type> filter, Action<IEnumerable<Type>> registrationHandler)
+        public void AddTypesScanner(Predicate<Type> typesFilter, Action<IEnumerable<Type>> registrationHandler)
         {
-            typeFilters.Add((filter, registrationHandler));
+            typesScanners.Add((typesFilter, registrationHandler));
         }
     }
 }

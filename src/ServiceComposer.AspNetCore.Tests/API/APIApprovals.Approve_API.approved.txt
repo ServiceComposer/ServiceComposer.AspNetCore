@@ -4,8 +4,8 @@ namespace ServiceComposer.AspNetCore
     public class AssemblyScanner
     {
         public bool IsEnabled { get; }
+        public void AddTypesScanner(System.Predicate<System.Type> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void Disable() { }
-        public void RegisterTypeFilter(System.Predicate<System.Type> filter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
     }
     public class ComposedRequestIdHeader
     {
