@@ -11,15 +11,15 @@ namespace ServiceComposer.AspNetCore
     {
         private readonly string requestId;
         private readonly RouteData routeData;
-        private readonly IQueryCollection query;
+        private readonly HttpRequest request;
         private readonly IDictionary<Type, List<EventHandler<object>>> subscriptions = new Dictionary<Type, List<EventHandler<object>>>();
         private readonly IDictionary<string, object> properties = new Dictionary<string, object>();
 
-        public DynamicViewModel(string requestId, RouteData routeData, IQueryCollection query)
+        public DynamicViewModel(string requestId, RouteData routeData, HttpRequest request)
         {
             this.requestId = requestId;
             this.routeData = routeData;
-            this.query = query;
+            this.request = request;
         }
 
         public void CleanupSubscribers() => subscriptions.Clear();
@@ -32,7 +32,7 @@ namespace ServiceComposer.AspNetCore
                 subscriptions.Add(typeof(TEvent), handlers);
             }
 
-            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent)@event, routeData, query));
+            handlers.Add((requestId, @event, routeData, request) => handler(requestId, (TEvent)@event, routeData, request));
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result) => properties.TryGetValue(binder.Name, out result);
@@ -73,7 +73,7 @@ namespace ServiceComposer.AspNetCore
                 var tasks = new List<Task>();
                 foreach (var handler in handlers)
                 {
-                    tasks.Add(handler.Invoke(requestId, this, @event, routeData, query));
+                    tasks.Add(handler.Invoke(requestId, @event, routeData, request));
                 }
 
                 return Task.WhenAll(tasks);

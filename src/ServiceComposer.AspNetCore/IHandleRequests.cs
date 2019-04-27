@@ -6,6 +6,6 @@ namespace ServiceComposer.AspNetCore
 {
     public interface IHandleRequests : IInterceptRoutes
     {
-        Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request);
+        Task Handle(string requestId, RouteData routeData, HttpRequest request);
     }
 }

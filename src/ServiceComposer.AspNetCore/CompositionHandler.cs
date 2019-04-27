@@ -16,7 +16,8 @@ namespace ServiceComposer.AspNetCore
         {
             var routeData = context.GetRouteData();
             var request = context.Request;
-            var viewModel = new DynamicViewModel(requestId, routeData, context.Request.Query);
+            var viewModel = new DynamicViewModel(requestId, routeData, request);
+            context.Items.Add(HttpRequestExtensions.ComposedResponseModelKey, viewModel);
 
             try
             {
@@ -40,7 +41,7 @@ namespace ServiceComposer.AspNetCore
                 {
                     pending.Add
                     (
-                        handler.Handle(requestId, viewModel, routeData, request)
+                        handler.Handle(requestId, routeData, request)
                     );
                 }
 
@@ -61,7 +62,7 @@ namespace ServiceComposer.AspNetCore
                         {
                             foreach (var handler in errorHandlers)
                             {
-                                await handler.OnRequestError(requestId, ex, viewModel, routeData, request);
+                                await handler.OnRequestError(requestId, routeData, request, ex);
                             }
                         }
 

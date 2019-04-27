@@ -13,7 +13,7 @@ namespace ServiceComposer.AspNetCore.Tests
     {
         class CatchAllMatchingHandler : IHandleRequests
         {
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            public Task Handle(string requestId, RouteData routeData, HttpRequest request)
             {
                 return Task.CompletedTask;
             }
