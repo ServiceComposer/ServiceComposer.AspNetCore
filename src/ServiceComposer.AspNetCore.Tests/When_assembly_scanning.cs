@@ -87,7 +87,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public void Should_not_register_duplicated_handlers()
+        public void Should_register_non_duplicate_handlers()
         {
             IServiceProvider container = null;
             // Arrange
