@@ -45,6 +45,48 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
+        public void Without_any_filter_should_return_assemblies()
+        {
+            //arrange
+            var scanner = new AssemblyScanner();
+
+            //act
+            var assemblies = scanner.Scan();
+
+            Assert.NotEmpty(assemblies);
+        }
+
+        [Fact]
+        public void With_exclude_all_filter_should_return_no_assemblies()
+        {
+            //arrange
+            var scanner = new AssemblyScanner();
+            scanner.AddAssemblyFilter(assemblyFullPath => AssemblyScanner.FilterResults.Exclude);
+            //act
+            var assemblies = scanner.Scan();
+
+            Assert.Empty(assemblies);
+        }
+
+        [Fact]
+        public void With_include_only_current_assembly_filter_should_return_1_assembly()
+        {
+            //arrange
+            var currentAssemblyName = "ServiceComposer.AspNetCore.Tests.dll";
+            var scanner = new AssemblyScanner();
+            scanner.AddAssemblyFilter(assemblyFullPath =>
+            {
+                return assemblyFullPath.EndsWith(currentAssemblyName)
+                    ? AssemblyScanner.FilterResults.Include
+                    : AssemblyScanner.FilterResults.Exclude;
+            });
+            //act
+            var assemblies = scanner.Scan();
+
+            Assert.Single(assemblies);
+        }
+
+        [Fact]
         public void Should_not_register_duplicated_handlers()
         {
             IServiceProvider container = null;
