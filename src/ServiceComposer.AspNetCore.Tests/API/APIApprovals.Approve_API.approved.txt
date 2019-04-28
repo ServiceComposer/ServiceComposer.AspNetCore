@@ -1,11 +1,18 @@
-﻿[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("ServiceComposer.AspNetCore.Tests")]
+[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
 namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
     {
+        public System.IO.SearchOption DirectorySearchOptions { get; set; }
         public bool IsEnabled { get; }
-        public void AddTypesScanner(System.Predicate<System.Type> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
+        public void AddAssemblyFilter(System.Func<string, ServiceComposer.AspNetCore.AssemblyScanner.FilterResults> filter) { }
         public void Disable() { }
+        public enum FilterResults
+        {
+            Exclude = 0,
+            Include = 1,
+        }
     }
     public class ComposedRequestIdHeader
     {
@@ -61,6 +68,7 @@ namespace ServiceComposer.AspNetCore
     {
         public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+        public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterRequestsHandler<T>()

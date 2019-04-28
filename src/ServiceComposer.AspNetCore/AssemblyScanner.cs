@@ -1,15 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
     {
+        public enum FilterResults
+        {
+            Exclude,
+            Include
+        }
+
         static string[] assemblySearchPatternsToUse =
         {
             "*.dll",
@@ -21,7 +25,7 @@ namespace ServiceComposer.AspNetCore
 
         }
 
-        List<(Predicate<Type> TypesFilter, Action<IEnumerable<Type>> RegistrationHandler)> typesScanners = new List<(Predicate<Type>, Action<IEnumerable<Type>>)>();
+        public SearchOption DirectorySearchOptions { get; set; } = SearchOption.TopDirectoryOnly;
 
         public bool IsEnabled { get; private set; } = true;
         public void Disable()
@@ -29,18 +33,32 @@ namespace ServiceComposer.AspNetCore
             IsEnabled = false;
         }
 
-        internal void ScanAndRegisterTypes()
+        List<Func<string, FilterResults>> assemblyFilters = new List<Func<string, FilterResults>>();
+
+        internal IEnumerable<Assembly> Scan()
         {
             var assemblies = new List<Assembly>();
+
+            Func<string, bool> fullPathsFilter = fullPath =>
+            {
+                return assemblyFilters.All(filter =>
+                {
+                    return filter(fullPath) == FilterResults.Include;
+                });
+            };
+
             foreach (var patternToUse in assemblySearchPatternsToUse)
             {
-                var fileNames = Directory.GetFiles(AppContext.BaseDirectory, patternToUse);
-                foreach (var fileName in fileNames)
+                var assembliesFullPaths = Directory
+                    .GetFiles(AppContext.BaseDirectory, patternToUse, DirectorySearchOptions)
+                    .Where(fullPathsFilter);
+
+                foreach (var assemblyFullPath in assembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(fileName, out var shouldLoad, out var reason);
+                    AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out var reason);
                     if (shouldLoad)
                     {
-                        assemblies.Add(Assembly.LoadFrom(fileName));
+                        assemblies.Add(Assembly.LoadFrom(assemblyFullPath));
                     }
                 }
             }
@@ -48,28 +66,26 @@ namespace ServiceComposer.AspNetCore
             var platformAssembliesString = (string)AppDomain.CurrentDomain.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
             if (platformAssembliesString != null)
             {
-                var platformAssemblies = platformAssembliesString.Split(Path.PathSeparator);
-                foreach (var platformAssembly in platformAssemblies)
+                var platformAssembliesFullPaths = platformAssembliesString
+                    .Split(Path.PathSeparator)
+                    .Where(fullPathsFilter);
+
+                foreach (var platformAssemblyFullPath in platformAssembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(platformAssembly, out var shouldLoad, out var reason);
+                    AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out var reason);
                     if (shouldLoad)
                     {
-                        assemblies.Add(Assembly.LoadFrom(platformAssembly));
+                        assemblies.Add(Assembly.LoadFrom(platformAssemblyFullPath));
                     }
                 }
             }
 
-            var allAssembliesAllTypes = assemblies.SelectMany(a => a.GetTypes());
-            foreach (var typesScanner in typesScanners)
-            {
-                var filteredTypes = allAssembliesAllTypes.Where(t => typesScanner.TypesFilter(t)).Distinct();
-                typesScanner.RegistrationHandler(filteredTypes);
-            }
+            return assemblies.Distinct();
         }
 
-        public void AddTypesScanner(Predicate<Type> typesFilter, Action<IEnumerable<Type>> registrationHandler)
+        public void AddAssemblyFilter(Func<string, FilterResults> filter)
         {
-            typesScanners.Add((typesFilter, registrationHandler));
+            assemblyFilters.Add(filter);
         }
     }
 }
