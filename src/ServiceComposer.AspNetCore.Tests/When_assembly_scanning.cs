@@ -45,10 +45,16 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
+        public void Without_any_path_to_scan_argumentnullexception_is_thrown()
+        {
+            Assert.Throws<ArgumentNullException>(() => new AssemblyScanner(null));
+        }
+
+        [Fact]
         public void Without_any_filter_should_return_assemblies()
         {
             //arrange
-            var scanner = new AssemblyScanner();
+            var scanner = new AssemblyScanner(AppContext.BaseDirectory);
 
             //act
             var assemblies = scanner.Scan();
@@ -60,7 +66,7 @@ namespace ServiceComposer.AspNetCore.Tests
         public void With_exclude_all_filter_should_return_no_assemblies()
         {
             //arrange
-            var scanner = new AssemblyScanner();
+            var scanner = new AssemblyScanner(AppContext.BaseDirectory);
             scanner.AddAssemblyFilter(assemblyFullPath => AssemblyScanner.FilterResults.Exclude);
             //act
             var assemblies = scanner.Scan();
@@ -73,7 +79,7 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             //arrange
             var currentAssemblyName = "ServiceComposer.AspNetCore.Tests.dll";
-            var scanner = new AssemblyScanner();
+            var scanner = new AssemblyScanner(AppContext.BaseDirectory);
             scanner.AddAssemblyFilter(assemblyFullPath =>
             {
                 return assemblyFullPath.EndsWith(currentAssemblyName)

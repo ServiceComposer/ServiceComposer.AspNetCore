@@ -8,6 +8,8 @@ namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
     {
+        private readonly string pathToScan;
+
         public enum FilterResults
         {
             Exclude,
@@ -20,9 +22,14 @@ namespace ServiceComposer.AspNetCore
             "*.exe"
         };
 
-        internal AssemblyScanner()
+        internal AssemblyScanner(string pathToScan)
         {
+            if (string.IsNullOrWhiteSpace(pathToScan))
+            {
+                throw new ArgumentNullException(pathToScan);
+            }
 
+            this.pathToScan = pathToScan;
         }
 
         public SearchOption DirectorySearchOptions { get; set; } = SearchOption.TopDirectoryOnly;
@@ -50,7 +57,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var patternToUse in assemblySearchPatternsToUse)
             {
                 var assembliesFullPaths = Directory
-                    .GetFiles(AppContext.BaseDirectory, patternToUse, DirectorySearchOptions)
+                    .GetFiles(this.pathToScan, patternToUse, DirectorySearchOptions)
                     .Where(fullPathsFilter);
 
                 foreach (var assemblyFullPath in assembliesFullPaths)

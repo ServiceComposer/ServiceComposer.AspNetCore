@@ -8,10 +8,11 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
-        internal ViewModelCompositionOptions(IServiceCollection services)
+        internal ViewModelCompositionOptions(IServiceCollection services, string compostionsPath)
         {
             Services = services;
-            AssemblyScanner = new AssemblyScanner();
+
+            AssemblyScanner = new AssemblyScanner(compostionsPath);
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();

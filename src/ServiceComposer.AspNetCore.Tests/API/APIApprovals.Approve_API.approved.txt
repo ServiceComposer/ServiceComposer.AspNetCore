@@ -62,7 +62,9 @@ namespace ServiceComposer.AspNetCore
     public class static ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string compositionsPath) { }
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config) { }
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string compositionsPath, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config) { }
     }
     public class ViewModelCompositionOptions
     {
