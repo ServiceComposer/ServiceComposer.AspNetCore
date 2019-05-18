@@ -11,15 +11,15 @@ namespace ServiceComposer.AspNetCore
     {
         private readonly string requestId;
         private readonly RouteData routeData;
-        private readonly IQueryCollection query;
+        private readonly HttpRequest httpRequest;
         private readonly IDictionary<Type, List<EventHandler<object>>> subscriptions = new Dictionary<Type, List<EventHandler<object>>>();
         private readonly IDictionary<string, object> properties = new Dictionary<string, object>();
 
-        public DynamicViewModel(string requestId, RouteData routeData, IQueryCollection query)
+        public DynamicViewModel(string requestId, RouteData routeData, HttpRequest httpRequest)
         {
             this.requestId = requestId;
             this.routeData = routeData;
-            this.query = query;
+            this.httpRequest = httpRequest;
         }
 
         public void CleanupSubscribers() => subscriptions.Clear();
@@ -73,7 +73,7 @@ namespace ServiceComposer.AspNetCore
                 var tasks = new List<Task>();
                 foreach (var handler in handlers)
                 {
-                    tasks.Add(handler.Invoke(requestId, this, @event, routeData, query));
+                    tasks.Add(handler.Invoke(requestId, this, @event, routeData, httpRequest));
                 }
 
                 return Task.WhenAll(tasks);

@@ -4,5 +4,5 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
-    public delegate Task EventHandler<TEvent>(string requestId, dynamic pageViewModel, TEvent @event, RouteData routeData, IQueryCollection query);
+    public delegate Task EventHandler<TEvent>(string requestId, dynamic viewModel, TEvent @event, RouteData routeData, HttpRequest httpRequest);
 }

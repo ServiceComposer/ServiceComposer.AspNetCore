@@ -16,7 +16,7 @@ namespace ServiceComposer.AspNetCore
         {
             var routeData = context.GetRouteData();
             var request = context.Request;
-            var viewModel = new DynamicViewModel(requestId, routeData, context.Request.Query);
+            var viewModel = new DynamicViewModel(requestId, routeData, context.Request);
 
             try
             {
