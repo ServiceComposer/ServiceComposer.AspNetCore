@@ -38,7 +38,7 @@ namespace ServiceComposer.AspNetCore
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
-    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object pageViewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.IQueryCollection query);
+    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
