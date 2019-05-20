@@ -70,7 +70,7 @@ namespace ServiceComposer.AspNetCore
 
         internal void RegisterRouteInterceptor(Type type)
         {
-            Services.AddSingleton(typeof(IInterceptRoutes), type);
+            Services.AddTransient(typeof(IInterceptRoutes), type);
         }
     }
 }
