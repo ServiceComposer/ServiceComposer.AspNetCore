@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
-    class DynamicViewModel : DynamicObject, IPublishCompositionEvents
+    class DynamicViewModel : DynamicObject, IPublishCompositionEvents, IDynamicViewModel
     {
         private readonly string requestId;
         private readonly RouteData routeData;
@@ -80,6 +80,14 @@ namespace ServiceComposer.AspNetCore
             }
 
             return Task.CompletedTask;
+        }
+
+        public void Merge(IDictionary<string, object> source)
+        {
+            foreach (var item in source)
+            {
+                properties[item.Key] = item.Value;
+            }
         }
     }
 }
