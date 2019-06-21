@@ -49,7 +49,7 @@ More details on how to implement `IHandleRequests` and `ISubscribeToCompositionE
 
 ### MVC and Web API support
 
-For information on how to host the Composition Gateway in a ASP.Net COre MVC application, please, refer to the `ServiceComposer.AspNetCore.Mvc` package.
+For information on how to host the Composition Gateway in a ASP.Net COre MVC application, please, refer to the [`ServiceComposer.AspNetCore.Mvc` package](https://github.com/ServiceComposer/ServiceComposer.AspNetCore.Mvc).
 
 ### Icon
 
