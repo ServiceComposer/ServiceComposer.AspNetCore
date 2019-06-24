@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
-    class DynamicViewModel : DynamicObject, IPublishCompositionEvents, IDynamicViewModel
+    class DynamicViewModel : DynamicObject, IPublishCompositionEvents
     {
         private readonly string requestId;
         private readonly RouteData routeData;
@@ -49,7 +49,13 @@ namespace ServiceComposer.AspNetCore
 
             if (binder.Name == "RaiseEvent")
             {
-                result = this.RaiseEvent(args[0]);
+                result = RaiseEventImpl(args[0]);
+                return true;
+            }
+
+            if (binder.Name == "Merge")
+            {
+                result = MergeImpl((IDictionary<string, object>)args[0]);
                 return true;
             }
 
@@ -64,9 +70,10 @@ namespace ServiceComposer.AspNetCore
             }
 
             yield return "RaiseEvent";
+            yield return "Merge";
         }
 
-        public Task RaiseEvent(object @event)
+        Task RaiseEventImpl(object @event)
         {
             if (subscriptions.TryGetValue(@event.GetType(), out var handlers))
             {
@@ -82,12 +89,14 @@ namespace ServiceComposer.AspNetCore
             return Task.CompletedTask;
         }
 
-        public void Merge(IDictionary<string, object> source)
+        DynamicViewModel MergeImpl(IDictionary<string, object> source)
         {
             foreach (var item in source)
             {
                 properties[item.Key] = item.Value;
             }
+
+            return this;
         }
     }
 }

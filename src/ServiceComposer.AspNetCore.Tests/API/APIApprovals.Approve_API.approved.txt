@@ -39,11 +39,6 @@ namespace ServiceComposer.AspNetCore
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
-    public interface IDynamicViewModel
-    {
-        void Merge(System.Collections.Generic.IDictionary<string, object> source);
-        System.Threading.Tasks.Task RaiseEvent(object @event);
-    }
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
