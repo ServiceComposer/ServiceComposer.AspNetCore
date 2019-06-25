@@ -7,6 +7,8 @@ branches:
   - /release-.*/
   - /^\d+\.\d+\.\d+(-\S*)?$/
 script: "./build.sh"
+env:
+  - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true NUGET_XMLDOC_MODE=skip
 git:
   depth: false
 matrix:
