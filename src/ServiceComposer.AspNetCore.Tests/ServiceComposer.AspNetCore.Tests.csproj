@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="ApprovalTests" Version="4.2.0" />
     <PackageReference Include="ApprovalUtilities" Version="4.2.0" />
-    <PackageReference Include="FakeItEasy" Version="5.1.1" />
+    <PackageReference Include="FakeItEasy" Version="5.1.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.2.0" />
