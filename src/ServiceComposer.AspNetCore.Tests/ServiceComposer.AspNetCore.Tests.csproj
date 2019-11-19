@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ApprovalTests" Version="4.3.0" />
+    <PackageReference Include="ApprovalTests" Version="4.4.0" />
     <PackageReference Include="ApprovalUtilities" Version="4.4.0" />
     <PackageReference Include="FakeItEasy" Version="5.4.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
