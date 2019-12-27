@@ -105,7 +105,7 @@ namespace ServiceComposer.AspNetCore.Gateway
            RouteValueDictionary dataTokens = null)
         {
             var route = new Route(
-                target: new RouteHandler(ctx => HandleRequest(ctx)),
+                target: new RouteHandler(ctx => Composition.HandleRequest(ctx)),
                 routeTemplate: template,
                 defaults: defaults,
                 constraints: constraints,
@@ -116,44 +116,6 @@ namespace ServiceComposer.AspNetCore.Gateway
             routeBuilder.Routes.Add(route);
 
             return routeBuilder;
-        }
-
-        static async Task HandleRequest(HttpContext context)
-        {
-            var requestId = context.Request.Headers.GetComposedRequestIdHeaderOr(() => Guid.NewGuid().ToString());
-            var (viewModel, statusCode) = await CompositionHandler.HandleRequest(requestId, context);
-            context.Response.Headers.AddComposedRequestIdHeader(requestId);
-
-            if (statusCode == StatusCodes.Status200OK)
-            {
-                string json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
-                context.Response.ContentType = "application/json; charset=utf-8";
-                await context.Response.WriteAsync(json);
-            }
-            else
-            {
-                context.Response.StatusCode = statusCode;
-            }
-        }
-
-        static JsonSerializerSettings GetSettings(HttpContext context)
-        {
-            if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))
-            {
-                casing = "casing/camel";
-            }
-
-            switch (casing)
-            {
-                case "casing/pascal":
-                    return new JsonSerializerSettings();
-
-                default: // "casing/camel":
-                    return new JsonSerializerSettings()
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
-                    };
-            }
         }
     }
 }
