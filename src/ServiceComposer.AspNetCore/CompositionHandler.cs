@@ -10,16 +10,21 @@ namespace ServiceComposer.AspNetCore
 {
     public class CompositionHandler
     {
-        static Dictionary<string, IInterceptRoutes[]> cache = new Dictionary<string, IInterceptRoutes[]>();
+        //static Dictionary<string, IInterceptRoutes[]> cache = new Dictionary<string, IInterceptRoutes[]>();
 
         public static async Task<(dynamic ViewModel, int StatusCode)> HandleRequest(string requestId, HttpContext context)
         {
             var routeData = context.GetRouteData();
             var request = context.Request;
-            var viewModel = new DynamicViewModel(requestId, routeData, context.Request.Query);
+            var viewModel = new DynamicViewModel(requestId, routeData, context.Request);
 
             try
             {
+                var interceptors = context.RequestServices.GetServices<IInterceptRoutes>()
+                        .Where(a => a.Matches(routeData, request.Method, request))
+                        .ToArray();
+                
+                /*
                 if (!cache.TryGetValue(request.Path, out var interceptors))
                 {
                     interceptors = context.RequestServices.GetServices<IInterceptRoutes>()
@@ -28,6 +33,7 @@ namespace ServiceComposer.AspNetCore
 
                     cache.Add(request.Path, interceptors);
                 }
+                */
 
                 foreach (var subscriber in interceptors.OfType<ISubscribeToCompositionEvents>())
                 {

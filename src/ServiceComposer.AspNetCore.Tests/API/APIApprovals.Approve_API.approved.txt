@@ -1,5 +1,5 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("ServiceComposer.AspNetCore.Tests")]
-[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ServiceComposer.AspNetCore.Tests")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
 namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
@@ -19,33 +19,33 @@ namespace ServiceComposer.AspNetCore
         public const string Key = "composed-request-id";
         public ComposedRequestIdHeader() { }
     }
-    public class static ComposedRequestIdHeaderExtensions
+    public static class ComposedRequestIdHeaderExtensions
     {
-        public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
+        public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
     public class CompositionHandler
     {
         public CompositionHandler() { }
-        [return: System.Runtime.CompilerServices.DynamicAttribute(new bool[] {
+        [return: System.Runtime.CompilerServices.Dynamic(new bool[] {
                 false,
                 false,
                 true,
                 false})]
-        [return: System.Runtime.CompilerServices.TupleElementNamesAttribute(new string[] {
+        [return: System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "ViewModel",
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
-    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object pageViewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.IQueryCollection query);
+    public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
-        System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+        System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.Dynamic] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
     }
     public interface IHandleRequestsErrors : ServiceComposer.AspNetCore.IInterceptRoutes
     {
-        System.Threading.Tasks.Task OnRequestError(string requestId, System.Exception ex, [System.Runtime.CompilerServices.DynamicAttribute()] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
+        System.Threading.Tasks.Task OnRequestError(string requestId, System.Exception ex, [System.Runtime.CompilerServices.Dynamic] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
     }
     public interface IInterceptRoutes
     {
@@ -59,7 +59,7 @@ namespace ServiceComposer.AspNetCore
     {
         void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
     }
-    public class static ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config) { }
@@ -77,12 +77,12 @@ namespace ServiceComposer.AspNetCore
 }
 namespace ServiceComposer.AspNetCore.Gateway
 {
-    public class static ApplicationBuilderExtensions
+    public static class ApplicationBuilderExtensions
     {
         public static void RunCompositionGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, System.Action<Microsoft.AspNetCore.Routing.IRouteBuilder> routes = null) { }
         public static void RunCompositionGatewayWithDefaultRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
-    public class static RouteBuilderExtentions
+    public static class RouteBuilderExtentions
     {
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableDelete(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableGet(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }

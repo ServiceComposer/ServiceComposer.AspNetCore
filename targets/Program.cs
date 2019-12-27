@@ -18,6 +18,6 @@ internal class Program
             Directory.EnumerateFiles("src", "*.Tests.csproj", SearchOption.AllDirectories),
             proj => Run(sdk.GetDotnetCliPath(), $"test \"{proj}\" --configuration Release --no-build"));
 
-        RunTargets(args);
+        RunTargetsAndExit(args);
     }
 }
