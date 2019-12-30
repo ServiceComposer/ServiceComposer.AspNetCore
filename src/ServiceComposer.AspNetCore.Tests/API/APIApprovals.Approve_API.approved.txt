@@ -82,6 +82,10 @@ namespace ServiceComposer.AspNetCore.Gateway
         public static void RunCompositionGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, System.Action<Microsoft.AspNetCore.Routing.IRouteBuilder> routes = null) { }
         public static void RunCompositionGatewayWithDefaultRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
+    public static class Composition
+    {
+        public static System.Threading.Tasks.Task HandleRequest(Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
     public static class RouteBuilderExtentions
     {
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableDelete(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
