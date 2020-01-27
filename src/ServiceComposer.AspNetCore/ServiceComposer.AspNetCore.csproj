@@ -8,7 +8,7 @@
     <Authors>Mauro Servienti</Authors>
     <Description>Services ViewModel Composition</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageIconUrl>https://raw.githubusercontent.com/ServiceComposer/ServiceComposer.AspNetCore/assets/ServiceComposer.png</PackageIconUrl>
+    <PackageIcon>ServiceComposer.png</PackageIcon>
     <PackageTags>Services ViewModel Composition</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
@@ -18,6 +18,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   </PropertyGroup>
+   
+   <ItemGroup>
+    <None Include="..\..\assets\ServiceComposer.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MinVer" Version="2.0.0">
