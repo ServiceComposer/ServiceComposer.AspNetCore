@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore.Gateway
@@ -17,7 +16,7 @@ namespace ServiceComposer.AspNetCore.Gateway
 
             if (statusCode == StatusCodes.Status200OK)
             {
-                string json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                string json = JsonSerializer.Serialize(viewModel, options: GetSerializerOptions(context));
                 context.Response.ContentType = "application/json; charset=utf-8";
                 await context.Response.WriteAsync(json);
             }
@@ -27,7 +26,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             }
         }
 
-        static JsonSerializerSettings GetSettings(HttpContext context)
+        static JsonSerializerOptions GetSerializerOptions(HttpContext context)
         {
             if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))
             {
@@ -37,12 +36,13 @@ namespace ServiceComposer.AspNetCore.Gateway
             switch (casing)
             {
                 case "casing/pascal":
-                    return new JsonSerializerSettings();
+                    //uses default options
+                    return null;
 
                 default: // "casing/camel":
-                    return new JsonSerializerSettings()
+                    return new JsonSerializerOptions()
                     {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     };
             }
         }
