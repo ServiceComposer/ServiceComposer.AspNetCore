@@ -1,5 +1,5 @@
 ﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ServiceComposer.AspNetCore.Tests")]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.1", FrameworkDisplayName="")]
 namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
@@ -14,6 +14,13 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
+    public class ComposedEndpointBuilder : Microsoft.AspNetCore.Builder.EndpointBuilder
+    {
+        public ComposedEndpointBuilder(Microsoft.AspNetCore.Routing.Patterns.RoutePattern routePattern, System.Collections.Generic.IEnumerable<System.Type> compositionHandlers, int order) { }
+        public int Order { get; set; }
+        public Microsoft.AspNetCore.Routing.Patterns.RoutePattern RoutePattern { get; set; }
+        public override Microsoft.AspNetCore.Http.Endpoint Build() { }
+    }
     public class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
@@ -24,6 +31,13 @@ namespace ServiceComposer.AspNetCore
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
         public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
+    }
+    public class CompositionEndpointDataSource : Microsoft.AspNetCore.Routing.EndpointDataSource
+    {
+        public CompositionEndpointDataSource() { }
+        public override System.Collections.Generic.IReadOnlyList<Microsoft.AspNetCore.Http.Endpoint> Endpoints { get; }
+        public Microsoft.AspNetCore.Builder.EndpointBuilder AddEndpointBuilder(Microsoft.AspNetCore.Builder.EndpointBuilder endpointBuilder) { }
+        public override Microsoft.Extensions.Primitives.IChangeToken GetChangeToken() { }
     }
     public class CompositionHandler
     {
@@ -37,6 +51,10 @@ namespace ServiceComposer.AspNetCore
                 "ViewModel",
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+    public static class EndpointsExtensions
+    {
+        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
     }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
