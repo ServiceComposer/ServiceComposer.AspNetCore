@@ -8,10 +8,14 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
+        readonly CompositionMetadataRegistry compositionMetadataRegistry = new CompositionMetadataRegistry();
+
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
             Services = services;
             AssemblyScanner = new AssemblyScanner();
+
+            Services.AddSingleton(compositionMetadataRegistry);
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
@@ -70,6 +74,7 @@ namespace ServiceComposer.AspNetCore
 
         internal void RegisterRouteInterceptor(Type type)
         {
+            compositionMetadataRegistry.AddComponent(type);
             Services.AddTransient(typeof(IInterceptRoutes), type);
         }
     }
