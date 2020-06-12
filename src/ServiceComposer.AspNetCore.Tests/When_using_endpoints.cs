@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using ServiceComposer.AspNetCore.Gateway;
 using System.Threading.Tasks;
 using Xunit;
 using System.Net;
@@ -11,11 +10,11 @@ using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class __When_a_matching_handler_is_found
+    public class When_using_endpoints
     {
-        class CatchAllMatchingHandler : IHandleRequests
+        class BasicHandler : IHandleRequests
         {
-            [HttpGet("/matching-handlers/{id}")]
+            [HttpGet("/basic-handlers/{id}")]
             public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
             {
                 return Task.CompletedTask;
@@ -28,7 +27,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Should_return_success_code()
+        public async Task Matching_handler_with_attribute_is_found()
         {
             // Arrange
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
@@ -38,7 +37,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<CatchAllMatchingHandler>();
+                        options.RegisterRequestsHandler<BasicHandler>();
                     });
                     services.AddRouting();
                 },
@@ -50,10 +49,39 @@ namespace ServiceComposer.AspNetCore.Tests
             ).CreateClient();
 
             // Act
-            var response = await client.GetAsync("/matching-handlers/1");
+            var response = await client.GetAsync("/basic-handlers/1");
 
             // Assert
             response.EnsureSuccessStatusCode();
+        }
+        
+        [Fact]
+        public async Task No_matching_handlers_return_404()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterRequestsHandler<BasicHandler>();
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/not-valid/1");
+
+            // Assert
+            Assert.Equal( HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
