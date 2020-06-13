@@ -3,5 +3,5 @@ using Microsoft.AspNetCore.Http;
 
 namespace ServiceComposer.AspNetCore
 {
-    public delegate Task CompositionEventHandler<TEvent>(TEvent @event, HttpRequest httpRequest);
+    public delegate Task CompositionEventHandler<in TEvent>(TEvent @event, HttpRequest httpRequest);
 }

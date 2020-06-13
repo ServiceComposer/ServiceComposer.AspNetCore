@@ -26,7 +26,7 @@ namespace ServiceComposer.AspNetCore
         public static string GetComposedRequestId(this Microsoft.AspNetCore.Http.IHeaderDictionary headers) { }
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
-    public delegate System.Threading.Tasks.Task CompositionEventHandler<TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
+    public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public class CompositionHandler
     {
         public CompositionHandler() { }
