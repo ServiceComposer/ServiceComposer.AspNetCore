@@ -2,7 +2,7 @@
 
 # ServiceComposer
 
-ServiceComposer is a ViewModel Composition Gateway, for more details and the philosophy behind a Composition Gateway refer to the [ViewModel Composition series](https://milestone.topics.it/categories/view-model-composition) of article available on [milestone.topics.it](https://milestone.topics.it/)
+ServiceComposer is a ViewModel Composition Gateway. For more details, and the philosophy behind a Composition Gateway, refer to the [ViewModel Composition series](https://milestone.topics.it/categories/view-model-composition) of article available on [milestone.topics.it](https://milestone.topics.it/).
 
 ## Usage
 
