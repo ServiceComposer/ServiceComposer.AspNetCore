@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ServiceComposer.AspNetCore;
+using ServiceComposer.AspNetCore.Gateway;
 
 namespace Snippets.NetCore2x
 {
