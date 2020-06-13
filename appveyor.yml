@@ -16,6 +16,10 @@ branches:
   - master
   - /release-.*/
   - /^\d+\.\d+\.\d+(-\S*)?$/
+  
+only_commits:
+  files:
+    - '**/*.source.md'
 
 test: off
 deploy: off
