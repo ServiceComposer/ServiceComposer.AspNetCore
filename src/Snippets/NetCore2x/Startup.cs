@@ -17,11 +17,12 @@ namespace Snippets.NetCore2x
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            app.RunCompositionGateway( routeBuilder=>
+            app.RunCompositionGateway(routeBuilder =>
             {
                 routeBuilder.MapComposableGet("{controller}/{id:int}");
-            } );
+            });
         }
     }
+
     // end-snippet
 }
