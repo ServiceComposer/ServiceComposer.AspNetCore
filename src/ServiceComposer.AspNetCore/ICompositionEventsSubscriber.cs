@@ -2,6 +2,6 @@
 {
     public interface ICompositionEventsSubscriber
     {
-        void Subscribe(IPublishCompositionEvents publisher);
+        void Subscribe(ICompositionEventsPublisher publisher);
     }
 }

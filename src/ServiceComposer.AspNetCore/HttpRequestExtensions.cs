@@ -10,5 +10,10 @@ namespace ServiceComposer.AspNetCore
         {
             return request.HttpContext.Items[ComposedResponseModelKey];
         }
+
+        internal static void SetModel(this HttpRequest request, dynamic viewModel)
+        {
+            request.HttpContext.Items.Add(HttpRequestExtensions.ComposedResponseModelKey, viewModel);
+        }
     }
 }

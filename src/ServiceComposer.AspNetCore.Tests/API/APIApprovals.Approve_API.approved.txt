@@ -51,13 +51,17 @@ namespace ServiceComposer.AspNetCore
         [return: System.Runtime.CompilerServices.Dynamic]
         public static object GetResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
     }
+    public interface ICompositionErrorsHandler
+    {
+        System.Threading.Tasks.Task OnRequestError(Microsoft.AspNetCore.Http.HttpRequest request, System.Exception ex);
+    }
     public interface ICompositionEventsPublisher
     {
-        void Subscribe<TEvent>(ServiceComposer.AspNetCore.EventHandler<TEvent> handler);
+        void Subscribe<TEvent>(ServiceComposer.AspNetCore.CompositionEventHandler<TEvent> handler);
     }
     public interface ICompositionEventsSubscriber
     {
-        void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
+        void Subscribe(ServiceComposer.AspNetCore.ICompositionEventsPublisher publisher);
     }
     public interface ICompositionRequestsHandler
     {
