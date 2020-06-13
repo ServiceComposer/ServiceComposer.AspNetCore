@@ -45,6 +45,22 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && (typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type));
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterCompositionHandler(type);
+                        }
+                    });
+
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
                     .SelectMany(assembly => assembly.GetTypes())
@@ -74,17 +90,21 @@ namespace ServiceComposer.AspNetCore
 
         public void RegisterCompositionHandler<T>()
         {
-            var type = typeof(T);
+            RegisterCompositionHandler(typeof(T));
+        }
+
+        void RegisterCompositionHandler(Type type)
+        {
             if (!(typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)))
             {
                 throw new NotSupportedException("Registered types must be ICompositionRequestsHandler or ICompositionEventsSubscriber.");
             }
 
             compositionMetadataRegistry.AddComponent(type);
-            Services.AddTransient(typeof(T));
+            Services.AddTransient(type);
         }
 
-        internal void RegisterRouteInterceptor(Type type)
+        void RegisterRouteInterceptor(Type type)
         {
             Services.AddTransient(typeof(IInterceptRoutes), type);
         }

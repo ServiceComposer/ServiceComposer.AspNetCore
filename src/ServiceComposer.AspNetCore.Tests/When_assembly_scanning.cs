@@ -111,5 +111,29 @@ namespace ServiceComposer.AspNetCore.Tests
 
             Assert.NotNull(handler);
         }
+
+        [Fact]
+        public async Task Should_return_success_code()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition();
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.RunCompositionGatewayWithDefaultRoutes();
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/matching-handlers/1");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
     }
 }
