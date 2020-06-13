@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
@@ -35,41 +36,61 @@ namespace ServiceComposer.AspNetCore
             }
 
             var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+            MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
+        }
+
+        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        {
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(compositionMetadataRegistry);
+
+            foreach (var componentsGroup in componentsGroupedByTemplate)
+            {
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Get}));
+
+                AppendToDataSource(dataSources, builder);
+            }
+        }
+
+        private static void AppendToDataSource(ICollection<EndpointDataSource> dataSources, CompositionEndpointBuilder builder)
+        {
+            var dataSource = dataSources.OfType<CompositionEndpointDataSource>().FirstOrDefault();
+            if (dataSource == null)
+            {
+                dataSource = new CompositionEndpointDataSource();
+                dataSources.Add(dataSource);
+            }
+
+            dataSource.AddEndpointBuilder(builder);
+        }
+
+        private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(IGrouping<string, (Type ComponentType, string Template)> componentsGroup, HttpMethodMetadata methodMetadata)
+        {
+            var builder = new CompositionEndpointBuilder(
+                RoutePatternFactory.Parse(componentsGroup.Key),
+                componentsGroup.Select(component => component.ComponentType),
+                0)
+            {
+                DisplayName = componentsGroup.Key,
+            };
+            builder.Metadata.Add(methodMetadata);
+
+            var attributes = componentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes());
+            foreach (var attribute in attributes)
+            {
+                builder.Metadata.Add(attribute);
+            }
+
+            return builder;
+        }
+
+        private static IEnumerable<IGrouping<string, (Type ComponentType, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(CompositionMetadataRegistry compositionMetadataRegistry) where TAttribute : HttpMethodAttribute
+        {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
-                .Select(componentType => new
-                {
-                    ComponentType = componentType,
-                    Template = ExtractComponentTemplate<HttpGetAttribute>(componentType)
-                })
+                .Select<Type, (Type ComponentType, string Template)>(componentType => (componentType, ExtractComponentTemplate<TAttribute>(componentType)))
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
-
-            foreach (var getComponentsGroup in getComponentsGroupedByTemplate)
-            {
-                var builder = new CompositionEndpointBuilder(
-                    RoutePatternFactory.Parse(getComponentsGroup.Key),
-                    getComponentsGroup.Select(component => component.ComponentType),
-                    0)
-                {
-                    DisplayName = getComponentsGroup.Key,
-                };
-                builder.Metadata.Add(new HttpMethodMetadata(new[] {HttpMethods.Get}));
-
-                var attributes = getComponentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes());
-                foreach (var attribute in attributes)
-                {
-                    builder.Metadata.Add(attribute);
-                }
-
-                var dataSource = endpoints.DataSources.OfType<CompositionEndpointDataSource>().FirstOrDefault();
-                if (dataSource == null)
-                {
-                    dataSource = new CompositionEndpointDataSource();
-                    endpoints.DataSources.Add(dataSource);
-                }
-
-                dataSource.AddEndpointBuilder(builder);
-            }
+            
+            return getComponentsGroupedByTemplate;
         }
     }
 }
