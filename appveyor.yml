@@ -1,5 +1,7 @@
 version: '{build}'
-image: Visual Studio 2019
+image:
+- ubuntu2004
+- Visual Studio 2019
 
 skip_branch_with_pr: true
 pull_requests:
@@ -15,13 +17,26 @@ branches:
   - /release-.*/
   - /^\d+\.\d+\.\d+(-\S*)?$/
 
-build_script:
-- cmd: ./build.cmd
-
 test: off
+deploy: off
 
 artifacts:
 - path: ./**/*.nupkg
 - path: ./**/*.snupkg
 
-deploy: off
+for:
+-
+  matrix:
+    only:
+      - image: ubuntu2004
+
+  build_script:
+  - sh: ./build.sh
+
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019
+
+  build_script:
+  - cmd: .\build.cmd
