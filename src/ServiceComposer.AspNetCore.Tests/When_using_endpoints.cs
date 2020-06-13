@@ -116,7 +116,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Get_returns_expected_response()
+        public async Task A_simple_get_with_2_handlers_returns_expected_response()
         {
             // Arrange
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
