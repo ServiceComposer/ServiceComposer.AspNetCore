@@ -17,7 +17,7 @@ branches:
   - /release-.*/
   - /^\d+\.\d+\.\d+(-\S*)?$/
   
-only_commits:
+skip_commits:
   files:
     - '**/*.source.md'
 
