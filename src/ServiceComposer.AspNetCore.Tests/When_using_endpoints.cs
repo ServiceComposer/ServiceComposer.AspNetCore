@@ -6,15 +6,16 @@ using Xunit;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_using_endpoints
     {
-        class BasicHandler : IHandleRequests
+        class EmptyResponseHandler : IHandleRequests
         {
-            [HttpGet("/basic-handlers/{id}")]
+            [HttpGet("/empty-response/{id}")]
             public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
             {
                 return Task.CompletedTask;
@@ -22,7 +23,7 @@ namespace ServiceComposer.AspNetCore.Tests
 
             public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
             {
-                return true;
+                throw new System.NotImplementedException();
             }
         }
 
@@ -37,7 +38,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<BasicHandler>();
+                        options.RegisterRequestsHandler<EmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
@@ -49,12 +50,12 @@ namespace ServiceComposer.AspNetCore.Tests
             ).CreateClient();
 
             // Act
-            var response = await client.GetAsync("/basic-handlers/1");
+            var response = await client.GetAsync("/empty-response/1");
 
             // Assert
             response.EnsureSuccessStatusCode();
         }
-        
+
         [Fact]
         public async Task No_matching_handlers_return_404()
         {
@@ -66,7 +67,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<BasicHandler>();
+                        options.RegisterRequestsHandler<EmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
@@ -82,6 +83,71 @@ namespace ServiceComposer.AspNetCore.Tests
 
             // Assert
             Assert.Equal( HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        class AppendIntegerHandler : IHandleRequests
+        {
+            [HttpGet("/sample/{id}")]
+            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            {
+                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
+                return Task.CompletedTask;
+            }
+
+            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        class AppendStrinHandler : IHandleRequests
+        {
+            [HttpGet("/sample/{id}")]
+            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            {
+                vm.AString = "sample";
+                return Task.CompletedTask;
+            }
+
+            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        [Fact]
+        public async Task Get_returns_expected_response()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterRequestsHandler<AppendStrinHandler>();
+                        options.RegisterRequestsHandler<AppendIntegerHandler>();
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/sample/1");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            dynamic responseObj = JObject.Parse(responseString);
+            Assert.Equal("sample", responseObj.AString);
+            Assert.Equal(1, responseObj.ANumber);
         }
     }
 }
