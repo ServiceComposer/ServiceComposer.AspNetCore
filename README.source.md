@@ -18,7 +18,7 @@ Configure the `Startup` class like following:
 
 snippet: net-core-2x-sample-startup
 
-> Note: define routes so to match your project needs. `ServiceComposer` adds many `MapComposable*` extension methods to the `IRouteBuilder` interface, to map routes for every HTTP supported Verb.
+> Note: define routes so to match your project needs. `ServiceComposer` adds provides all the required `MapComposable*` `IRouteBuilder` extension methods to map routes for every HTTP supported Verb.
 
 Define one or more classes implementing either the `IHandleRequests` or the `ISubscribeToCompositionEvents` based on your needs.
 
