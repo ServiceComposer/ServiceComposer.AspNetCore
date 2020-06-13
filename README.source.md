@@ -16,7 +16,7 @@ Create a new .NET Core console project and add a reference to the following Nuge
 
 Configure the `Startup` class like following:
 
-snippet: snippet: NetCore2x-sample-startup
+snippet: net-core-2x-sample-startup
 
 > Note: define routes so to match your project needs. `ServiceComposer` adds many `MapComposable*` extension methods to the `IRouteBuilder` interface, to map routes for every HTTP supported Verb.
 

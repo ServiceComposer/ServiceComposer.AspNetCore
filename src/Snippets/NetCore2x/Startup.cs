@@ -6,7 +6,7 @@ using ServiceComposer.AspNetCore.Gateway;
 
 namespace Snippets.NetCore2x
 {
-    // begin-snippet: NetCore2x-sample-startup
+    // begin-snippet: net-core-2x-sample-startup
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
