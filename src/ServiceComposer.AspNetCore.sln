@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClassLibraryWithHandlers", "TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj", "{138F9349-BE91-43F9-BADE-1FE88B7FCC84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snippets", "Snippets\Snippets.csproj", "{66C6DEED-9D3E-4793-BE52-8976D09A89B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66C6DEED-9D3E-4793-BE52-8976D09A89B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66C6DEED-9D3E-4793-BE52-8976D09A89B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66C6DEED-9D3E-4793-BE52-8976D09A89B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66C6DEED-9D3E-4793-BE52-8976D09A89B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
