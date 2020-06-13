@@ -72,9 +72,20 @@ namespace ServiceComposer.AspNetCore
             RegisterRouteInterceptor(typeof(T));
         }
 
+        public void RegisterCompositionHandler<T>()
+        {
+            var type = typeof(T);
+            if (!(typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)))
+            {
+                throw new NotSupportedException("Registered types must be ICompositionRequestsHandler or ICompositionEventsSubscriber.");
+            }
+
+            compositionMetadataRegistry.AddComponent(type);
+            Services.AddTransient(typeof(T));
+        }
+
         internal void RegisterRouteInterceptor(Type type)
         {
-            compositionMetadataRegistry.AddComponent(type);
             Services.AddTransient(typeof(IInterceptRoutes), type);
         }
     }

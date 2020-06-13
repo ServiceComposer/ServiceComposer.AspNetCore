@@ -28,5 +28,10 @@ namespace ServiceComposer.AspNetCore
                 ? headers[ComposedRequestIdHeader.Key].Single()
                 : defaultValue();
         }
+
+        public static string GetComposedRequestId(this IHeaderDictionary headers)
+        {
+            return GetComposedRequestIdHeaderOr(headers, () => null);
+        }
     }
 }

@@ -23,8 +23,10 @@ namespace ServiceComposer.AspNetCore
     {
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
         public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
+        public static string GetComposedRequestId(this Microsoft.AspNetCore.Http.IHeaderDictionary headers) { }
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
+    public delegate System.Threading.Tasks.Task CompositionEventHandler<TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public class CompositionHandler
     {
         public CompositionHandler() { }
@@ -43,6 +45,24 @@ namespace ServiceComposer.AspNetCore
         public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
     }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
+    public static class HttpRequestExtensions
+    {
+        public static readonly string ComposedResponseModelKey;
+        [return: System.Runtime.CompilerServices.Dynamic]
+        public static object GetResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+    }
+    public interface ICompositionEventsPublisher
+    {
+        void Subscribe<TEvent>(ServiceComposer.AspNetCore.EventHandler<TEvent> handler);
+    }
+    public interface ICompositionEventsSubscriber
+    {
+        void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
+    }
+    public interface ICompositionRequestsHandler
+    {
+        System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
+    }
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.Dynamic] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
@@ -75,6 +95,7 @@ namespace ServiceComposer.AspNetCore
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
+        public void RegisterCompositionHandler<T>() { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
     }

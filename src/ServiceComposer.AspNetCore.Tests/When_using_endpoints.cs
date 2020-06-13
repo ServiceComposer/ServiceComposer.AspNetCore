@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Xunit;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 
@@ -13,17 +13,12 @@ namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_using_endpoints
     {
-        class EmptyResponseHandler : IHandleRequests
+        class EmptyResponseHandler : ICompositionRequestsHandler
         {
             [HttpGet("/empty-response/{id}")]
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            public Task Handle(HttpRequest request)
             {
                 return Task.CompletedTask;
-            }
-
-            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-            {
-                throw new System.NotImplementedException();
             }
         }
 
@@ -38,7 +33,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<EmptyResponseHandler>();
+                        options.RegisterCompositionHandler<EmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
@@ -53,7 +48,7 @@ namespace ServiceComposer.AspNetCore.Tests
             var response = await client.GetAsync("/empty-response/1");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.True(response.IsSuccessStatusCode);
         }
 
         [Fact]
@@ -67,7 +62,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<EmptyResponseHandler>();
+                        options.RegisterCompositionHandler<EmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
@@ -85,33 +80,26 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal( HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        class AppendIntegerHandler : IHandleRequests
+        class AppendIntegerHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            public Task Handle(HttpRequest request)
             {
+                var routeData = request.HttpContext.GetRouteData();
+                var vm = request.GetResponseModel();
                 vm.ANumber = int.Parse(routeData.Values["id"].ToString());
                 return Task.CompletedTask;
             }
-
-            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-            {
-                throw new System.NotImplementedException();
-            }
         }
 
-        class AppendStrinHandler : IHandleRequests
+        class AppendStrinHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            public Task Handle(HttpRequest request)
             {
+                var vm = request.GetResponseModel();
                 vm.AString = "sample";
                 return Task.CompletedTask;
-            }
-
-            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-            {
-                throw new System.NotImplementedException();
             }
         }
 
@@ -126,8 +114,8 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterRequestsHandler<AppendStrinHandler>();
-                        options.RegisterRequestsHandler<AppendIntegerHandler>();
+                        options.RegisterCompositionHandler<AppendStrinHandler>();
+                        options.RegisterCompositionHandler<AppendIntegerHandler>();
                     });
                     services.AddRouting();
                 },
