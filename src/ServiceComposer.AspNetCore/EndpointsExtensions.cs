@@ -50,9 +50,9 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var getComponentsGroup in getComponentsGroupedByTemplate)
             {
-                var builder = new ComposedEndpointBuilder(
+                var builder = new CompositionEndpointBuilder(
                     RoutePatternFactory.Parse(getComponentsGroup.Key),
-                    getComponentsGroup.Select(component=>component.ComponentType),
+                    getComponentsGroup.Select(component => component.ComponentType),
                     0)
                 {
                     DisplayName = getComponentsGroup.Key,
@@ -78,14 +78,14 @@ namespace ServiceComposer.AspNetCore
         }
     }
 
-    public class ComposedEndpointBuilder : EndpointBuilder
+    class CompositionEndpointBuilder : EndpointBuilder
     {
         private readonly Type[] _compositionHandlers;
         public RoutePattern RoutePattern { get; set; }
 
         public int Order { get; set; }
 
-        public ComposedEndpointBuilder(RoutePattern routePattern, IEnumerable<Type> compositionHandlers, int order)
+        public CompositionEndpointBuilder(RoutePattern routePattern, IEnumerable<Type> compositionHandlers, int order)
         {
             _compositionHandlers = compositionHandlers.ToArray();
             RoutePattern = routePattern;
@@ -93,6 +93,7 @@ namespace ServiceComposer.AspNetCore
             RequestDelegate = context =>
             {
                 var types = _compositionHandlers;
+                context.RequestServices.GetRequiredService(types[0]);
 
                 return Task.CompletedTask;
             };
@@ -111,20 +112,13 @@ namespace ServiceComposer.AspNetCore
         }
     }
 
-    public class CompositionEndpointDataSource : EndpointDataSource
+    class CompositionEndpointDataSource : EndpointDataSource
     {
-        readonly List<EndpointBuilder> _endpointBuilders;
+        readonly List<CompositionEndpointBuilder> _endpointBuilders = new List<CompositionEndpointBuilder>();
 
-        public CompositionEndpointDataSource()
-        {
-            _endpointBuilders = new List<EndpointBuilder>();
-        }
-
-        public EndpointBuilder AddEndpointBuilder(EndpointBuilder endpointBuilder)
+        public void AddEndpointBuilder(CompositionEndpointBuilder endpointBuilder)
         {
             _endpointBuilders.Add(endpointBuilder);
-
-            return endpointBuilder;
         }
 
         public override IChangeToken GetChangeToken()
@@ -132,6 +126,8 @@ namespace ServiceComposer.AspNetCore
             return NullChangeToken.Singleton;
         }
 
-        public override IReadOnlyList<Endpoint> Endpoints => _endpointBuilders.Select(e => e.Build()).ToArray();
+        public override IReadOnlyList<Endpoint> Endpoints => _endpointBuilders
+            .OrderBy(builder=>builder.Order)
+            .Select(builder => builder.Build()).ToArray();
     }
 }

@@ -14,13 +14,6 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
-    public class ComposedEndpointBuilder : Microsoft.AspNetCore.Builder.EndpointBuilder
-    {
-        public ComposedEndpointBuilder(Microsoft.AspNetCore.Routing.Patterns.RoutePattern routePattern, System.Collections.Generic.IEnumerable<System.Type> compositionHandlers, int order) { }
-        public int Order { get; set; }
-        public Microsoft.AspNetCore.Routing.Patterns.RoutePattern RoutePattern { get; set; }
-        public override Microsoft.AspNetCore.Http.Endpoint Build() { }
-    }
     public class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
@@ -31,13 +24,6 @@ namespace ServiceComposer.AspNetCore
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
         public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
-    }
-    public class CompositionEndpointDataSource : Microsoft.AspNetCore.Routing.EndpointDataSource
-    {
-        public CompositionEndpointDataSource() { }
-        public override System.Collections.Generic.IReadOnlyList<Microsoft.AspNetCore.Http.Endpoint> Endpoints { get; }
-        public Microsoft.AspNetCore.Builder.EndpointBuilder AddEndpointBuilder(Microsoft.AspNetCore.Builder.EndpointBuilder endpointBuilder) { }
-        public override Microsoft.Extensions.Primitives.IChangeToken GetChangeToken() { }
     }
     public class CompositionHandler
     {
