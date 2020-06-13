@@ -98,6 +98,17 @@ namespace ServiceComposer.AspNetCore
                 return Task.WhenAll(tasks);
             }
 
+            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
+            {
+                var tasks = new List<Task>();
+                foreach (var handler in compositionHandlers)
+                {
+                    tasks.Add(handler.Invoke(@event, _httpRequest));
+                }
+
+                return Task.WhenAll(tasks);
+            }
+
             return Task.CompletedTask;
         }
 
