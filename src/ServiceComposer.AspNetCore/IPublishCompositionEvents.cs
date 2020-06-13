@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ServiceComposer.AspNetCore
+﻿namespace ServiceComposer.AspNetCore
 {
     public interface IPublishCompositionEvents
     {

@@ -4,10 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Gateway;
 using System.Threading.Tasks;
 using Xunit;
-using System.Net;
 using ServiceComposer.AspNetCore.Testing;
-using System;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace ServiceComposer.AspNetCore.Tests

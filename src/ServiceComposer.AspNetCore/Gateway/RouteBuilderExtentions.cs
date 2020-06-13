@@ -2,12 +2,7 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore.Gateway
 {
