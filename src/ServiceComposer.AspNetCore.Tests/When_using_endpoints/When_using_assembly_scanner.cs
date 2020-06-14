@@ -6,7 +6,7 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 {
-    public class Whe_using_assembly_scanner
+    public class When_using_assembly_scanner
     {
         [Fact]
         public async Task Matching_handlers_are_found()
