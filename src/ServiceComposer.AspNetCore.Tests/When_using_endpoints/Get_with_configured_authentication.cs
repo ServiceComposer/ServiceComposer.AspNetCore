@@ -1,7 +1,9 @@
 using System.Net;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Xunit;
 using Microsoft.AspNetCore.Builder;
@@ -30,13 +32,12 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             (
                 configureServices: services =>
                 {
-                    services.AddAuthorization(options =>
-                    {
-                        // options.AddPolicy("TestRequireAuthenticatedUser", policy =>
-                        // {
-                        //     policy.RequireAuthenticatedUser();
-                        // });
-                    });
+                    services.AddAuthorization();
+                    services.AddAuthentication("BasicAuthentication")
+                        .AddScheme<DelegateAuthenticationSchemeOptions, TestAuthenticationHandler>("BasicAuthentication", options =>
+                        {
+                            options.OnAuthenticate = request => Task.FromResult( AuthenticateResult.Fail("Invalid username or password"));
+                        });
 
                     services.AddViewModelComposition(options =>
                     {
@@ -47,8 +48,9 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                 },
                 configure: app =>
                 {
-                    app.UseAuthorization();
                     app.UseRouting();
+                    app.UseAuthorization();
+                    app.UseAuthentication();
                     app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             ).CreateClient();
