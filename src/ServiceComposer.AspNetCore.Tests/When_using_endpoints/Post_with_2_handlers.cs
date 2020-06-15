@@ -28,11 +28,9 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                 await request.Body.ReadAsync(buffer, 0, buffer.Length);
                 var requestContent = Encoding.UTF8.GetString(buffer);
 
-                request.Body.Position = 0;
-
                 var content = JObject.Parse(requestContent);
-                
-                var vm = request.GetResponseModel();
+
+                var vm = request.GetComposedResponseModel();
                 vm.ANumber = content?.SelectToken("ANumber")?.Value<int>();
             }
         }
@@ -46,11 +44,9 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                 await request.Body.ReadAsync(buffer, 0, buffer.Length);
                 var requestContent = Encoding.UTF8.GetString(buffer);
 
-                request.Body.Position = 0;
-
                 var content = JObject.Parse(requestContent);
-                
-                var vm = request.GetResponseModel();
+
+                var vm = request.GetComposedResponseModel();
                 vm.AString = content?.SelectToken("AString")?.Value<int>();
             }
         }
@@ -86,7 +82,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
             var stringContent = new StringContent(
                 JsonConvert.SerializeObject(model),
-                Encoding.UTF8, 
+                Encoding.UTF8,
                 MediaTypeNames.Application.Json);
             // Act
             var response = await client.PostAsync("/sample/1", stringContent);

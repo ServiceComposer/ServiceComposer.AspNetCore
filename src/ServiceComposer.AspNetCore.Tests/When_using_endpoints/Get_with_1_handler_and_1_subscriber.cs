@@ -18,7 +18,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             [HttpGet("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var vm = request.GetResponseModel();
+                var vm = request.GetComposedResponseModel();
                 vm.AString = "sample";
 
                 await vm.RaiseEvent(new TestEvent());
@@ -32,7 +32,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             {
                 publisher.Subscribe<TestEvent>((@event, request) =>
                 {
-                    var vm = request.GetResponseModel();
+                    var vm = request.GetComposedResponseModel();
                     vm.AnotherString = "sample";
                     return Task.CompletedTask;
                 });

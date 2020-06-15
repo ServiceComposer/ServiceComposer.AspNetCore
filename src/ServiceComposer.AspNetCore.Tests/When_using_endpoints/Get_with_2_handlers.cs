@@ -18,7 +18,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             public Task Handle(HttpRequest request)
             {
                 var routeData = request.HttpContext.GetRouteData();
-                var vm = request.GetResponseModel();
+                var vm = request.GetComposedResponseModel();
                 vm.ANumber = int.Parse(routeData.Values["id"].ToString());
                 return Task.CompletedTask;
             }
@@ -29,7 +29,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
             {
-                var vm = request.GetResponseModel();
+                var vm = request.GetComposedResponseModel();
                 vm.AString = "sample";
                 return Task.CompletedTask;
             }
