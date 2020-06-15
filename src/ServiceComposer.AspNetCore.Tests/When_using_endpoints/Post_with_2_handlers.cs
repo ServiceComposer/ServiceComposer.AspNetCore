@@ -54,7 +54,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             var expectedString = "this is a string value";
             var expectedNumber = 32;
 
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Post_with_2_handlers>
             (
                 configureServices: services =>
                 {

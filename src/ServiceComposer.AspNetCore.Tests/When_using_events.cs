@@ -36,7 +36,7 @@ namespace ServiceComposer.AspNetCore.Tests
 
             public void Subscribe(IPublishCompositionEvents publisher)
             {
-                publisher.Subscribe<AnEvent>((requestId, viewModel, @event, routeData, httpRequest) => 
+                publisher.Subscribe<AnEvent>((requestId, viewModel, @event, routeData, httpRequest) =>
                 {
                     var id = int.Parse((string)routeData.Values["id"]);
                     viewModel.SubscriberValue = id;
@@ -55,7 +55,7 @@ namespace ServiceComposer.AspNetCore.Tests
         public async Task Should_invoke_subscribers()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_events>
             (
                 configureServices: services =>
                 {

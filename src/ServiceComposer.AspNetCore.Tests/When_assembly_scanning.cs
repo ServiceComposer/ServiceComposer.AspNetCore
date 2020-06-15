@@ -116,7 +116,7 @@ namespace ServiceComposer.AspNetCore.Tests
         public async Task Should_return_success_code()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_assembly_scanning>
             (
                 configureServices: services =>
                 {

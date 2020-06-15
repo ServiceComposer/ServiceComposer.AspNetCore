@@ -43,7 +43,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         public async Task Returns_expected_response()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_1_handler_and_1_subscriber>
             (
                 configureServices: services =>
                 {

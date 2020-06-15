@@ -12,7 +12,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         public async Task Matching_handlers_are_found()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_a_matching_handler_is_found>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
             (
                 configureServices: services =>
                 {
