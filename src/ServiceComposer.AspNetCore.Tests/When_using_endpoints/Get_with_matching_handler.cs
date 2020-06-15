@@ -2,11 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Xunit;
-using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
