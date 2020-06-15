@@ -13,21 +13,6 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
-        static string ExtractComponentTemplate<TAttribute>(Type componentType) where TAttribute : HttpMethodAttribute
-        {
-            MethodInfo method = null;
-            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(componentType))
-            {
-                method = componentType.GetMethod(nameof(ICompositionRequestsHandler.Handle));
-            }
-            else if (typeof(ICompositionEventsSubscriber).IsAssignableFrom(componentType))
-            {
-                method = componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
-            }
-
-            return method?.GetCustomAttribute<TAttribute>()?.Template;
-        }
-
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
             if (endpoints == null)
@@ -76,7 +61,7 @@ namespace ServiceComposer.AspNetCore
             dataSource.AddEndpointBuilder(builder);
         }
 
-        private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(IGrouping<string, (Type ComponentType, string Template)> componentsGroup, HttpMethodMetadata methodMetadata)
+        private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, HttpMethodMetadata methodMetadata)
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
@@ -87,7 +72,7 @@ namespace ServiceComposer.AspNetCore
             };
             builder.Metadata.Add(methodMetadata);
 
-            var attributes = componentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes());
+            var attributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes());
             foreach (var attribute in attributes)
             {
                 builder.Metadata.Add(attribute);
@@ -96,14 +81,33 @@ namespace ServiceComposer.AspNetCore
             return builder;
         }
 
-        private static IEnumerable<IGrouping<string, (Type ComponentType, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(CompositionMetadataRegistry compositionMetadataRegistry) where TAttribute : HttpMethodAttribute
+        static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(CompositionMetadataRegistry compositionMetadataRegistry) where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
-                .Select<Type, (Type ComponentType, string Template)>(componentType => (componentType, ExtractComponentTemplate<TAttribute>(componentType)))
+                .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
+                {
+                    var method = ExtractMethod(componentType);
+                    var template = method.GetCustomAttribute<TAttribute>()?.Template;
+                    return (componentType, method, template);
+                })
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
 
             return getComponentsGroupedByTemplate;
+        }
+
+        static MethodInfo ExtractMethod(Type componentType)
+        {
+            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(componentType))
+            {
+                return componentType.GetMethod(nameof(ICompositionRequestsHandler.Handle));
+            }
+            else if (typeof(ICompositionEventsSubscriber).IsAssignableFrom(componentType))
+            {
+                return componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
+            }
+
+            throw new NotSupportedException($"Component needs to be either {nameof(ICompositionRequestsHandler)} or {nameof(ICompositionEventsSubscriber)}.");
         }
     }
 }
