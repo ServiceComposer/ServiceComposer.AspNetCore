@@ -9,6 +9,9 @@
 # mergetool output
 *.orig
 
+# API Approvals
+*.received.txt
+
 # Build dependencies and artifacts
 .dotnet/
 .build/
