@@ -27,6 +27,8 @@ namespace ServiceComposer.AspNetCore
             Order = order;
             RequestDelegate = async context =>
             {
+                context.Request.EnableBuffering();
+
                 var request = context.Request;
                 var routeData = context.GetRouteData();
 
