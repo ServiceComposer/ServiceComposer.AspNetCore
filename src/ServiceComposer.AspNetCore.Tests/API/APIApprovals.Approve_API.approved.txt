@@ -49,7 +49,7 @@ namespace ServiceComposer.AspNetCore
     {
         public static readonly string ComposedResponseModelKey;
         [return: System.Runtime.CompilerServices.Dynamic]
-        public static object GetResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+        public static object GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
     }
     public interface ICompositionErrorsHandler
     {
