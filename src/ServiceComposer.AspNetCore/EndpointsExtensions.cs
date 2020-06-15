@@ -37,6 +37,7 @@ namespace ServiceComposer.AspNetCore
 
             var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
             MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
+            MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
         }
 
         private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
@@ -46,6 +47,18 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Get}));
+
+                AppendToDataSource(dataSources, builder);
+            }
+        }
+
+        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        {
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(compositionMetadataRegistry);
+
+            foreach (var componentsGroup in componentsGroupedByTemplate)
+            {
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Post}));
 
                 AppendToDataSource(dataSources, builder);
             }
@@ -89,7 +102,7 @@ namespace ServiceComposer.AspNetCore
                 .Select<Type, (Type ComponentType, string Template)>(componentType => (componentType, ExtractComponentTemplate<TAttribute>(componentType)))
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
-            
+
             return getComponentsGroupedByTemplate;
         }
     }
