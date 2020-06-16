@@ -15,16 +15,23 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
-        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
+        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enbaleWriteSupport = false)
         {
             if (endpoints == null)
             {
                 throw new ArgumentNullException(nameof(endpoints));
             }
 
-            var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+            var compositionMetadataRegistry =
+                endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
             MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
-            MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
+            if (enbaleWriteSupport)
+            {
+                MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
+                MapPutComponents(compositionMetadataRegistry, endpoints.DataSources);
+                MapPatchComponents(compositionMetadataRegistry, endpoints.DataSources);
+                MapDeleteComponents(compositionMetadataRegistry, endpoints.DataSources);
+            }
         }
 
         private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
@@ -46,6 +53,42 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Post}));
+
+                AppendToDataSource(dataSources, builder);
+            }
+        }
+        
+        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        {
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(compositionMetadataRegistry);
+
+            foreach (var componentsGroup in componentsGroupedByTemplate)
+            {
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Patch}));
+
+                AppendToDataSource(dataSources, builder);
+            }
+        }
+        
+        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        {
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(compositionMetadataRegistry);
+
+            foreach (var componentsGroup in componentsGroupedByTemplate)
+            {
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Put}));
+
+                AppendToDataSource(dataSources, builder);
+            }
+        }
+        
+        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        {
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(compositionMetadataRegistry);
+
+            foreach (var componentsGroup in componentsGroupedByTemplate)
+            {
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Delete}));
 
                 AppendToDataSource(dataSources, builder);
             }

@@ -17,11 +17,11 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 {
-    public class Post_with_2_handlers
+    public class Put_with_2_handlers
     {
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpPost("/sample/{id}")]
+            [HttpPut("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -36,7 +36,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
         class TestStrinHandler : ICompositionRequestsHandler
         {
-            [HttpPost("/sample/{id}")]
+            [HttpPut("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -86,7 +86,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             stringContent.Headers.ContentLength = json.Length;
 
             // Act
-            var response = await client.PostAsync("/sample/1", stringContent);
+            var response = await client.PutAsync("/sample/1", stringContent);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
