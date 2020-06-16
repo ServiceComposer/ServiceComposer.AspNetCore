@@ -1,4 +1,6 @@
-﻿using System.Dynamic;
+﻿#if NETCOREAPP3_1
+
+using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;
@@ -97,3 +99,5 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
+
+#endif

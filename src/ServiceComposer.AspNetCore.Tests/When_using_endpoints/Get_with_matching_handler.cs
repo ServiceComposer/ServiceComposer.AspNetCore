@@ -1,3 +1,5 @@
+#if NETCOREAPP3_1
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -49,3 +51,5 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
+
+#endif

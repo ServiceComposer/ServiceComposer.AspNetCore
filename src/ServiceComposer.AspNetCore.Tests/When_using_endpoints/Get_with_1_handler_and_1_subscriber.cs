@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿#if NETCOREAPP3_1
+
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -77,3 +79,5 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
+
+#endif
