@@ -15,7 +15,7 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
-        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enbaleWriteSupport = false)
+        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport = false)
         {
             if (endpoints == null)
             {
@@ -25,7 +25,7 @@ namespace ServiceComposer.AspNetCore
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
             MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
-            if (enbaleWriteSupport)
+            if (enableWriteSupport)
             {
                 MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
                 MapPutComponents(compositionMetadataRegistry, endpoints.DataSources);

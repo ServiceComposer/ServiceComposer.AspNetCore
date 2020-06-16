@@ -42,7 +42,7 @@ namespace ServiceComposer.AspNetCore
     }
     public static class EndpointsExtensions
     {
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enbaleWriteSupport = false) { }
+        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport = false) { }
     }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class HttpRequestExtensions

@@ -64,7 +64,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                 configure: app =>
                 {
                     app.UseRouting();
-                    app.UseEndpoints(builder => builder.MapCompositionHandlers(enbaleWriteSupport: true));
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers(enableWriteSupport: true));
                 }
             ).CreateClient();
 
