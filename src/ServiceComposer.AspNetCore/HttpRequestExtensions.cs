@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿#if NETCOREAPP3_1
+
+using Microsoft.AspNetCore.Http;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -17,3 +19,5 @@ namespace ServiceComposer.AspNetCore
         }
     }
 }
+
+#endif

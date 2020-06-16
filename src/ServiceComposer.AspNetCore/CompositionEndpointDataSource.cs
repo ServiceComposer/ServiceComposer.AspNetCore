@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#if NETCOREAPP3_1
+
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -26,3 +28,5 @@ namespace ServiceComposer.AspNetCore
             .Select(builder => builder.Build()).ToArray();
     }
 }
+
+#endif
