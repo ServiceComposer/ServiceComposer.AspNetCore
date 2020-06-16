@@ -43,7 +43,7 @@ public class Startup
     }
 }
 ```
-<sup><a href='/src/Snippets/NetCore2x/Startup.cs#L9-L27' title='File snippet `net-core-2x-sample-startup` was extracted from'>snippet source</a> | <a href='#snippet-net-core-2x-sample-startup' title='Navigate to start of snippet `net-core-2x-sample-startup`'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore2x/Startup.cs#L9-L26' title='File snippet `net-core-2x-sample-startup` was extracted from'>snippet source</a> | <a href='#snippet-net-core-2x-sample-startup' title='Navigate to start of snippet `net-core-2x-sample-startup`'>anchor</a></sup>
 <!-- endsnippet -->
 
 > Note: define routes so to match your project needs. `ServiceComposer` adds provides all the required `MapComposable*` `IRouteBuilder` extension methods to map routes for every HTTP supported Verb.
