@@ -23,6 +23,5 @@ namespace Snippets.NetCore2x
             });
         }
     }
-
     // end-snippet
 }
