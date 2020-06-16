@@ -15,9 +15,18 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 {
     public class Get_with_configured_authentication
     {
-        class EmptyResponseHandler : ICompositionRequestsHandler
+        class RetrictedEmptyResponseHandler : ICompositionRequestsHandler
         {
             [Authorize]
+            [HttpGet("/not-authorized-response/{id}")]
+            public Task Handle(HttpRequest request)
+            {
+                return Task.CompletedTask;
+            }
+        }
+        
+        class NotRetrictedEmptyResponseHandler : ICompositionRequestsHandler
+        {
             [HttpGet("/not-authorized-response/{id}")]
             public Task Handle(HttpRequest request)
             {
@@ -43,7 +52,46 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<EmptyResponseHandler>();
+                        options.RegisterCompositionHandler<RetrictedEmptyResponseHandler>();
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseAuthorization();
+                    app.UseAuthentication();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/not-authorized-response/1");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+        
+        [Fact]
+        public async Task When_not_all_handlers_are_restricted_is_Unauthorized()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_configured_authentication>
+            (
+                configureServices: services =>
+                {
+                    services.AddAuthorization();
+                    services.AddAuthentication("BasicAuthentication")
+                        .AddScheme<DelegateAuthenticationSchemeOptions, TestAuthenticationHandler>("BasicAuthentication", options =>
+                        {
+                            options.OnAuthenticate = request => Task.FromResult( AuthenticateResult.Fail("Invalid username or password"));
+                        });
+
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<RetrictedEmptyResponseHandler>();
+                        options.RegisterCompositionHandler<NotRetrictedEmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
