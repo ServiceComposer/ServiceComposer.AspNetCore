@@ -15,7 +15,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 {
     public class Get_with_configured_authentication
     {
-        class RetrictedEmptyResponseHandler : ICompositionRequestsHandler
+        class RestrictedEmptyResponseHandler : ICompositionRequestsHandler
         {
             [Authorize]
             [HttpGet("/not-authorized-response/{id}")]
@@ -25,7 +25,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             }
         }
         
-        class NotRetrictedEmptyResponseHandler : ICompositionRequestsHandler
+        class NotRestrictedEmptyResponseHandler : ICompositionRequestsHandler
         {
             [HttpGet("/not-authorized-response/{id}")]
             public Task Handle(HttpRequest request)
@@ -52,7 +52,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<RetrictedEmptyResponseHandler>();
+                        options.RegisterCompositionHandler<RestrictedEmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
@@ -90,8 +90,8 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<RetrictedEmptyResponseHandler>();
-                        options.RegisterCompositionHandler<NotRetrictedEmptyResponseHandler>();
+                        options.RegisterCompositionHandler<RestrictedEmptyResponseHandler>();
+                        options.RegisterCompositionHandler<NotRestrictedEmptyResponseHandler>();
                     });
                     services.AddRouting();
                 },
