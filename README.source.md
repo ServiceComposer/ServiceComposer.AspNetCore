@@ -6,6 +6,25 @@ ServiceComposer is a ViewModel Composition Gateway. For more details, and the ph
 
 ## Usage
 
+### ASP.NET Core 3.x
+
+ServiceComposer for ASP.NET Core 3.x levarages the new Endpoints support to plugin into the request handling pipeline.
+ServiceComposer can be added to exsting or new ASP.NET Core projects, and to .NET Core console applications.
+
+Add a reference to `ServiceComposer.AspNetCore` Nuget package and configure the `Startup` class like follows:
+
+snippet: net-core-3x-sample-startup
+
+> NOTE: To use a `Startup` class Generic Host support is required.
+
+ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required. For example to enable composition support for the `/sample/{id}` route an handler like the following can be defined:
+
+snippet: net-core-3x-sample-handler
+
+#### Authentication and Authorization
+
+By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. it's possible to use the `Authorize` attribute to specify that a handler requires authorization. The authorization process is the regaulr ASP.NET Core 3.x process and no special configuration is needed to plugin ServiceComposer.
+
 ### ASP.NET Core 2.x
 
 Create a new .NET Core console project and add a reference to the following Nuget packages:
@@ -14,7 +33,7 @@ Create a new .NET Core console project and add a reference to the following Nuge
 * `Microsoft.AspNetCore.Routing`
 * `ServiceComposer.AspNetCore`
 
-Configure the `Startup` class like following:
+Configure the `Startup` class like follows:
 
 snippet: net-core-2x-sample-startup
 
