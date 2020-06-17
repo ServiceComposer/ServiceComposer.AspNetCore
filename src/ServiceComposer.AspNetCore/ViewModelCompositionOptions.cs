@@ -8,10 +8,14 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
+        readonly CompositionMetadataRegistry compositionMetadataRegistry = new CompositionMetadataRegistry();
+
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
             Services = services;
             AssemblyScanner = new AssemblyScanner();
+
+            Services.AddSingleton(compositionMetadataRegistry);
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
@@ -38,6 +42,22 @@ namespace ServiceComposer.AspNetCore
                         foreach (var type in types)
                         {
                             RegisterRouteInterceptor(type);
+                        }
+                    });
+
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && (typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type));
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterCompositionHandler(type);
                         }
                     });
 
@@ -68,7 +88,23 @@ namespace ServiceComposer.AspNetCore
             RegisterRouteInterceptor(typeof(T));
         }
 
-        internal void RegisterRouteInterceptor(Type type)
+        public void RegisterCompositionHandler<T>()
+        {
+            RegisterCompositionHandler(typeof(T));
+        }
+
+        void RegisterCompositionHandler(Type type)
+        {
+            if (!(typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)))
+            {
+                throw new NotSupportedException("Registered types must be ICompositionRequestsHandler or ICompositionEventsSubscriber.");
+            }
+
+            compositionMetadataRegistry.AddComponent(type);
+            Services.AddTransient(type);
+        }
+
+        void RegisterRouteInterceptor(Type type)
         {
             Services.AddTransient(typeof(IInterceptRoutes), type);
         }

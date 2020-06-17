@@ -1,11 +1,7 @@
 ﻿using FakeItEasy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests

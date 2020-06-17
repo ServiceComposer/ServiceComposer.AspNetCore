@@ -7,39 +7,51 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
-    class DynamicViewModel : DynamicObject, IPublishCompositionEvents
+    class DynamicViewModel : DynamicObject, IPublishCompositionEvents, ICompositionEventsPublisher
     {
-        private readonly string requestId;
-        private readonly RouteData routeData;
-        private readonly HttpRequest httpRequest;
-        private readonly IDictionary<Type, List<EventHandler<object>>> subscriptions = new Dictionary<Type, List<EventHandler<object>>>();
-        private readonly IDictionary<string, object> properties = new Dictionary<string, object>();
+        readonly string _requestId;
+        readonly RouteData _routeData;
+        readonly HttpRequest _httpRequest;
+        readonly IDictionary<Type, List<EventHandler<object>>> _subscriptions = new Dictionary<Type, List<EventHandler<object>>>();
+        readonly IDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new Dictionary<Type, List<CompositionEventHandler<object>>>();
+        readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
 
         public DynamicViewModel(string requestId, RouteData routeData, HttpRequest httpRequest)
         {
-            this.requestId = requestId;
-            this.routeData = routeData;
-            this.httpRequest = httpRequest;
+            this._requestId = requestId;
+            this._routeData = routeData;
+            this._httpRequest = httpRequest;
         }
 
-        public void CleanupSubscribers() => subscriptions.Clear();
+        public void CleanupSubscribers() => _subscriptions.Clear();
 
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {
-            if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
+            if (!_subscriptions.TryGetValue(typeof(TEvent), out var handlers))
             {
                 handlers = new List<EventHandler<object>>();
-                subscriptions.Add(typeof(TEvent), handlers);
+                _subscriptions.Add(typeof(TEvent), handlers);
             }
 
-            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent)@event, routeData, query));
+            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent) @event, routeData, query));
         }
 
-        public override bool TryGetMember(GetMemberBinder binder, out object result) => properties.TryGetValue(binder.Name, out result);
+        public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
+        {
+            if (!_compositionEventsSubscriptions.TryGetValue(typeof(TEvent), out var handlers))
+            {
+                handlers = new List<CompositionEventHandler<object>>();
+                _compositionEventsSubscriptions.Add(typeof(TEvent), handlers);
+            }
+
+            handlers.Add((@event, request) => handler((TEvent) @event, request));
+        }
+
+        public override bool TryGetMember(GetMemberBinder binder, out object result) => _properties.TryGetValue(binder.Name, out result);
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            properties[binder.Name] = value;
+            _properties[binder.Name] = value;
             return true;
         }
 
@@ -55,7 +67,7 @@ namespace ServiceComposer.AspNetCore
 
             if (binder.Name == "Merge")
             {
-                result = MergeImpl((IDictionary<string, object>)args[0]);
+                result = MergeImpl((IDictionary<string, object>) args[0]);
                 return true;
             }
 
@@ -64,7 +76,7 @@ namespace ServiceComposer.AspNetCore
 
         public override IEnumerable<string> GetDynamicMemberNames()
         {
-            foreach (var item in properties.Keys)
+            foreach (var item in _properties.Keys)
             {
                 yield return item;
             }
@@ -75,12 +87,23 @@ namespace ServiceComposer.AspNetCore
 
         Task RaiseEventImpl(object @event)
         {
-            if (subscriptions.TryGetValue(@event.GetType(), out var handlers))
+            if (_subscriptions.TryGetValue(@event.GetType(), out var handlers))
             {
                 var tasks = new List<Task>();
                 foreach (var handler in handlers)
                 {
-                    tasks.Add(handler.Invoke(requestId, this, @event, routeData, httpRequest));
+                    tasks.Add(handler.Invoke(_requestId, this, @event, _routeData, _httpRequest));
+                }
+
+                return Task.WhenAll(tasks);
+            }
+
+            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
+            {
+                var tasks = new List<Task>();
+                foreach (var handler in compositionHandlers)
+                {
+                    tasks.Add(handler.Invoke(@event, _httpRequest));
                 }
 
                 return Task.WhenAll(tasks);
@@ -93,7 +116,7 @@ namespace ServiceComposer.AspNetCore
         {
             foreach (var item in source)
             {
-                properties[item.Key] = item.Value;
+                _properties[item.Key] = item.Value;
             }
 
             return this;

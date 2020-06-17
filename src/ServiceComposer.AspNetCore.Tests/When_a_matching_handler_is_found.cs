@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Gateway;
 using System.Threading.Tasks;
 using Xunit;
-using System.Net;
 using ServiceComposer.AspNetCore.Testing;
 
 namespace ServiceComposer.AspNetCore.Tests
