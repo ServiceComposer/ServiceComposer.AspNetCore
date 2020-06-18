@@ -34,6 +34,41 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             // Assert
             Assert.True(response.IsSuccessStatusCode);
         }
+
+        private static bool _invoked = false;
+        class Customizations : IViewModelCompositionOptionsCustomization
+        {
+            public void Customize(ViewModelCompositionOptions options)
+            {
+                _invoked = true;
+            }
+        }
+
+        [Fact]
+        public async Task Options_customization_are_invoked()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition();
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/empty-response/1");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(_invoked);
+        }
     }
 }
 

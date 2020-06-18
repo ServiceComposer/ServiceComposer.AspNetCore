@@ -75,7 +75,16 @@ namespace ServiceComposer.AspNetCore
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
                     .SelectMany(assembly => assembly.GetTypes())
-                    .Distinct();
+                    .Distinct()
+                    .ToList();
+
+                var optionsCustomizations = allTypes.Where(t => !t.IsAbstract && typeof(IViewModelCompositionOptionsCustomization).IsAssignableFrom(t));
+                foreach (var optionsCustomization in optionsCustomizations)
+                {
+                    var oc = (IViewModelCompositionOptionsCustomization)Activator.CreateInstance(optionsCustomization);
+                    oc.Customize(this);
+                }
+
 
                 foreach (var (typesFilter, registrationHandler) in typesRegistrationHandlers)
                 {
