@@ -87,6 +87,10 @@ namespace ServiceComposer.AspNetCore
     {
         void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
     }
+    public interface IViewModelCompositionOptionsCustomization
+    {
+        void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
+    }
     public static class ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
