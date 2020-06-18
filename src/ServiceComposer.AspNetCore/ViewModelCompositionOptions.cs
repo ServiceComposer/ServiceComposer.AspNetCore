@@ -19,6 +19,17 @@ namespace ServiceComposer.AspNetCore
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
+        Dictionary<Type, Action<Type, IServiceCollection>> configurationHandlers = new Dictionary<Type, Action<Type, IServiceCollection>>();
+
+        public void AddServicesConfigurationHandler(Type serviceType, Action<Type, IServiceCollection> configurationHandler)
+        {
+            if (configurationHandlers.ContainsKey(serviceType))
+            {
+                throw new NotSupportedException($"There is already a Services configuration handler for the {serviceType}.");
+            }
+
+            configurationHandlers.Add(serviceType, configurationHandler);
+        }
 
         public void AddTypesRegistrationHandler(Func<Type, bool> typesFilter, Action<IEnumerable<Type>> registrationHandler)
         {
@@ -101,12 +112,26 @@ namespace ServiceComposer.AspNetCore
             }
 
             compositionMetadataRegistry.AddComponent(type);
-            Services.AddTransient(type);
+            if (configurationHandlers.TryGetValue(type, out var handler))
+            {
+                handler(type, Services);
+            }
+            else
+            {
+                Services.AddTransient(type);
+            }
         }
 
         void RegisterRouteInterceptor(Type type)
         {
-            Services.AddTransient(typeof(IInterceptRoutes), type);
+            if (configurationHandlers.TryGetValue(type, out var handler))
+            {
+                handler(type, Services);
+            }
+            else
+            {
+                Services.AddTransient(typeof(IInterceptRoutes), type);
+            }
         }
     }
 }

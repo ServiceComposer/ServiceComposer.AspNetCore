@@ -86,6 +86,7 @@ namespace ServiceComposer.AspNetCore
     {
         public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+        public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
