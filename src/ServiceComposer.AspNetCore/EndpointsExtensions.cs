@@ -24,6 +24,7 @@ namespace ServiceComposer.AspNetCore
 
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+
             MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
             if (enableWriteSupport)
             {
@@ -132,7 +133,7 @@ namespace ServiceComposer.AspNetCore
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
-                    var template = method.GetCustomAttribute<TAttribute>()?.Template;
+                    var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
                     return (componentType, method, template);
                 })
                 .Where(component => component.Template != null)
