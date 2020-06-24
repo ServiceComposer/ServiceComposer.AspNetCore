@@ -8,14 +8,21 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
-        readonly CompositionMetadataRegistry compositionMetadataRegistry = new CompositionMetadataRegistry();
-
+        readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
+#if NETCOREAPP3_1
+        readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
+#endif
+        
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
             Services = services;
             AssemblyScanner = new AssemblyScanner();
 
-            Services.AddSingleton(compositionMetadataRegistry);
+            Services.AddSingleton(_compositionMetadataRegistry);
+            
+#if NETCOREAPP3_1
+            Services.AddSingleton(_compositionOverControllersRoutes);
+#endif
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
@@ -38,6 +45,13 @@ namespace ServiceComposer.AspNetCore
 
         internal void InitializeServiceCollection()
         {
+#if NETCOREAPP3_1
+            Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+            {
+                options.Filters.Add(typeof(CompositionOverControllersActionFilter));
+            });
+#endif
+            
             if (AssemblyScanner.IsEnabled)
             {
                 AddTypesRegistrationHandler(
@@ -85,7 +99,6 @@ namespace ServiceComposer.AspNetCore
                     oc.Customize(this);
                 }
 
-
                 foreach (var (typesFilter, registrationHandler) in typesRegistrationHandlers)
                 {
                     var filteredTypes = allTypes.Where(typesFilter);
@@ -120,7 +133,7 @@ namespace ServiceComposer.AspNetCore
                 throw new NotSupportedException("Registered types must be ICompositionRequestsHandler or ICompositionEventsSubscriber.");
             }
 
-            compositionMetadataRegistry.AddComponent(type);
+            _compositionMetadataRegistry.AddComponent(type);
             if (configurationHandlers.TryGetValue(type, out var handler))
             {
                 handler(type, Services);

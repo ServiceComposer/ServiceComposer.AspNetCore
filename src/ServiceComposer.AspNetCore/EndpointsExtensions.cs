@@ -15,12 +15,17 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
+        static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
+    
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport = false)
         {
             if (endpoints == null)
             {
                 throw new ArgumentNullException(nameof(endpoints));
             }
+            
+            var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
+            compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
 
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
@@ -43,7 +48,8 @@ namespace ServiceComposer.AspNetCore
             {
                 if (ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources, out var endpoint))
                 {
-                    
+                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
+                    compositionOverControllerGetComponents[componentsGroup.Key] = componentTypes;
                 }
                 else
                 {
