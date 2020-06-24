@@ -41,9 +41,15 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Get}));
-
-                AppendToDataSource(dataSources, builder);
+                if (ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources, out var endpoint))
+                {
+                    
+                }
+                else
+                {
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Get}));
+                    AppendToDataSource(dataSources, builder);
+                }
             }
         }
 
@@ -105,6 +111,25 @@ namespace ServiceComposer.AspNetCore
             }
 
             dataSource.AddEndpointBuilder(builder);
+        }
+        
+        private static bool ThereIsAlreadyAnEndpointForTheSameTemplate(IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, ICollection<EndpointDataSource> dataSources, out Endpoint endpoint)
+        {
+            foreach (var dataSource in dataSources)
+            {
+                if (dataSource.GetType() == typeof(CompositionEndpointDataSource))
+                {
+                    continue;
+                }
+                
+                endpoint = dataSource.Endpoints.OfType<RouteEndpoint>()
+                    .SingleOrDefault(e => e.RoutePattern.RawText == componentsGroup.Key);
+                
+                return endpoint != null;
+            }
+
+            endpoint = null;
+            return false;
         }
 
         private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, HttpMethodMetadata methodMetadata)

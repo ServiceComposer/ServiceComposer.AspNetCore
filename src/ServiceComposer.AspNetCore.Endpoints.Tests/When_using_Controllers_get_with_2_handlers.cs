@@ -12,8 +12,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     namespace Controllers
     {
-        [Route("Sample")]
-        [ApiController]
+        [Route("/api/CompositionOverController")]
         public class SampleController : ControllerBase
         {
             [HttpGet("{id}")]
@@ -28,7 +27,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     {
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpGet("/sample/{id}")]
+            [HttpGet("/api/CompositionOverController/{id}")]
             public Task Handle(HttpRequest request)
             {
                 var routeData = request.HttpContext.GetRouteData();
@@ -40,7 +39,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
         class TestGetStrinHandler : ICompositionRequestsHandler
         {
-            [HttpGet("/sample/{id}")]
+            [HttpGet("/api/CompositionOverController/{id}")]
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
@@ -77,9 +76,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 }
             ).CreateClient();
 
-            client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal");
             // Act
-            var response = await client.GetAsync("/sample/1");
+            var response = await client.GetAsync("/api/CompositionOverController/1");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
