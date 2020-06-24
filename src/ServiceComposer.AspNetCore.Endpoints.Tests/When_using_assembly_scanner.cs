@@ -1,12 +1,10 @@
-﻿#if NETCOREAPP3_1
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_using_assembly_scanner
     {
@@ -71,5 +69,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif
