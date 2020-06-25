@@ -75,7 +75,7 @@ namespace ServiceComposer.AspNetCore
         }
         
 #if NETCOREAPP3_1
-        internal static async Task ComposeResponse(HttpContext context, Type[] handlerTypes)
+        internal static async Task<(dynamic ViewModel, int StatusCode)> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
         {
             context.Request.EnableBuffering();
 
@@ -86,67 +86,48 @@ namespace ServiceComposer.AspNetCore
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
             var viewModel = new DynamicViewModel(requestId, routeData, request);
-            request.SetModel(viewModel);
-
-            var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
-
-            foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
+            try
             {
-                subscriber.Subscribe(viewModel);
-            }
+                request.SetModel(viewModel);
 
-            var pending = new List<Task>();
+                var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
 
-            foreach (var handler in handlers.OfType<ICompositionRequestsHandler>())
-            {
-                pending.Add(handler.Handle(request));
-            }
-
-            if (pending.Count == 0)
-            {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
-            }
-            else
-            {
-                try
+                foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
                 {
-                    await Task.WhenAll(pending);
+                    subscriber.Subscribe(viewModel);
                 }
-                catch (Exception ex)
+
+                var pending = handlers.OfType<ICompositionRequestsHandler>()
+                    .Select(handler => handler.Handle(request))
+                    .ToList();
+
+                if (pending.Count == 0)
                 {
-                    var errorHandlers = handlers.OfType<ICompositionErrorsHandler>();
-                    foreach (var handler in errorHandlers)
+                    return (null, StatusCodes.Status404NotFound);
+                }
+                else
+                {
+                    try
                     {
-                        await handler.OnRequestError(request, ex);
+                        await Task.WhenAll(pending);
                     }
-
-                    throw;
-                }
-            }
-
-            context.Response.StatusCode = StatusCodes.Status200OK;
-            var json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
-            context.Response.ContentType = "application/json; charset=utf-8";
-            await context.Response.WriteAsync(json);
-        }
-
-        static JsonSerializerSettings GetSettings(HttpContext context)
-        {
-            if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))
-            {
-                casing = "casing/camel";
-            }
-
-            switch (casing)
-            {
-                case "casing/pascal":
-                    return new JsonSerializerSettings();
-
-                default: // "casing/camel":
-                    return new JsonSerializerSettings()
+                    catch (Exception ex)
                     {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
-                    };
+                        var errorHandlers = handlers.OfType<ICompositionErrorsHandler>();
+                        foreach (var handler in errorHandlers)
+                        {
+                            await handler.OnRequestError(request, ex);
+                        }
+
+                        throw;
+                    }
+                }
+
+                return (viewModel, StatusCodes.Status200OK);
+            }
+            finally
+            {
+                viewModel.CleanupSubscribers();
             }
         }
 #endif

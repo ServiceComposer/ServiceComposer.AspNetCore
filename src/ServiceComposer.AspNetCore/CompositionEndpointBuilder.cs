@@ -27,7 +27,35 @@ namespace ServiceComposer.AspNetCore
             _compositionHandlers = compositionHandlers.ToArray();
             RoutePattern = routePattern;
             Order = order;
-            RequestDelegate = context => CompositionHandler.ComposeResponse(context, _compositionHandlers);
+            RequestDelegate = async context =>
+            {
+                var (viewModel, statusCode) = await CompositionHandler.HandleComposableRequest(context, _compositionHandlers);
+                
+                context.Response.StatusCode = statusCode;
+                var json = (string)JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                context.Response.ContentType = "application/json; charset=utf-8";
+                await context.Response.WriteAsync(json);
+            };
+        }
+        
+        JsonSerializerSettings GetSettings(HttpContext context)
+        {
+            if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))
+            {
+                casing = "casing/camel";
+            }
+
+            switch (casing)
+            {
+                case "casing/pascal":
+                    return new JsonSerializerSettings();
+
+                default: // "casing/camel":
+                    return new JsonSerializerSettings()
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    };
+            }
         }
 
         public override Endpoint Build()

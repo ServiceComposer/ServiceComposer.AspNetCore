@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 
@@ -19,11 +20,39 @@ namespace ServiceComposer.AspNetCore
         public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
             var endpoint = context.HttpContext.GetEndpoint() as RouteEndpoint;
-            var handlerTypes = _compositionOverControllersRoutes.HandlersForRoute(endpoint.RoutePattern.RawText,
-                context.HttpContext.Request.Method);
-            if (handlerTypes.Any())
+            if (endpoint != null)
             {
+                var handlerTypes = _compositionOverControllersRoutes.HandlersForRoute(
+                    endpoint.RoutePattern.RawText,
+                    context.HttpContext.Request.Method);
                 
+                if (handlerTypes.Any())
+                {
+                    var (viewModel, statusCode) = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
+                    switch (context.Result)
+                    {
+                        case ViewResult viewResult when viewResult.ViewData.Model == null:
+                        {
+                            //MVC
+                            if (statusCode == StatusCodes.Status200OK)
+                            {
+                                viewResult.ViewData.Model = viewModel;
+                            }
+
+                            break;
+                        }
+                        case ObjectResult objectResult when objectResult.Value == null:
+                        {
+                            //WebAPI
+                            if (statusCode == StatusCodes.Status200OK)
+                            {
+                                objectResult.Value = viewModel;
+                            }
+
+                            break;
+                        }
+                    }
+                }
             }
 
             await next();
