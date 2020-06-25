@@ -63,7 +63,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                     });
                     services.AddRouting();
-                    services.AddControllers();
+                    services.AddControllers()
+                            .AddNewtonsoftJson();;
                 },
                 configure: app =>
                 {
