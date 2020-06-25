@@ -1,17 +1,15 @@
-#if NETCOREAPP3_1
-
 using System.Net;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Xunit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
+using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class Get_with_configured_authentication
     {
@@ -112,5 +110,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif

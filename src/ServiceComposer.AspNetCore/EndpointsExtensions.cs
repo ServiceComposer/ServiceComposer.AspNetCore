@@ -15,6 +15,8 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
+        static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
+    
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport = false)
         {
             if (endpoints == null)
@@ -22,9 +24,17 @@ namespace ServiceComposer.AspNetCore
                 throw new ArgumentNullException(nameof(endpoints));
             }
 
-            var compositionMetadataRegistry =
-                endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
-            MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
+            var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
+            if (options.CompositionOverControllersIsEnabled)
+            {
+                var compositionOverControllersRoutes =
+                    endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
+                compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
+            }
+
+            var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+
+            MapGetComponents(compositionMetadataRegistry, endpoints.DataSources, options.CompositionOverControllersIsEnabled);
             if (enableWriteSupport)
             {
                 MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
@@ -34,15 +44,22 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, bool compositionOverControllersIsEnabled)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(compositionMetadataRegistry);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup,new HttpMethodMetadata(new[] {HttpMethods.Get}));
-
-                AppendToDataSource(dataSources, builder);
+                if (compositionOverControllersIsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources, out var endpoint))
+                {
+                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
+                    compositionOverControllerGetComponents[componentsGroup.Key] = componentTypes;
+                }
+                else
+                {
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Get}));
+                    AppendToDataSource(dataSources, builder);
+                }
             }
         }
 
@@ -105,6 +122,25 @@ namespace ServiceComposer.AspNetCore
 
             dataSource.AddEndpointBuilder(builder);
         }
+        
+        private static bool ThereIsAlreadyAnEndpointForTheSameTemplate(IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, ICollection<EndpointDataSource> dataSources, out Endpoint endpoint)
+        {
+            foreach (var dataSource in dataSources)
+            {
+                if (dataSource.GetType() == typeof(CompositionEndpointDataSource))
+                {
+                    continue;
+                }
+                
+                endpoint = dataSource.Endpoints.OfType<RouteEndpoint>()
+                    .SingleOrDefault(e => e.RoutePattern.RawText == componentsGroup.Key);
+                
+                return endpoint != null;
+            }
+
+            endpoint = null;
+            return false;
+        }
 
         private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, HttpMethodMetadata methodMetadata)
         {
@@ -132,7 +168,7 @@ namespace ServiceComposer.AspNetCore
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
-                    var template = method.GetCustomAttribute<TAttribute>()?.Template;
+                    var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
                     return (componentType, method, template);
                 })
                 .Where(component => component.Template != null)

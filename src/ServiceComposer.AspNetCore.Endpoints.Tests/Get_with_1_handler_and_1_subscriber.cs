@@ -1,39 +1,41 @@
-﻿#if NETCOREAPP3_1
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Get_with_2_handlers
+    public class Get_with_1_handler_and_1_subscriber
     {
-        class TestGetIntegerHandler : ICompositionRequestsHandler
-        {
-            [HttpGet("/sample/{id}")]
-            public Task Handle(HttpRequest request)
-            {
-                var routeData = request.HttpContext.GetRouteData();
-                var vm = request.GetComposedResponseModel();
-                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
-                return Task.CompletedTask;
-            }
-        }
+        class TestEvent{}
 
-        class TestGetStrinHandler : ICompositionRequestsHandler
+        class TestGetHandlerThatAppendAStringAndRaisesTestEvent : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
-            public Task Handle(HttpRequest request)
+            public async Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
                 vm.AString = "sample";
-                return Task.CompletedTask;
+
+                await vm.RaiseEvent(new TestEvent());
+            }
+        }
+
+        class TestGetSubscriberThatAppendAnotherStringWhenTestEventIsRaised : ICompositionEventsSubscriber
+        {
+            [HttpGet("/sample/{id}")]
+            public void Subscribe(ICompositionEventsPublisher publisher)
+            {
+                publisher.Subscribe<TestEvent>((@event, request) =>
+                {
+                    var vm = request.GetComposedResponseModel();
+                    vm.AnotherString = "sample";
+                    return Task.CompletedTask;
+                });
             }
         }
 
@@ -41,15 +43,15 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         public async Task Returns_expected_response()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_1_handler_and_1_subscriber>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
-                        options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.RegisterCompositionHandler<TestGetHandlerThatAppendAStringAndRaisesTestEvent>();
+                        options.RegisterCompositionHandler<TestGetSubscriberThatAppendAnotherStringWhenTestEventIsRaised>();
                     });
                     services.AddRouting();
                 },
@@ -71,9 +73,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             var responseObj = JObject.Parse(responseString);
 
             Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
-            Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
+            Assert.Equal("sample", responseObj?.SelectToken("AnotherString")?.Value<string>());
         }
     }
 }
-
-#endif

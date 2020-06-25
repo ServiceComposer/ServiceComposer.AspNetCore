@@ -1,11 +1,10 @@
-﻿#if NETCOREAPP3_1
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ServiceComposer.AspNetCore.Tests
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     class TestAuthenticationHandler : AuthenticationHandler<DelegateAuthenticationSchemeOptions>
     {
@@ -25,4 +24,3 @@ namespace ServiceComposer.AspNetCore.Tests
         }
     }
 }
-#endif

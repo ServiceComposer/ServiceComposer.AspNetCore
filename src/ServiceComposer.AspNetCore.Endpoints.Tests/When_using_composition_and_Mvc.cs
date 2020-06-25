@@ -1,22 +1,14 @@
-﻿#if NETCOREAPP3_1
-
-using System.Dynamic;
-using System.IO;
-using System.Net.Http;
-using System.Net.Mime;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     namespace Controllers
     {
@@ -104,5 +96,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif

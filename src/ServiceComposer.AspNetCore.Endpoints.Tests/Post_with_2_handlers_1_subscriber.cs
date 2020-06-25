@@ -1,6 +1,4 @@
-﻿#if NETCOREAPP3_1
-
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;
@@ -15,13 +13,18 @@ using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Put_with_2_handlers
+    public class Post_with_2_handlers_1_subscriber
     {
+        class TestEvent
+        {
+            public string AValue { get; set; }
+        }
+
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpPut("/sample/{id}")]
+            [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -31,12 +34,14 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
                 var vm = request.GetComposedResponseModel();
                 vm.ANumber = content?.SelectToken("ANumber")?.Value<int>();
+
+                await vm.RaiseEvent(new TestEvent(){ AValue = $"ANumber: {vm.ANumber}."});
             }
         }
 
         class TestStrinHandler : ICompositionRequestsHandler
         {
-            [HttpPut("/sample/{id}")]
+            [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -46,6 +51,21 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
                 var vm = request.GetComposedResponseModel();
                 vm.AString = content?.SelectToken("AString")?.Value<string>();
+            }
+        }
+        
+        class TestStringSubcriber : ICompositionEventsSubscriber
+        {
+            [HttpPost("/sample/{id}")]
+            public void Subscribe(ICompositionEventsPublisher publisher)
+            {
+                publisher.Subscribe<TestEvent>((@event, request) =>
+                {
+                    var vm = request.GetComposedResponseModel();
+                    vm.AValue = @event.AValue;
+                    
+                    return Task.CompletedTask;
+                });
             }
         }
 
@@ -65,6 +85,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestStrinHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
+                        options.RegisterCompositionHandler<TestStringSubcriber>();
                     });
                     services.AddRouting();
                 },
@@ -86,7 +107,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             stringContent.Headers.ContentLength = json.Length;
 
             // Act
-            var response = await client.PutAsync("/sample/1", stringContent);
+            var response = await client.PostAsync("/sample/1", stringContent);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -96,8 +117,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
             Assert.Equal(expectedString, responseObj?.SelectToken("AString")?.Value<string>());
             Assert.Equal(expectedNumber, responseObj?.SelectToken("ANumber")?.Value<int>());
+            Assert.Equal($"ANumber: {expectedNumber}.", responseObj?.SelectToken("AValue")?.Value<string>());
         }
     }
 }
-
-#endif

@@ -1,6 +1,3 @@
-﻿#if NETCOREAPP3_1
-
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -9,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Get_with_no_matching_handlers
+    public class Get_with_matching_handler
     {
         class EmptyResponseHandler : ICompositionRequestsHandler
         {
@@ -23,10 +20,10 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
 
         [Fact]
-        public async Task Return_404()
+        public async Task Is_found()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_no_matching_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_matching_handler>
             (
                 configureServices: services =>
                 {
@@ -45,12 +42,10 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             ).CreateClient();
 
             // Act
-            var response = await client.GetAsync("/not-valid/1");
+            var response = await client.GetAsync("/empty-response/1");
 
             // Assert
-            Assert.Equal( HttpStatusCode.NotFound, response.StatusCode);
+            Assert.True(response.IsSuccessStatusCode);
         }
     }
 }
-
-#endif

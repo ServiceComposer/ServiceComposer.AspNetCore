@@ -1,15 +1,12 @@
-﻿#if NETCOREAPP3_1
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_using_custom_services_registration_handlers
     {
@@ -64,5 +61,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif

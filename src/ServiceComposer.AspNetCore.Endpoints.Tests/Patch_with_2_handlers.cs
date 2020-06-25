@@ -1,6 +1,4 @@
-﻿#if NETCOREAPP3_1
-
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;
@@ -15,33 +13,37 @@ using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Delete_with_2_handlers
+    public class Patch_with_2_handlers
     {
-        static string expectedString = "this is a string value";
-        static int expectedNumber = 32;
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpDelete("/sample/{id}")]
-            public Task Handle(HttpRequest request)
+            [HttpPatch("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
             {
+                request.Body.Position = 0;
+                using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                var content = JObject.Parse(body);
+
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = expectedNumber;
-                
-                return Task.CompletedTask;
+                vm.ANumber = content?.SelectToken("ANumber")?.Value<int>();
             }
         }
 
         class TestStrinHandler : ICompositionRequestsHandler
         {
-            [HttpDelete("/sample/{id}")]
-            public Task Handle(HttpRequest request)
+            [HttpPatch("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
             {
+                request.Body.Position = 0;
+                using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true );
+                var body = await reader.ReadToEndAsync();
+                var content = JObject.Parse(body);
+
                 var vm = request.GetComposedResponseModel();
-                vm.AString = expectedString;
-                
-                return Task.CompletedTask;
+                vm.AString = content?.SelectToken("AString")?.Value<string>();
             }
         }
 
@@ -49,7 +51,10 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         public async Task Returns_expected_response()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Delete_with_2_handlers>
+            var expectedString = "this is a string value";
+            var expectedNumber = 32;
+
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Patch_with_2_handlers>
             (
                 configureServices: services =>
                 {
@@ -70,8 +75,16 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
             client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal");
 
+            dynamic model = new ExpandoObject();
+            model.AString = expectedString;
+            model.ANumber = expectedNumber;
+
+            var json = (string) JsonConvert.SerializeObject(model);
+            var stringContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            stringContent.Headers.ContentLength = json.Length;
+
             // Act
-            var response = await client.DeleteAsync("/sample/1");
+            var response = await client.PatchAsync("/sample/1", stringContent);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -84,5 +97,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif

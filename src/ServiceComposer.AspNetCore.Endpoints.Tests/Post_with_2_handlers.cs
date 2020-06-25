@@ -1,6 +1,4 @@
-﻿#if NETCOREAPP3_1
-
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;
@@ -15,13 +13,13 @@ using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Patch_with_2_handlers
+    public class Post_with_2_handlers
     {
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpPatch("/sample/{id}")]
+            [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -36,7 +34,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
 
         class TestStrinHandler : ICompositionRequestsHandler
         {
-            [HttpPatch("/sample/{id}")]
+            [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 request.Body.Position = 0;
@@ -56,7 +54,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             var expectedString = "this is a string value";
             var expectedNumber = 32;
 
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Patch_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Post_with_2_handlers>
             (
                 configureServices: services =>
                 {
@@ -86,7 +84,7 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
             stringContent.Headers.ContentLength = json.Length;
 
             // Act
-            var response = await client.PatchAsync("/sample/1", stringContent);
+            var response = await client.PostAsync("/sample/1", stringContent);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -99,5 +97,3 @@ namespace ServiceComposer.AspNetCore.Tests.When_using_endpoints
         }
     }
 }
-
-#endif

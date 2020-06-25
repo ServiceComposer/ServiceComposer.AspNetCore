@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snippets.NetCore3x", "Snipp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snippets.NetCore2x", "Snippets.NetCore2x\Snippets.NetCore2x.csproj", "{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.Endpoints.Tests", "ServiceComposer.AspNetCore.Endpoints.Tests\ServiceComposer.AspNetCore.Endpoints.Tests.csproj", "{C4DB74A3-854B-46D1-B4B7-176BEB304E92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
