@@ -18,11 +18,8 @@ namespace ServiceComposer.AspNetCore
             Services = services;
             AssemblyScanner = new AssemblyScanner();
 
+            Services.AddSingleton(this);
             Services.AddSingleton(_compositionMetadataRegistry);
-            
-#if NETCOREAPP3_1
-            Services.AddSingleton(_compositionOverControllersRoutes);
-#endif
         }
 
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
@@ -42,14 +39,26 @@ namespace ServiceComposer.AspNetCore
         {
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
+        
+#if NETCOREAPP3_1
+        internal bool CompositionOverControllersIsEnabled { get; private set; }
+        public void EnableCompositionOverControllers()
+        {
+            CompositionOverControllersIsEnabled = true;
+        }
+#endif
 
         internal void InitializeServiceCollection()
         {
 #if NETCOREAPP3_1
-            Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+            if (CompositionOverControllersIsEnabled)
             {
-                options.Filters.Add(typeof(CompositionOverControllersActionFilter));
-            });
+                Services.AddSingleton(_compositionOverControllersRoutes);
+                Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+                {
+                    options.Filters.Add(typeof(CompositionOverControllersActionFilter));
+                });
+            }
 #endif
             
             if (AssemblyScanner.IsEnabled)

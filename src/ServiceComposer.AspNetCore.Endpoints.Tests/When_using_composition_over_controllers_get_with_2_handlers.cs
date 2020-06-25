@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         }
     }
     
-    public class When_using_Controllers_get_with_2_handlers
+    public class When_using_composition_over_controllers_get_with_2_handlers
     {
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
@@ -61,10 +62,11 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStrinHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.EnableCompositionOverControllers();
                     });
                     services.AddRouting();
                     services.AddControllers()
-                            .AddNewtonsoftJson();;
+                            .AddNewtonsoftJson();
                 },
                 configure: app =>
                 {
@@ -88,6 +90,51 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
             Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
             Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
+        }
+        
+        [Fact]
+        public async Task Fails_if_composition_over_controllers_is_disabled()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                    });
+                    services.AddRouting();
+                    services.AddControllers()
+                        .AddNewtonsoftJson();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapControllers();
+                        builder.MapCompositionHandlers();
+                    });
+                }
+            ).CreateClient();
+
+            Exception capturedException = null;
+            try
+            {
+                // Act
+                var response = await client.GetAsync("/api/CompositionOverController/1");
+            }
+            catch (Exception e)
+            {
+                capturedException = e;
+            }
+            
+            // Assert
+            Assert.NotNull(capturedException);
+            Assert.Equal("Microsoft.AspNetCore.Routing.Matching.AmbiguousMatchException", capturedException.GetType().FullName);
         }
     }
 }

@@ -23,14 +23,18 @@ namespace ServiceComposer.AspNetCore
             {
                 throw new ArgumentNullException(nameof(endpoints));
             }
-            
-            var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
-            compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
 
-            var compositionMetadataRegistry =
-                endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+            var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
+            if (options.CompositionOverControllersIsEnabled)
+            {
+                var compositionOverControllersRoutes =
+                    endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
+                compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
+            }
 
-            MapGetComponents(compositionMetadataRegistry, endpoints.DataSources);
+            var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+
+            MapGetComponents(compositionMetadataRegistry, endpoints.DataSources, options.CompositionOverControllersIsEnabled);
             if (enableWriteSupport)
             {
                 MapPostComponents(compositionMetadataRegistry, endpoints.DataSources);
@@ -40,13 +44,13 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources)
+        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, bool compositionOverControllersIsEnabled)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(compositionMetadataRegistry);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                if (ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources, out var endpoint))
+                if (compositionOverControllersIsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources, out var endpoint))
                 {
                     var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
                     compositionOverControllerGetComponents[componentsGroup.Key] = componentTypes;
