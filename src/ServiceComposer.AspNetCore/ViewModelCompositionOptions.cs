@@ -12,7 +12,7 @@ namespace ServiceComposer.AspNetCore
 #if NETCOREAPP3_1
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 #endif
-        
+
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
             Services = services;
@@ -39,19 +39,26 @@ namespace ServiceComposer.AspNetCore
         {
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
-        
+
 #if NETCOREAPP3_1
-        internal bool CompositionOverControllersIsEnabled { get; private set; }
+        internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
+
         public void EnableCompositionOverControllers()
         {
-            CompositionOverControllersIsEnabled = true;
+            EnableCompositionOverControllers(false);
+        }
+
+        public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching)
+        {
+            CompositionOverControllersOptions.IsEnabled = true;
+            CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
         }
 #endif
 
         internal void InitializeServiceCollection()
         {
 #if NETCOREAPP3_1
-            if (CompositionOverControllersIsEnabled)
+            if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
                 Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
@@ -60,7 +67,7 @@ namespace ServiceComposer.AspNetCore
                 });
             }
 #endif
-            
+
             if (AssemblyScanner.IsEnabled)
             {
                 AddTypesRegistrationHandler(

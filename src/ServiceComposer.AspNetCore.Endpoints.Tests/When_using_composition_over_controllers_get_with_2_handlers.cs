@@ -23,10 +23,22 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
     }
-    
+
     public class When_using_composition_over_controllers_get_with_2_handlers
     {
-        class TestGetIntegerHandler : ICompositionRequestsHandler
+        class CaseInsensitiveRoute_TestGetIntegerHandler : ICompositionRequestsHandler
+        {
+            [HttpGet("/api/compositionovercontroller/{id}")]
+            public Task Handle(HttpRequest request)
+            {
+                var routeData = request.HttpContext.GetRouteData();
+                var vm = request.GetComposedResponseModel();
+                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
+                return Task.CompletedTask;
+            }
+        }
+
+        class CaseSensitiveRoute_TestGetIntegerHandler : ICompositionRequestsHandler
         {
             [HttpGet("/api/CompositionOverController/{id}")]
             public Task Handle(HttpRequest request)
@@ -61,7 +73,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStrinHandler>();
-                        options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.RegisterCompositionHandler<CaseSensitiveRoute_TestGetIntegerHandler>();
                         options.EnableCompositionOverControllers();
                     });
                     services.AddRouting();
@@ -80,7 +92,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             ).CreateClient();
 
             // Act
-            var response = await client.GetAsync("/api/CompositionOverController/1");
+            var response = await client.GetAsync("/api/compositionovercontroller/1");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -91,7 +103,50 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
             Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
         }
-        
+
+        [Fact]
+        public async Task Returns_expected_response_with_case_insensitive_routes()
+        {
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
+                        options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
+                    });
+                    services.AddRouting();
+                    services.AddControllers()
+                        .AddNewtonsoftJson();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapControllers();
+                        builder.MapCompositionHandlers();
+                    });
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/api/compositionovercontroller/1");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = JObject.Parse(responseString);
+
+            Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
+            Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
+        }
+
         [Fact]
         public async Task Fails_if_composition_over_controllers_is_disabled()
         {
@@ -104,7 +159,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStrinHandler>();
-                        options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -131,7 +186,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             {
                 capturedException = e;
             }
-            
+
             // Assert
             Assert.NotNull(capturedException);
             Assert.Equal("Microsoft.AspNetCore.Routing.Matching.AmbiguousMatchException", capturedException.GetType().FullName);
