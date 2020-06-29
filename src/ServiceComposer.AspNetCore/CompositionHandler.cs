@@ -73,7 +73,7 @@ namespace ServiceComposer.AspNetCore
                 viewModel.CleanupSubscribers();
             }
         }
-        
+
 #if NETCOREAPP3_1
         internal static async Task<(dynamic ViewModel, int StatusCode)> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
         {
@@ -86,6 +86,11 @@ namespace ServiceComposer.AspNetCore
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
             var viewModel = new DynamicViewModel(requestId, routeData, request);
+
+            await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
+                .Select(visitor => visitor.Preview(viewModel))
+                .ToList());
+
             try
             {
                 request.SetModel(viewModel);

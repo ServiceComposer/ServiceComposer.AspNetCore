@@ -102,6 +102,24 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
+#if NETCOREAPP3_1
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && typeof(IViewModelPreviewHandler).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            Services.AddTransient(typeof(IViewModelPreviewHandler), type);
+                        }
+                    });
+#endif
+
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
                     .SelectMany(assembly => assembly.GetTypes())

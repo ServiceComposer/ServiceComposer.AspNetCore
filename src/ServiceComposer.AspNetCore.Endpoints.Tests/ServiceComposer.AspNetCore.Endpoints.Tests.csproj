@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceComposer.AspNetCore\ServiceComposer.AspNetCore.csproj" />
+    <ProjectReference Include="..\TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj" />
   </ItemGroup>
  
   <ItemGroup>
