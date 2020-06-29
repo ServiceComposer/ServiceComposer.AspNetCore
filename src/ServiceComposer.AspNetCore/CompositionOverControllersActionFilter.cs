@@ -11,21 +11,24 @@ namespace ServiceComposer.AspNetCore
     internal class CompositionOverControllersActionFilter : IAsyncResultFilter
     {
         private readonly CompositionOverControllersRoutes _compositionOverControllersRoutes;
+        private readonly CompositionOverControllersOptions _compositionOverControllersOptions;
 
-        public CompositionOverControllersActionFilter(CompositionOverControllersRoutes compositionOverControllersRoutes)
+        public CompositionOverControllersActionFilter(CompositionOverControllersRoutes compositionOverControllersRoutes, ViewModelCompositionOptions viewModelCompositionOptions)
         {
             _compositionOverControllersRoutes = compositionOverControllersRoutes;
+            _compositionOverControllersOptions = viewModelCompositionOptions.CompositionOverControllersOptions;
         }
-        
+
         public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
             var endpoint = context.HttpContext.GetEndpoint() as RouteEndpoint;
             if (endpoint != null)
             {
-                var handlerTypes = _compositionOverControllersRoutes.HandlersForRoute(
-                    endpoint.RoutePattern.RawText,
-                    context.HttpContext.Request.Method);
-                
+                var rawTemplate = _compositionOverControllersOptions.UseCaseInsensitiveRouteMatching
+                    ? endpoint.RoutePattern.RawText.ToLowerInvariant()
+                    : endpoint.RoutePattern.RawText;
+                var handlerTypes = _compositionOverControllersRoutes.HandlersForRoute(rawTemplate, context.HttpContext.Request.Method);
+
                 if (handlerTypes.Any())
                 {
                     var (viewModel, statusCode) = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
