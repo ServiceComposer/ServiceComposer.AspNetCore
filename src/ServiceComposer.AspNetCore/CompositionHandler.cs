@@ -87,8 +87,8 @@ namespace ServiceComposer.AspNetCore
 
             var viewModel = new DynamicViewModel(requestId, routeData, request);
 
-            await Task.WhenAll(context.RequestServices.GetServices<IViewModelVisitor>()
-                .Select(visitor => visitor.Visit(viewModel))
+            await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
+                .Select(visitor => visitor.Preview(viewModel))
                 .ToList());
 
             try

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
-    public interface IViewModelVisitor
+    public interface IViewModelPreviewHandler
     {
-        Task Visit(dynamic viewModel);
+        Task Preview(dynamic viewModel);
     }
 }
 
