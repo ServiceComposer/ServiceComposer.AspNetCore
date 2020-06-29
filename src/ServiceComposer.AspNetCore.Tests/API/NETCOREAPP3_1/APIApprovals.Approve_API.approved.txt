@@ -91,6 +91,10 @@ namespace ServiceComposer.AspNetCore
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
     }
+    public interface IViewModelPreviewHandler
+    {
+        System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
+    }
     public static class ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
