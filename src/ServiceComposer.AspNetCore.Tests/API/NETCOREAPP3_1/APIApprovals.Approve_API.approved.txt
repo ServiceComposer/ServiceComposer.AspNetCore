@@ -93,7 +93,9 @@ namespace ServiceComposer.AspNetCore
     }
     public interface IViewModelPreviewHandler
     {
+        [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel). Will be removed in v2.")]
         System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
+        System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
     }
     public static class ServiceCollectionExtensions
     {
