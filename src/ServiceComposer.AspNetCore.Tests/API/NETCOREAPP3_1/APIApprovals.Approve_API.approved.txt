@@ -42,7 +42,10 @@ namespace ServiceComposer.AspNetCore
     }
     public static class EndpointsExtensions
     {
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport = false) { }
+        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
+            "sitionOptions. This method will be removed in v2.")]
+        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
     }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class HttpRequestExtensions
@@ -110,6 +113,7 @@ namespace ServiceComposer.AspNetCore
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void EnableCompositionOverControllers() { }
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching) { }
+        public void EnableWriteSupport() { }
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterCompositionHandler<T>() { }
