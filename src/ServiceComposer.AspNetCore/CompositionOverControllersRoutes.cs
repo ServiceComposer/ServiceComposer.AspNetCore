@@ -6,38 +6,32 @@ namespace ServiceComposer.AspNetCore
     internal class CompositionOverControllersRoutes
     {
         private readonly Type[] empty = new Type[0];
-        private Dictionary<string, Type[]> _compositionOverControllerGetComponents;
-        private Dictionary<string, Type[]> _compositionOverControllerPostComponents;
+        private Dictionary<string, Dictionary<string, Type[]>> routes = new Dictionary<string, Dictionary<string, Type[]>>();
 
         public void AddGetComponentsSource(Dictionary<string, Type[]> compositionOverControllerGetComponents)
         {
-            _compositionOverControllerGetComponents = compositionOverControllerGetComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerGetComponents));
+            routes["get"] = compositionOverControllerGetComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerGetComponents));
         }
 
         public void AddPostComponentsSource(Dictionary<string, Type[]> compositionOverControllerPostComponents)
         {
-            _compositionOverControllerPostComponents = compositionOverControllerPostComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerPostComponents));
+            routes["post"] = compositionOverControllerPostComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerPostComponents));
         }
 
         public Type[] HandlersForRoute(string routePatternRawText, string requestMethod)
         {
-            switch (requestMethod.ToLowerInvariant())
+            var results = empty;
+            requestMethod = requestMethod.ToLowerInvariant();
+            if (routes.ContainsKey(requestMethod))
             {
-                case "get":
-                    if (_compositionOverControllerGetComponents.ContainsKey(routePatternRawText))
-                    {
-                        return _compositionOverControllerGetComponents[routePatternRawText];
-                    }
-                    break;
-                case "post":
-                    if (_compositionOverControllerPostComponents.ContainsKey(routePatternRawText))
-                    {
-                        return _compositionOverControllerPostComponents[routePatternRawText];
-                    }
-                    break;
+                var methodRoutes = routes[requestMethod];
+                if (methodRoutes.ContainsKey(routePatternRawText))
+                {
+                    results = methodRoutes[routePatternRawText];
+                }
             }
 
-            return empty;
+            return results;
         }
     }
 }
