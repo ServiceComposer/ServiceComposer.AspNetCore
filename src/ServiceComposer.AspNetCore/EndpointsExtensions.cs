@@ -16,8 +16,15 @@ namespace ServiceComposer.AspNetCore
     public static class EndpointsExtensions
     {
         static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
+        static Dictionary<string, Type[]> compositionOverControllerPostComponents = new Dictionary<string, Type[]>();
 
-        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport = false)
+        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
+        {
+            MapCompositionHandlers(endpoints, false);
+        }
+
+        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be removed in v2.")]
+        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
             {
@@ -27,15 +34,15 @@ namespace ServiceComposer.AspNetCore
             var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
             if (options.CompositionOverControllersOptions.IsEnabled)
             {
-                var compositionOverControllersRoutes =
-                    endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
+                var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
                 compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
+                compositionOverControllersRoutes.AddPostComponentsSource(compositionOverControllerPostComponents);
             }
 
             var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
 
             MapGetComponents(compositionMetadataRegistry, endpoints.DataSources, options.CompositionOverControllersOptions);
-            if (enableWriteSupport)
+            if (enableWriteSupport || options.IsWriteSupportEnabled)
             {
                 MapPostComponents(compositionMetadataRegistry, endpoints.DataSources, options.CompositionOverControllersOptions);
                 MapPutComponents(compositionMetadataRegistry, endpoints.DataSources, options.CompositionOverControllersOptions);
@@ -70,9 +77,17 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Post}));
-
-                AppendToDataSource(dataSources, builder);
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources,
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
+                {
+                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
+                    compositionOverControllerPostComponents[componentsGroup.Key] = componentTypes;
+                }
+                else
+                {
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Post}));
+                    AppendToDataSource(dataSources, builder);
+                }
             }
         }
 
