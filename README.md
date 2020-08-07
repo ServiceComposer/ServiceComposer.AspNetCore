@@ -21,7 +21,7 @@ ServiceComposer can be added to exsting or new ASP.NET Core projects, and to .NE
 Add a reference to `ServiceComposer.AspNetCore` Nuget package and configure the `Startup` class like follows:
 
 <!-- snippet: net-core-3x-sample-startup -->
-<a id='snippet-net-core-3x-sample-startup'/></a>
+<a id='snippet-net-core-3x-sample-startup'></a>
 ```cs
 public class Startup
 {
@@ -46,7 +46,7 @@ public class Startup
 ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required. For example, to enable composition support for the `/sample/{id}` route an handler like the following can be defined:
 
 <!-- snippet: net-core-3x-sample-handler -->
-<a id='snippet-net-core-3x-sample-handler'/></a>
+<a id='snippet-net-core-3x-sample-handler'></a>
 ```cs
 public class SampleHandler : ICompositionRequestsHandler
 {
@@ -65,7 +65,7 @@ public class SampleHandler : ICompositionRequestsHandler
 By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. For example, it's possible to use the `Authorize` attribute to specify that a handler requires authorization. The authorization process is the regular ASP.NET Core 3.x process and no special configuration is needed to plugin ServiceComposer:
 
 <!-- snippet: net-core-3x-sample-handler-with-authorization -->
-<a id='snippet-net-core-3x-sample-handler-with-authorization'/></a>
+<a id='snippet-net-core-3x-sample-handler-with-authorization'></a>
 ```cs
 public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
 {
@@ -91,7 +91,7 @@ Create a new .NET Core console project and add a reference to the following Nuge
 Configure the `Startup` class like follows:
 
 <!-- snippet: net-core-2x-sample-startup -->
-<a id='snippet-net-core-2x-sample-startup'/></a>
+<a id='snippet-net-core-2x-sample-startup'></a>
 ```cs
 public class Startup
 {
