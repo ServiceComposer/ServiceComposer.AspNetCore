@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,20 @@ namespace Snippets.NetCore3x.SampleHandler
         [HttpGet("/sample/{id}")]
         public Task Handle(HttpRequest request)
         {
+            return Task.CompletedTask;
+        }
+    }
+    // end-snippet
+
+    // begin-snippet: net-core-3x-sample-handler-with-custom-status-code
+    public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
+    {
+        [HttpGet("/sample/{id}")]
+        public Task Handle(HttpRequest request)
+        {
+            var response = request.HttpContext.Response;
+            response.StatusCode = (int)HttpStatusCode.Forbidden;
+
             return Task.CompletedTask;
         }
     }

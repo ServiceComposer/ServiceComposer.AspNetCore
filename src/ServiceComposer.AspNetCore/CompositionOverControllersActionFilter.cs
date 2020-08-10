@@ -31,26 +31,20 @@ namespace ServiceComposer.AspNetCore
 
                 if (handlerTypes.Any())
                 {
-                    var (viewModel, statusCode) = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
+                    var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
                     switch (context.Result)
                     {
                         case ViewResult viewResult when viewResult.ViewData.Model == null:
                         {
                             //MVC
-                            if (statusCode == StatusCodes.Status200OK)
-                            {
-                                viewResult.ViewData.Model = viewModel;
-                            }
+                            viewResult.ViewData.Model = viewModel;
 
                             break;
                         }
                         case ObjectResult objectResult when objectResult.Value == null:
                         {
                             //WebAPI
-                            if (statusCode == StatusCodes.Status200OK)
-                            {
-                                objectResult.Value = viewModel;
-                            }
+                            objectResult.Value = viewModel;
 
                             break;
                         }

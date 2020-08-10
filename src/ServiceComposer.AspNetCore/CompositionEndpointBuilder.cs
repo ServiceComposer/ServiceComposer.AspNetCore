@@ -27,15 +27,20 @@ namespace ServiceComposer.AspNetCore
             Order = order;
             RequestDelegate = async context =>
             {
-                var (viewModel, statusCode) = await CompositionHandler.HandleComposableRequest(context, _compositionHandlers);
-                
-                context.Response.StatusCode = statusCode;
-                var json = (string)JsonConvert.SerializeObject(viewModel, GetSettings(context));
-                context.Response.ContentType = "application/json; charset=utf-8";
-                await context.Response.WriteAsync(json);
+                var viewModel = await CompositionHandler.HandleComposableRequest(context, _compositionHandlers);
+                if (viewModel != null)
+                {
+                    var json = (string) JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                    context.Response.ContentType = "application/json; charset=utf-8";
+                    await context.Response.WriteAsync(json);
+                }
+                else
+                {
+                    await context.Response.WriteAsync(string.Empty);
+                }
             };
         }
-        
+
         JsonSerializerSettings GetSettings(HttpContext context)
         {
             if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))

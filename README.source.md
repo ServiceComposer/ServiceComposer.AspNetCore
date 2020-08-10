@@ -27,6 +27,14 @@ By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically
 
 snippet: net-core-3x-sample-handler-with-authorization
 
+#### Custom HTTP status codes in ASP.NET Core 3.x
+
+The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
+
+snippet: net-core-3x-sample-handler-with-custom-status-code
+
+NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
+
 ### ASP.NET Core 2.x
 
 Create a new .NET Core console project and add a reference to the following Nuget packages:
@@ -49,6 +57,14 @@ More details on how to implement `IHandleRequests` and `ISubscribeToCompositionE
 
 * [ViewModel Composition: show me the code!](https://milestone.topics.it/view-model-composition/2019/03/06/viewmodel-composition-show-me-the-code.html)
 * [The ViewModels Lists Composition Dance](https://milestone.topics.it/view-model-composition/2019/03/21/the-viewmodels-lists-composition-dance.html)
+
+#### Custom HTTP status codes in ASP.NET Core 2.x
+
+The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
+
+snippet: net-core-2x-sample-handler-with-custom-status-code
+
+NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
 
 ### MVC and Web API support
 

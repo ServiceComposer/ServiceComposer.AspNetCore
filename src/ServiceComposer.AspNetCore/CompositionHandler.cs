@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
@@ -43,6 +44,8 @@ namespace ServiceComposer.AspNetCore
 
                 if (pending.Count == 0)
                 {
+                    //we set this here to keep the implementation aligned with the .NET Core 3.x version
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                     return (null, StatusCodes.Status404NotFound);
                 }
                 else
@@ -75,7 +78,7 @@ namespace ServiceComposer.AspNetCore
         }
 
 #if NETCOREAPP3_1
-        internal static async Task<(dynamic ViewModel, int StatusCode)> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
+        internal static async Task<dynamic> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
         {
             context.Request.EnableBuffering();
 
@@ -108,7 +111,8 @@ namespace ServiceComposer.AspNetCore
 
                 if (pending.Count == 0)
                 {
-                    return (null, StatusCodes.Status404NotFound);
+                    context.Response.StatusCode = (int) StatusCodes.Status404NotFound;
+                    return null;
                 }
                 else
                 {
@@ -128,7 +132,7 @@ namespace ServiceComposer.AspNetCore
                     }
                 }
 
-                return (viewModel, StatusCodes.Status200OK);
+                return viewModel;
             }
             finally
             {
