@@ -33,6 +33,8 @@ The response status code can be set in requests handlers and it'll be honored by
 
 snippet: net-core-3x-sample-handler-with-custom-status-code
 
+NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
+
 ### ASP.NET Core 2.x
 
 Create a new .NET Core console project and add a reference to the following Nuget packages:
@@ -60,7 +62,9 @@ More details on how to implement `IHandleRequests` and `ISubscribeToCompositionE
 
 The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
 
-snippet: net-core-3x-sample-handler-with-custom-status-code
+snippet: net-core-2x-sample-handler-with-custom-status-code
+
+NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
 
 ### MVC and Web API support
 
