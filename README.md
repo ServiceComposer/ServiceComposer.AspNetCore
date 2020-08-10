@@ -57,7 +57,7 @@ public class SampleHandler : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L9-L18' title='File snippet `net-core-3x-sample-handler` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler' title='Navigate to start of snippet `net-core-3x-sample-handler`'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L10-L19' title='File snippet `net-core-3x-sample-handler` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler' title='Navigate to start of snippet `net-core-3x-sample-handler`'>anchor</a></sup>
 <!-- endsnippet -->
 
 #### Authentication and Authorization
@@ -77,7 +77,29 @@ public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L20-L30' title='File snippet `net-core-3x-sample-handler-with-authorization` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-authorization' title='Navigate to start of snippet `net-core-3x-sample-handler-with-authorization`'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L21-L31' title='File snippet `net-core-3x-sample-handler-with-authorization` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-authorization' title='Navigate to start of snippet `net-core-3x-sample-handler-with-authorization`'>anchor</a></sup>
+<!-- endsnippet -->
+
+#### Custom HTTP status codes in ASP.NET Core 3.x
+
+The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
+
+<!-- snippet: net-core-3x-sample-handler-with-custom-status-code -->
+<a id='snippet-net-core-3x-sample-handler-with-custom-status-code'></a>
+```cs
+public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
+{
+    [HttpGet("/sample/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var response = request.HttpContext.Response;
+        response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L33-L45' title='File snippet `net-core-3x-sample-handler-with-custom-status-code` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-custom-status-code' title='Navigate to start of snippet `net-core-3x-sample-handler-with-custom-status-code`'>anchor</a></sup>
 <!-- endsnippet -->
 
 ### ASP.NET Core 2.x
@@ -123,6 +145,28 @@ More details on how to implement `IHandleRequests` and `ISubscribeToCompositionE
 
 * [ViewModel Composition: show me the code!](https://milestone.topics.it/view-model-composition/2019/03/06/viewmodel-composition-show-me-the-code.html)
 * [The ViewModels Lists Composition Dance](https://milestone.topics.it/view-model-composition/2019/03/21/the-viewmodels-lists-composition-dance.html)
+
+#### Custom HTTP status codes in ASP.NET Core 2.x
+
+The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
+
+<!-- snippet: net-core-3x-sample-handler-with-custom-status-code -->
+<a id='snippet-net-core-3x-sample-handler-with-custom-status-code'></a>
+```cs
+public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
+{
+    [HttpGet("/sample/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var response = request.HttpContext.Response;
+        response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L33-L45' title='File snippet `net-core-3x-sample-handler-with-custom-status-code` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-custom-status-code' title='Navigate to start of snippet `net-core-3x-sample-handler-with-custom-status-code`'>anchor</a></sup>
+<!-- endsnippet -->
 
 ### MVC and Web API support
 
