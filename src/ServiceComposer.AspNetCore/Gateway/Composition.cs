@@ -3,6 +3,7 @@ using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore.Gateway
@@ -15,7 +16,10 @@ namespace ServiceComposer.AspNetCore.Gateway
             var (viewModel, statusCode) = await CompositionHandler.HandleRequest(requestId, context);
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
-            if (statusCode == StatusCodes.Status200OK)
+            //to avoid a breaking change we cannot change the tuple returned by CompositionHandler.HandleRequest
+            //so the only option here is to check if the viewModel is null. View model is null only when there are
+            //no handlers registered for the route, so it's for sure an HTTP404
+            if (viewModel != null)
             {
                 string json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
                 context.Response.ContentType = "application/json; charset=utf-8";
@@ -23,7 +27,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             }
             else
             {
-                context.Response.StatusCode = statusCode;
+                await context.Response.WriteAsync(string.Empty);
             }
         }
 
