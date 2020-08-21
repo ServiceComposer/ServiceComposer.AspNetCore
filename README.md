@@ -39,7 +39,7 @@ public class Startup
 }
 ```
 <sup><a href='/src/Snippets.NetCore3x/Configuration/Startup.cs#L8-L23' title='File snippet `net-core-3x-sample-startup` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-startup' title='Navigate to start of snippet `net-core-3x-sample-startup`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 > NOTE: To use a `Startup` class Generic Host support is required.
 
@@ -58,7 +58,7 @@ public class SampleHandler : ICompositionRequestsHandler
 }
 ```
 <sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L10-L19' title='File snippet `net-core-3x-sample-handler` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler' title='Navigate to start of snippet `net-core-3x-sample-handler`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 #### Authentication and Authorization
 
@@ -78,7 +78,7 @@ public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
 }
 ```
 <sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L21-L31' title='File snippet `net-core-3x-sample-handler-with-authorization` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-authorization' title='Navigate to start of snippet `net-core-3x-sample-handler-with-authorization`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 #### Custom HTTP status codes in ASP.NET Core 3.x
 
@@ -100,7 +100,7 @@ public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
 }
 ```
 <sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L33-L45' title='File snippet `net-core-3x-sample-handler-with-custom-status-code` was extracted from'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-custom-status-code' title='Navigate to start of snippet `net-core-3x-sample-handler-with-custom-status-code`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
 
@@ -135,7 +135,7 @@ public class Startup
 }
 ```
 <sup><a href='/src/Snippets.NetCore2x/Startup.cs#L9-L26' title='File snippet `net-core-2x-sample-startup` was extracted from'>snippet source</a> | <a href='#snippet-net-core-2x-sample-startup' title='Navigate to start of snippet `net-core-2x-sample-startup`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 > Note: define routes so to match your project needs. `ServiceComposer` adds provides all the required `MapComposable*` `IRouteBuilder` extension methods to map routes for every HTTP supported Verb.
 
@@ -172,7 +172,7 @@ public class SampleHandlerWithCustomStatusCode : IHandleRequests
 }
 ```
 <sup><a href='/src/Snippets.NetCore2x/SampleHandler/SampleHandler.cs#L9-L25' title='File snippet `net-core-2x-sample-handler-with-custom-status-code` was extracted from'>snippet source</a> | <a href='#snippet-net-core-2x-sample-handler-with-custom-status-code' title='Navigate to start of snippet `net-core-2x-sample-handler-with-custom-status-code`'>anchor</a></sup>
-<!-- endsnippet -->
+<!-- endSnippet -->
 
 NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
 
