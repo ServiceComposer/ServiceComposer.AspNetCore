@@ -68,7 +68,7 @@ NOTE: Requests handlers are executed in parallel in a non-deterministic way, set
 
 ### MVC and Web API support
 
-For information on how to host the Composition Gateway in a ASP.Net COre MVC application, please, refer to the [`ServiceComposer.AspNetCore.Mvc` package](https://github.com/ServiceComposer/ServiceComposer.AspNetCore.Mvc).
+For information on how to host the Composition Gateway in a ASP.Net Core MVC application, please, refer to the [`ServiceComposer.AspNetCore.Mvc` package](https://github.com/ServiceComposer/ServiceComposer.AspNetCore.Mvc).
 
 ### Icon
 
