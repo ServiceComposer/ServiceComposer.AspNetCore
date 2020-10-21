@@ -45,7 +45,7 @@ namespace ServiceComposer.AspNetCore
                 if (pending.Count == 0)
                 {
                     //we set this here to keep the implementation aligned with the .NET Core 3.x version
-                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    context.Response.StatusCode = (int) HttpStatusCode.NotFound;
                     return (null, StatusCodes.Status404NotFound);
                 }
                 else
@@ -85,7 +85,13 @@ namespace ServiceComposer.AspNetCore
             var request = context.Request;
             var routeData = context.GetRouteData();
 
-            var requestId = request.Headers.GetComposedRequestIdHeaderOr(() => Guid.NewGuid().ToString());
+            var requestId = request.Headers.GetComposedRequestIdHeaderOr(() =>
+            {
+                var id = Guid.NewGuid().ToString();
+                context.Request.Headers.AddComposedRequestIdHeader(id);
+                return id;
+            });
+
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
             var viewModel = new DynamicViewModel(requestId, routeData, request);

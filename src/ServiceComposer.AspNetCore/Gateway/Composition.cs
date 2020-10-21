@@ -12,7 +12,12 @@ namespace ServiceComposer.AspNetCore.Gateway
     {
         public static async Task HandleRequest(HttpContext context)
         {
-            var requestId = context.Request.Headers.GetComposedRequestIdHeaderOr(() => Guid.NewGuid().ToString());
+            var requestId = context.Request.Headers.GetComposedRequestIdHeaderOr(() =>
+            {
+                var id = Guid.NewGuid().ToString();
+                context.Request.Headers.AddComposedRequestIdHeader(id);
+                return id;
+            });
             var (viewModel, statusCode) = await CompositionHandler.HandleRequest(requestId, context);
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
