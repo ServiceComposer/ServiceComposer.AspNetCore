@@ -9,7 +9,7 @@ namespace ServiceComposer.AspNetCore
     public class ViewModelCompositionOptions
     {
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1 || NET5_0
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 #endif
 
@@ -40,7 +40,7 @@ namespace ServiceComposer.AspNetCore
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
 
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1 || NET5_0
         internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
 
         public void EnableCompositionOverControllers()
@@ -64,7 +64,7 @@ namespace ServiceComposer.AspNetCore
 
         internal void InitializeServiceCollection()
         {
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1 || NET5_0
             if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
@@ -109,7 +109,7 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1 || NET5_0
                 AddTypesRegistrationHandler(
                     typesFilter: type =>
                     {

@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP3_1
+﻿#if NETCOREAPP3_1 || NET5_0
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
