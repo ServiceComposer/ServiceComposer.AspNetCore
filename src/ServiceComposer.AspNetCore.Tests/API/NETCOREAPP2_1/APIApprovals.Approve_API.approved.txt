@@ -1,6 +1,6 @@
 [assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/ServiceComposer/ServiceComposer.AspNetCore.git")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ServiceComposer.AspNetCore.Tests")]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.1", FrameworkDisplayName="")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
 namespace ServiceComposer.AspNetCore
 {
     public class AssemblyScanner
@@ -41,20 +41,7 @@ namespace ServiceComposer.AspNetCore
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
-    public static class EndpointsExtensions
-    {
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
-        [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
-            "sitionOptions. This method will be removed in v2.")]
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
-    }
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
-    public static class HttpRequestExtensions
-    {
-        public static readonly string ComposedResponseModelKey;
-        [return: System.Runtime.CompilerServices.Dynamic]
-        public static object GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
-    }
     public interface ICompositionErrorsHandler
     {
         System.Threading.Tasks.Task OnRequestError(Microsoft.AspNetCore.Http.HttpRequest request, System.Exception ex);
@@ -95,12 +82,6 @@ namespace ServiceComposer.AspNetCore
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
     }
-    public interface IViewModelPreviewHandler
-    {
-        [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel). Will be removed in v2.")]
-        System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
-        System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
-    }
     public static class ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
@@ -112,9 +93,6 @@ namespace ServiceComposer.AspNetCore
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
-        public void EnableCompositionOverControllers() { }
-        public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching) { }
-        public void EnableWriteSupport() { }
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterCompositionHandler<T>() { }
