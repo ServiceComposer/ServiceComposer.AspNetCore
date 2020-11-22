@@ -77,7 +77,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1 || NET5_0
         internal static async Task<dynamic> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
         {
             context.Request.EnableBuffering();

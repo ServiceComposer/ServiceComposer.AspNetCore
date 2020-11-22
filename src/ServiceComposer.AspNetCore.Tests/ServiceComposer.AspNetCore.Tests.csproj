@@ -2,33 +2,57 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceComposer.AspNetCore\ServiceComposer.AspNetCore.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.8.1" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+   
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
+  </ItemGroup>
+   
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ApprovalTests" Version="5.4.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.8.1" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+   
+  <ItemGroup>
+    <PackageReference Include="ApprovalTests" Version="5.4.4" />
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
-    <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="1.1.0" />
+    <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="1.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+   
+  <ItemGroup>
+    <None Update="API\NET5_0\APIApprovals.Approve_API.approved.txt">
+      <ParentExtension>.cs</ParentExtension>
+      <ParentFile>APIApprovals</ParentFile>
+      <DependentUpon>APIApprovals.cs</DependentUpon>
+    </None>
+    <None Update="API\NET5_0\APIApprovals.Approve_API.approved.txt.orig">
+      <ParentExtension>.cs</ParentExtension>
+      <ParentFile>APIApprovals</ParentFile>
+      <DependentUpon>APIApprovals.cs</DependentUpon>
+    </None>
   </ItemGroup>
 
 </Project>
