@@ -105,12 +105,14 @@ namespace ServiceComposer.AspNetCore
                 request.SetModel(viewModel);
 
                 var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
+                //TODO: if handlers == none we could shortcut to 404 here
 
                 foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
                 {
                     subscriber.Subscribe(viewModel);
                 }
 
+                //TODO: if handlers == none we could shortcut again to 404 here
                 var pending = handlers.OfType<ICompositionRequestsHandler>()
                     .Select(handler => handler.Handle(request))
                     .ToList();
@@ -128,6 +130,7 @@ namespace ServiceComposer.AspNetCore
                     }
                     catch (Exception ex)
                     {
+                        //TODO: refactor to Task.WhenAll
                         var errorHandlers = handlers.OfType<ICompositionErrorsHandler>();
                         foreach (var handler in errorHandlers)
                         {

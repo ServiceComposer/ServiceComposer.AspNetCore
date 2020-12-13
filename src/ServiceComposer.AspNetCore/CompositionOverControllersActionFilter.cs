@@ -1,4 +1,5 @@
 ﻿#if NETCOREAPP3_1 || NET5_0
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -21,9 +22,9 @@ namespace ServiceComposer.AspNetCore
 
         public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
-            var endpoint = context.HttpContext.GetEndpoint() as RouteEndpoint;
-            if (endpoint != null)
+            if (context.HttpContext.GetEndpoint() is RouteEndpoint endpoint)
             {
+                Debug.Assert(endpoint.RoutePattern.RawText != null, "endpoint.RoutePattern.RawText != null");
                 var rawTemplate = _compositionOverControllersOptions.UseCaseInsensitiveRouteMatching
                     ? endpoint.RoutePattern.RawText.ToLowerInvariant()
                     : endpoint.RoutePattern.RawText;
