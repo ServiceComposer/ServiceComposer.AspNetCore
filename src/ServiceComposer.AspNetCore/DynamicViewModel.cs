@@ -19,9 +19,9 @@ namespace ServiceComposer.AspNetCore
 
         public DynamicViewModel(string requestId, RouteData routeData, HttpRequest httpRequest)
         {
-            this._requestId = requestId;
-            this._routeData = routeData;
-            this._httpRequest = httpRequest;
+            _requestId = requestId;
+            _routeData = routeData;
+            _httpRequest = httpRequest;
         }
 
         public void CleanupSubscribers() => _subscriptions.Clear();
