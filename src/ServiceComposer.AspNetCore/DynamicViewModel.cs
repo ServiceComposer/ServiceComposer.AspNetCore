@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
@@ -89,22 +90,14 @@ namespace ServiceComposer.AspNetCore
         {
             if (_subscriptions.TryGetValue(@event.GetType(), out var handlers))
             {
-                var tasks = new List<Task>();
-                foreach (var handler in handlers)
-                {
-                    tasks.Add(handler.Invoke(_requestId, this, @event, _routeData, _httpRequest));
-                }
+                var tasks = handlers.Select(handler => handler.Invoke(_requestId, this, @event, _routeData, _httpRequest)).ToList();
 
                 return Task.WhenAll(tasks);
             }
 
             if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
             {
-                var tasks = new List<Task>();
-                foreach (var handler in compositionHandlers)
-                {
-                    tasks.Add(handler.Invoke(@event, _httpRequest));
-                }
+                var tasks = compositionHandlers.Select(handler => handler.Invoke(@event, _httpRequest)).ToList();
 
                 return Task.WhenAll(tasks);
             }
