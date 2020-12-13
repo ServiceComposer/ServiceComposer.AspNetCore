@@ -60,19 +60,17 @@ namespace ServiceComposer.AspNetCore
         {
             result = null;
 
-            if (binder.Name == "RaiseEvent")
+            switch (binder.Name)
             {
-                result = RaiseEventImpl(args[0]);
-                return true;
+                case "RaiseEvent":
+                    result = RaiseEventImpl(args[0]);
+                    return true;
+                case "Merge":
+                    result = MergeImpl((IDictionary<string, object>) args[0]);
+                    return true;
+                default:
+                    return false;
             }
-
-            if (binder.Name == "Merge")
-            {
-                result = MergeImpl((IDictionary<string, object>) args[0]);
-                return true;
-            }
-
-            return false;
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()
