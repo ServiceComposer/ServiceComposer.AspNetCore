@@ -6,20 +6,23 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
-    class DynamicViewModel : DynamicObject, IPublishCompositionEvents, ICompositionEventsPublisher
+    class DynamicViewModel : DynamicObject, IPublishCompositionEvents, ICompositionEventsPublisher, ICompositionContext
     {
+        readonly ILogger<DynamicViewModel> _logger;
         readonly string _requestId;
         readonly RouteData _routeData;
         readonly HttpRequest _httpRequest;
         readonly ConcurrentDictionary<Type, List<EventHandler<object>>> _subscriptions = new ConcurrentDictionary<Type, List<EventHandler<object>>>();
         readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new ConcurrentDictionary<Type, List<CompositionEventHandler<object>>>();
         readonly ConcurrentDictionary<string, object> _properties = new ConcurrentDictionary<string, object>();
-
-        public DynamicViewModel(string requestId, RouteData routeData, HttpRequest httpRequest)
+        
+        public DynamicViewModel(ILogger<DynamicViewModel> logger, string requestId, RouteData routeData, HttpRequest httpRequest)
         {
+            _logger = logger;
             _requestId = requestId;
             _routeData = routeData;
             _httpRequest = httpRequest;
@@ -64,6 +67,7 @@ namespace ServiceComposer.AspNetCore
             switch (binder.Name)
             {
                 case "RaiseEvent":
+                    _logger.LogWarning(message: "dynamic.RaiseEvent is obsolete. It'll be treated as an error starting v2 and removed in v3. Use HttpRequest.GetCompositionContext() to raise events.");
                     result = RaiseEventImpl(args[0]);
                     return true;
                 case "Merge":
@@ -112,6 +116,11 @@ namespace ServiceComposer.AspNetCore
             }
 
             return this;
+        }
+
+        Task ICompositionContext.RaiseEvent(object @event)
+        {
+            return RaiseEventImpl(@event);
         }
     }
 }

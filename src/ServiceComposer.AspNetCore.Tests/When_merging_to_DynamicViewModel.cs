@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System.Dynamic;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
@@ -9,10 +10,10 @@ namespace ServiceComposer.AspNetCore.Tests
     public class When_merging_to_DynamicViewModel
     {
         [Fact]
-        public void ExpandoObject_porperties_should_be_copied_over()
+        public void ExpandoObject_properties_should_be_copied_over()
         {
             // Arrange
-            dynamic sut = new DynamicViewModel("empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
+            dynamic sut = new DynamicViewModel(A.Fake<ILogger<DynamicViewModel>>(),"empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
             dynamic source = new ExpandoObject();
             source.SomeProperty = "some value";
 
@@ -24,10 +25,10 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public void Existing_porperties_should_be_overwritten()
+        public void Existing_properties_should_be_overwritten()
         {
             // Arrange
-            dynamic sut = new DynamicViewModel("empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
+            dynamic sut = new DynamicViewModel(A.Fake<ILogger<DynamicViewModel>>(),"empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
             sut.ExistingProperty = 10;
 
             dynamic source = new ExpandoObject();

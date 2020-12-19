@@ -6,7 +6,7 @@ namespace ServiceComposer.AspNetCore
 {
     public static class HttpRequestExtensions
     {
-        public static readonly string ComposedResponseModelKey = "composed-response-model";
+        internal static readonly string ComposedResponseModelKey = "composed-response-model";
 
         public static dynamic GetComposedResponseModel(this HttpRequest request)
         {
@@ -16,6 +16,11 @@ namespace ServiceComposer.AspNetCore
         internal static void SetModel(this HttpRequest request, dynamic viewModel)
         {
             request.HttpContext.Items.Add(HttpRequestExtensions.ComposedResponseModelKey, viewModel);
+        }
+        
+        public static ICompositionContext GetCompositionContext(this HttpRequest request)
+        {
+            return (ICompositionContext)request.HttpContext.Items[ComposedResponseModelKey];
         }
     }
 }

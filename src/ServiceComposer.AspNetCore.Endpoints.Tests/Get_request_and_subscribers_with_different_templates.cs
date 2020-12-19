@@ -21,7 +21,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 var vm = request.GetComposedResponseModel();
                 vm.AString = "sample";
 
-                await vm.RaiseEvent(new TestEvent());
+                var ctx = request.GetCompositionContext();
+                await ctx.RaiseEvent(new TestEvent());
             }
         }
 
