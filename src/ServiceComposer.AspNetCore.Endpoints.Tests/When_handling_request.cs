@@ -17,7 +17,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
-                vm.RequestId = request.Headers.GetComposedRequestId();
+                var ctx = request.GetCompositionContext();
+                vm.RequestId = ctx.RequestId;
 
                 return Task.CompletedTask;
             }

@@ -23,11 +23,17 @@ namespace ServiceComposer.AspNetCore
     }
     public static class ComposedRequestIdHeaderExtensions
     {
+        [System.Obsolete("AddComposedRequestIdHeader is obsolete, it\'ll be treated as an error starting v2 " +
+            "and removed in v3.", false)]
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
+        [System.Obsolete("AddComposedRequestIdHeader is obsolete, it\'ll be treated as an error starting v2 " +
+            "and removed in v3.", false)]
         public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
+        [System.Obsolete("GetComposedRequestId is obsolete, it\'ll be treated as an error starting v2 and re" +
+            "moved in v3. Use GetCompositionContext().RequestId.", false)]
         public static string GetComposedRequestId(this Microsoft.AspNetCore.Http.IHeaderDictionary headers) { }
         [System.Obsolete("GetComposedRequestIdHeaderOr is obsolete, it\'ll be treated as an error starting v" +
-            "2 and removed in v3. Use GetComposedRequestId.", false)]
+            "2 and removed in v3. Use GetCompositionContext().RequestId.", false)]
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
@@ -50,6 +56,7 @@ namespace ServiceComposer.AspNetCore
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public interface ICompositionContext
     {
+        string RequestId { get; }
         System.Threading.Tasks.Task RaiseEvent(object @event);
     }
     public interface ICompositionErrorsHandler
