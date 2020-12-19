@@ -10,7 +10,7 @@ namespace ServiceComposer.AspNetCore.Tests
     public class When_merging_to_DynamicViewModel
     {
         [Fact]
-        public void ExpandoObject_porperties_should_be_copied_over()
+        public void ExpandoObject_properties_should_be_copied_over()
         {
             // Arrange
             dynamic sut = new DynamicViewModel(A.Fake<ILogger<DynamicViewModel>>(),"empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
@@ -25,7 +25,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public void Existing_porperties_should_be_overwritten()
+        public void Existing_properties_should_be_overwritten()
         {
             // Arrange
             dynamic sut = new DynamicViewModel(A.Fake<ILogger<DynamicViewModel>>(),"empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
