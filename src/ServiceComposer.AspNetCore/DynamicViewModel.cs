@@ -122,5 +122,10 @@ namespace ServiceComposer.AspNetCore
         {
             return RaiseEventImpl(@event);
         }
+
+        string ICompositionContext.RequestId
+        {
+            get { return _requestId; }
+        }
     }
 }

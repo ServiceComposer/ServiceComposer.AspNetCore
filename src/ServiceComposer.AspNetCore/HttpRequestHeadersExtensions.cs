@@ -12,17 +12,20 @@ namespace ServiceComposer.AspNetCore
 
     public static class ComposedRequestIdHeaderExtensions
     {
+        [Obsolete(message:"AddComposedRequestIdHeader is obsolete, it'll be treated as an error starting v2 and removed in v3.", error:false)]
         public static void AddComposedRequestIdHeader(this HttpRequestHeaders headers, string requestId)
         {
             headers.Add(ComposedRequestIdHeader.Key, requestId);
         }
 
+        //TODO: make internal
+        [Obsolete(message:"AddComposedRequestIdHeader is obsolete, it'll be treated as an error starting v2 and removed in v3.", error:false)]
         public static void AddComposedRequestIdHeader(this IHeaderDictionary headers, string requestId)
         {
             headers.Add(ComposedRequestIdHeader.Key, requestId);
         }
 
-        [Obsolete(message:"GetComposedRequestIdHeaderOr is obsolete, it'll be treated as an error starting v2 and removed in v3. Use GetComposedRequestId.", error:false)]
+        [Obsolete(message:"GetComposedRequestIdHeaderOr is obsolete, it'll be treated as an error starting v2 and removed in v3. Use GetCompositionContext().RequestId.", error:false)]
         public static string GetComposedRequestIdHeaderOr(this IHeaderDictionary headers, Func<string> defaultValue)
         {
             return headers.ContainsKey(ComposedRequestIdHeader.Key)
@@ -30,6 +33,7 @@ namespace ServiceComposer.AspNetCore
                 : defaultValue();
         }
 
+        [Obsolete(message:"GetComposedRequestId is obsolete, it'll be treated as an error starting v2 and removed in v3. Use GetCompositionContext().RequestId.", error:false)]
         public static string GetComposedRequestId(this IHeaderDictionary headers)
         {
             return GetComposedRequestIdHeaderOr(headers, () => null);
