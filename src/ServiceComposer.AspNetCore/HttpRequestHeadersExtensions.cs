@@ -22,6 +22,7 @@ namespace ServiceComposer.AspNetCore
             headers.Add(ComposedRequestIdHeader.Key, requestId);
         }
 
+        [Obsolete(message:"GetComposedRequestIdHeaderOr is obsolete, it'll be treated as an error starting v2 and removed in v3. Use GetComposedRequestId.", error:false)]
         public static string GetComposedRequestIdHeaderOr(this IHeaderDictionary headers, Func<string> defaultValue)
         {
             return headers.ContainsKey(ComposedRequestIdHeader.Key)

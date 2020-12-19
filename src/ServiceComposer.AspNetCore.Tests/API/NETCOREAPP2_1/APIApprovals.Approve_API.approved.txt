@@ -25,6 +25,8 @@ namespace ServiceComposer.AspNetCore
         public static void AddComposedRequestIdHeader(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, string requestId) { }
         public static void AddComposedRequestIdHeader(this System.Net.Http.Headers.HttpRequestHeaders headers, string requestId) { }
         public static string GetComposedRequestId(this Microsoft.AspNetCore.Http.IHeaderDictionary headers) { }
+        [System.Obsolete("GetComposedRequestIdHeaderOr is obsolete, it\'ll be treated as an error starting v" +
+            "2 and removed in v3. Use GetComposedRequestId.", false)]
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
@@ -41,6 +43,9 @@ namespace ServiceComposer.AspNetCore
                 "StatusCode"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<object, int>> HandleRequest(string requestId, Microsoft.AspNetCore.Http.HttpContext context) { }
     }
+    [System.Obsolete("EventHandler<TEvent> is obsoleted and will be treated as an error starting v2 and" +
+        " removed in v3. Use attribute routing based composition, and CompositionEventHan" +
+        "dler<TEvent>.", false)]
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public interface ICompositionErrorsHandler
     {
@@ -58,22 +63,36 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    [System.Obsolete("IHandleRequests is obsoleted and will be treated as an error starting v2 and remo" +
+        "ved in v3. Use attribute routing based composition and ICompositionRequestsHandl" +
+        "er.", false)]
     public interface IHandleRequests : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         System.Threading.Tasks.Task Handle(string requestId, [System.Runtime.CompilerServices.Dynamic] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    [System.Obsolete("IHandleRequestsErrors is obsoleted and will be treated as an error starting v2 an" +
+        "d removed in v3. Use attribute routing based composition and ICompositionErrorsH" +
+        "andler.", false)]
     public interface IHandleRequestsErrors : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         System.Threading.Tasks.Task OnRequestError(string requestId, System.Exception ex, [System.Runtime.CompilerServices.Dynamic] object vm, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    [System.Obsolete("IInterceptRoutes is obsoleted and will be treated as an error starting v2 and rem" +
+        "oved in v3. Use attribute routing based composition.", false)]
     public interface IInterceptRoutes
     {
         bool Matches(Microsoft.AspNetCore.Routing.RouteData routeData, string httpVerb, Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    [System.Obsolete("IPublishCompositionEvents is obsoleted and will be treated as an error starting v" +
+        "2 and removed in v3. Use attribute routing based composition and ICompositionEve" +
+        "ntsPublisher.", false)]
     public interface IPublishCompositionEvents
     {
         void Subscribe<TEvent>(ServiceComposer.AspNetCore.EventHandler<TEvent> handler);
     }
+    [System.Obsolete("ISubscribeToCompositionEvents is obsoleted and will be treated as an error starti" +
+        "ng v2 and removed in v3. Use attribute routing based composition and ICompositio" +
+        "nEventsSubscriber.", false)]
     public interface ISubscribeToCompositionEvents : ServiceComposer.AspNetCore.IInterceptRoutes
     {
         void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
@@ -104,20 +123,47 @@ namespace ServiceComposer.AspNetCore.Gateway
 {
     public static class ApplicationBuilderExtensions
     {
+        [System.Obsolete("CompositionGateway is obsoleted and will be treated as an error starting v2 and r" +
+            "emoved in v3. Use attribute routing based composition, MapCompositionHandlers, a" +
+            "nd MVC Endpoints.", false)]
         public static void RunCompositionGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, System.Action<Microsoft.AspNetCore.Routing.IRouteBuilder> routes = null) { }
+        [System.Obsolete("CompositionGateway is obsoleted and will be treated as an error starting v2 and r" +
+            "emoved in v3. Use attribute routing based composition, MapCompositionHandlers, a" +
+            "nd MVC Endpoints.", false)]
         public static void RunCompositionGatewayWithDefaultRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public static class Composition
     {
+        [System.Obsolete("HandleRequest is obsoleted and will be treated as an error starting v2 and remove" +
+            "d in v3. Use attribute routing based composition, MapCompositionHandlers, and MV" +
+            "C Endpoints.", false)]
         public static System.Threading.Tasks.Task HandleRequest(Microsoft.AspNetCore.Http.HttpContext context) { }
     }
     public static class RouteBuilderExtentions
     {
+        [System.Obsolete("MapComposableDelete is obsoleted and will be treated as an error starting v2 and " +
+            "removed in v3. Use attribute routing based composition, MapCompositionHandlers, " +
+            "and MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableDelete(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        [System.Obsolete("MapComposableGet is obsoleted and will be treated as an error starting v2 and rem" +
+            "oved in v3. Use attribute routing based composition, MapCompositionHandlers, and" +
+            " MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableGet(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        [System.Obsolete("MapComposablePatch is obsoleted and will be treated as an error starting v2 and r" +
+            "emoved in v3. Use attribute routing based composition, MapCompositionHandlers, a" +
+            "nd MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePatch(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        [System.Obsolete("MapComposablePost is obsoleted and will be treated as an error starting v2 and re" +
+            "moved in v3. Use attribute routing based composition, MapCompositionHandlers, an" +
+            "d MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePost(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        [System.Obsolete("MapComposablePut is obsoleted and will be treated as an error starting v2 and rem" +
+            "oved in v3. Use attribute routing based composition, MapCompositionHandlers, and" +
+            " MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposablePut(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
+        [System.Obsolete("MapComposableRoute is obsoleted and will be treated as an error starting v2 and r" +
+            "emoved in v3. Use attribute routing based composition, MapCompositionHandlers, a" +
+            "nd MVC Endpoints.", false)]
         public static Microsoft.AspNetCore.Routing.IRouteBuilder MapComposableRoute(this Microsoft.AspNetCore.Routing.IRouteBuilder routeBuilder, string template, System.Collections.Generic.IDictionary<string, object> constraints, Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = null, Microsoft.AspNetCore.Routing.RouteValueDictionary dataTokens = null) { }
     }
 }

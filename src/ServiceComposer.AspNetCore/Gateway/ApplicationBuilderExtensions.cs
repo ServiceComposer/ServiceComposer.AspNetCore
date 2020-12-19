@@ -8,6 +8,7 @@ namespace ServiceComposer.AspNetCore.Gateway
 {
     public static class ApplicationBuilderExtensions
     {
+        [Obsolete(message:"CompositionGateway is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
         public static void RunCompositionGateway(this IApplicationBuilder app, Action<IRouteBuilder> routes = null)
         {
             var routeBuilder = new RouteBuilder(app);
@@ -16,6 +17,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             app.UseRouter(routeBuilder.Build());
         }
 
+        [Obsolete(message:"CompositionGateway is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
         public static void RunCompositionGatewayWithDefaultRoutes(this IApplicationBuilder app)
         {
             app.RunCompositionGateway(routes =>
