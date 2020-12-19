@@ -37,7 +37,7 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             // Arrange
             var logger = new Logger();
-            dynamic sut = new DynamicViewModel(logger,"empty", A.Fake<RouteData>(), A.Fake<HttpRequest>());
+            dynamic sut = new DynamicViewModel(logger, new CompositionContext("empty", A.Fake<RouteData>(), A.Fake<HttpRequest>()));
 
             await sut.RaiseEvent(new object());
             

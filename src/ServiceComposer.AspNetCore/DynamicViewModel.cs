@@ -13,43 +13,24 @@ namespace ServiceComposer.AspNetCore
     class DynamicViewModel : DynamicObject, IPublishCompositionEvents, ICompositionEventsPublisher, ICompositionContext
     {
         readonly ILogger<DynamicViewModel> _logger;
-        readonly string _requestId;
-        readonly RouteData _routeData;
-        readonly HttpRequest _httpRequest;
-        readonly ConcurrentDictionary<Type, List<EventHandler<object>>> _subscriptions = new ConcurrentDictionary<Type, List<EventHandler<object>>>();
-        readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new ConcurrentDictionary<Type, List<CompositionEventHandler<object>>>();
-        readonly ConcurrentDictionary<string, object> _properties = new ConcurrentDictionary<string, object>();
+        readonly CompositionContext _compositionContext;
+        readonly ConcurrentDictionary<string, object> _properties = new();
         
-        public DynamicViewModel(ILogger<DynamicViewModel> logger, string requestId, RouteData routeData, HttpRequest httpRequest)
+        public DynamicViewModel(ILogger<DynamicViewModel> logger, CompositionContext compositionContext)
         {
             _logger = logger;
-            _requestId = requestId;
-            _routeData = routeData;
-            _httpRequest = httpRequest;
+            _compositionContext = compositionContext;
+            _compositionContext.CurrentViewModel = this;
         }
-
-        public void CleanupSubscribers() => _subscriptions.Clear();
 
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {
-            if (!_subscriptions.TryGetValue(typeof(TEvent), out var handlers))
-            {
-                handlers = new List<EventHandler<object>>();
-                _subscriptions.TryAdd(typeof(TEvent), handlers);
-            }
-
-            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent) @event, routeData, query));
+            _compositionContext.Subscribe(handler); 
         }
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
         {
-            if (!_compositionEventsSubscriptions.TryGetValue(typeof(TEvent), out var handlers))
-            {
-                handlers = new List<CompositionEventHandler<object>>();
-                _compositionEventsSubscriptions.TryAdd(typeof(TEvent), handlers);
-            }
-
-            handlers.Add((@event, request) => handler((TEvent) @event, request));
+            _compositionContext.Subscribe(handler);
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result) => _properties.TryGetValue(binder.Name, out result);
@@ -91,21 +72,7 @@ namespace ServiceComposer.AspNetCore
 
         Task RaiseEventImpl(object @event)
         {
-            if (_subscriptions.TryGetValue(@event.GetType(), out var handlers))
-            {
-                var tasks = handlers.Select(handler => handler.Invoke(_requestId, this, @event, _routeData, _httpRequest)).ToList();
-
-                return Task.WhenAll(tasks);
-            }
-
-            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
-            {
-                var tasks = compositionHandlers.Select(handler => handler.Invoke(@event, _httpRequest)).ToList();
-
-                return Task.WhenAll(tasks);
-            }
-
-            return Task.CompletedTask;
+            return _compositionContext.RaiseEvent(@event);
         }
 
         DynamicViewModel MergeImpl(IDictionary<string, object> source)
@@ -120,12 +87,12 @@ namespace ServiceComposer.AspNetCore
 
         Task ICompositionContext.RaiseEvent(object @event)
         {
-            return RaiseEventImpl(@event);
+            return _compositionContext.RaiseEvent(@event);
         }
 
         string ICompositionContext.RequestId
         {
-            get { return _requestId; }
+            get { return _compositionContext.RequestId; }
         }
     }
 }

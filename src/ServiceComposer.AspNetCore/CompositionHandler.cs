@@ -20,8 +20,9 @@ namespace ServiceComposer.AspNetCore
         {
             var routeData = context.GetRouteData();
             var request = context.Request;
+            var compositionContext = new CompositionContext(requestId, routeData, request);
             var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-            var viewModel = new DynamicViewModel(logger, requestId, routeData, context.Request);
+            var viewModel = new DynamicViewModel(logger, compositionContext);
 
             try
             {
@@ -75,7 +76,7 @@ namespace ServiceComposer.AspNetCore
             }
             finally
             {
-                viewModel.CleanupSubscribers();
+                compositionContext.CleanupSubscribers();
             }
         }
 
@@ -97,7 +98,8 @@ namespace ServiceComposer.AspNetCore
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
             var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-            var viewModel = new DynamicViewModel(logger, requestId, routeData, request);
+            var compositionContext = new CompositionContext(requestId, routeData, request);
+            var viewModel = new DynamicViewModel(logger, compositionContext);
 
             await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
                 .Select(visitor => visitor.Preview(request, viewModel))
@@ -105,7 +107,8 @@ namespace ServiceComposer.AspNetCore
 
             try
             {
-                request.SetModel(viewModel);
+                request.SetViewModel(viewModel);
+                request.SetCompositionContext(compositionContext);
 
                 var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
                 //TODO: if handlers == none we could shortcut to 404 here
@@ -148,7 +151,7 @@ namespace ServiceComposer.AspNetCore
             }
             finally
             {
-                viewModel.CleanupSubscribers();
+                compositionContext.CleanupSubscribers();
             }
         }
 #endif
