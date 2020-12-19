@@ -10,6 +10,7 @@ namespace ServiceComposer.AspNetCore.Gateway
 {
     public static class Composition
     {
+        [Obsolete(message:"HandleRequest is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
         public static async Task HandleRequest(HttpContext context)
         {
             var requestId = context.Request.Headers.GetComposedRequestIdHeaderOr(() =>
