@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ServiceComposer.AspNetCore.Tests")]
+[assembly: InternalsVisibleTo("ServiceComposer.AspNetCore.Endpoints.Tests")]
 [assembly: InternalsVisibleTo("ServiceComposer.AspNetCore.TypedViewModel")]
 
 //Required by FakeItEasy
