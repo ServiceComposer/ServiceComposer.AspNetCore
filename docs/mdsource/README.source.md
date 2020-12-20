@@ -8,5 +8,5 @@ ServiceComposer is a ViewModel Composition Gateway. For more details, and the ph
 
 ServiceComposer is available for the following platforms:
 
-- [ASP.NET Core 2.x](/docs/mdsource/asp-net-core-2x) (.NET Standard 2.0 compatible)
-- [ASP.NET Core 3.x and .NET 5](/docs/mdsource/asp-net-core-3x)
+- [ASP.NET Core 2.x](/docs/asp-net-core-2x) (.NET Standard 2.0 compatible)
+- [ASP.NET Core 3.x and .NET 5](/docs/asp-net-core-3x)
