@@ -102,7 +102,7 @@ namespace ServiceComposer.AspNetCore
             var viewModel = new DynamicViewModel(logger, compositionContext);
 
             await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
-                .Select(visitor => visitor.Preview(request, viewModel))
+                .Select(visitor => visitor.Preview(request, viewModel, compositionContext))
                 .ToList());
 
             try
