@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +18,8 @@ namespace ServiceComposer.AspNetCore
             _compositionContext = compositionContext;
             _compositionContext.CurrentViewModel = this;
         }
+
+        protected IDictionary<string, object> GetProperties() => _properties;
 
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {

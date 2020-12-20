@@ -7,9 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -97,10 +94,20 @@ namespace ServiceComposer.AspNetCore
 
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
-            var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
             var compositionContext = new CompositionContext(requestId, routeData, request);
-            var viewModel = new DynamicViewModel(logger, compositionContext);
 
+            DynamicViewModel viewModel;
+            var compositionOptions = context.RequestServices.GetRequiredService<ViewModelCompositionOptions>();
+            if (compositionOptions.ViewModelFactory != null)
+            {
+                viewModel = compositionOptions.ViewModelFactory.CreateViewModel(context, compositionContext);
+            }
+            else
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
+                viewModel = new DynamicViewModel(logger, compositionContext);
+            }
+            
             await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
                 .Select(visitor => visitor.Preview(request, viewModel, compositionContext))
                 .ToList());

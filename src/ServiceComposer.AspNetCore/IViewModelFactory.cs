@@ -2,8 +2,8 @@
 
 namespace ServiceComposer.AspNetCore
 {
-    public interface IViewModelFactory
+    interface IViewModelFactory
     {
-        IViewModel CreateViewModel(HttpRequest request);
+        DynamicViewModel CreateViewModel(HttpContext httpContext, CompositionContext compositionContext);
     }
 }
