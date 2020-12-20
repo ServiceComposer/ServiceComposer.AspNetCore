@@ -60,8 +60,6 @@ namespace ServiceComposer.AspNetCore
         {
             IsWriteSupportEnabled = true;
         }
-        
-        internal IViewModelFactory ViewModelFactory { get; set; }
 #endif
 
         internal void InitializeServiceCollection()

@@ -97,10 +97,10 @@ namespace ServiceComposer.AspNetCore
             var compositionContext = new CompositionContext(requestId, routeData, request);
 
             DynamicViewModel viewModel;
-            var compositionOptions = context.RequestServices.GetRequiredService<ViewModelCompositionOptions>();
-            if (compositionOptions.ViewModelFactory != null)
+            var viewModelFactory = context.RequestServices.GetService<IViewModelFactory>();
+            if (viewModelFactory != null)
             {
-                viewModel = compositionOptions.ViewModelFactory.CreateViewModel(context, compositionContext);
+                viewModel = viewModelFactory.CreateViewModel(context, compositionContext);
             }
             else
             {
