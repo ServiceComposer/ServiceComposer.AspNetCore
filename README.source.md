@@ -37,6 +37,8 @@ NOTE: Requests handlers are executed in parallel in a non-deterministic way, set
 
 ### ASP.NET Core 2.x
 
+NOTE: As of v1.8.0 ASP.NET Core 2.x is legacy. It'll be removed in v2.0.0, consider moving to the new endpoint and attribute routing based approach available starting with ASP.NET Core 3.x.
+
 Create a new .NET Core console project and add a reference to the following Nuget packages:
 
 * `Microsoft.AspNetCore`
