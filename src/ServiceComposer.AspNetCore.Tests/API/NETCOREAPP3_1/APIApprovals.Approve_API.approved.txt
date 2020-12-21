@@ -67,6 +67,8 @@ namespace ServiceComposer.AspNetCore
     {
         [return: System.Runtime.CompilerServices.Dynamic]
         public static object GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+        public static T GetComposedResponseModel<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
+            where T :  class { }
         public static ServiceComposer.AspNetCore.ICompositionContext GetCompositionContext(this Microsoft.AspNetCore.Http.HttpRequest request) { }
     }
     public interface ICompositionContext
@@ -132,6 +134,10 @@ namespace ServiceComposer.AspNetCore
     public interface IViewModelCompositionOptionsCustomization
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
+    }
+    public interface IViewModelFactory
+    {
+        object CreateViewModel(Microsoft.AspNetCore.Http.HttpContext httpContext, ServiceComposer.AspNetCore.ICompositionContext compositionContext);
     }
     public interface IViewModelPreviewHandler
     {

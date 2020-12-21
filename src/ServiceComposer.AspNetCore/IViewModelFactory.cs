@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿#if NETCOREAPP3_1 || NET5_0
+using Microsoft.AspNetCore.Http;
 
 namespace ServiceComposer.AspNetCore
 {
-    interface IViewModelFactory
+    public interface IViewModelFactory
     {
-        DynamicViewModel CreateViewModel(HttpContext httpContext, CompositionContext compositionContext);
+        object CreateViewModel(HttpContext httpContext, ICompositionContext compositionContext);
     }
 }
+#endif

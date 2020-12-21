@@ -78,7 +78,7 @@ namespace ServiceComposer.AspNetCore
         }
 
 #if NETCOREAPP3_1 || NET5_0
-        internal static async Task<dynamic> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
+        internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
         {
             context.Request.EnableBuffering();
 
@@ -96,7 +96,7 @@ namespace ServiceComposer.AspNetCore
 
             var compositionContext = new CompositionContext(requestId, routeData, request);
 
-            DynamicViewModel viewModel;
+            object viewModel;
             var viewModelFactory = context.RequestServices.GetService<IViewModelFactory>();
             if (viewModelFactory != null)
             {
@@ -122,7 +122,7 @@ namespace ServiceComposer.AspNetCore
 
                 foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
                 {
-                    subscriber.Subscribe(viewModel);
+                    subscriber.Subscribe(compositionContext);
                 }
 
                 //TODO: if handlers == none we could shortcut again to 404 here
