@@ -11,7 +11,7 @@ namespace ServiceComposer.AspNetCore
         readonly ILogger<DynamicViewModel> _logger;
         readonly CompositionContext _compositionContext;
         readonly ConcurrentDictionary<string, object> _properties = new();
-        
+
         public DynamicViewModel(ILogger<DynamicViewModel> logger, CompositionContext compositionContext)
         {
             _logger = logger;
@@ -19,11 +19,9 @@ namespace ServiceComposer.AspNetCore
             _compositionContext.CurrentViewModel = this;
         }
 
-        protected IDictionary<string, object> GetProperties() => _properties;
-
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {
-            _compositionContext.Subscribe(handler); 
+            _compositionContext.Subscribe(handler);
         }
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
