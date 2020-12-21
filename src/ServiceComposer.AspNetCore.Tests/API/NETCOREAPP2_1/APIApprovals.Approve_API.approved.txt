@@ -110,11 +110,6 @@ namespace ServiceComposer.AspNetCore
     {
         void Subscribe(ServiceComposer.AspNetCore.IPublishCompositionEvents publisher);
     }
-    public interface IViewModel : ServiceComposer.AspNetCore.ICompositionEventsPublisher
-    {
-        void CleanupSubscribers();
-        System.Threading.Tasks.Task RaiseEvent(object @event);
-    }
     public interface IViewModelCompositionOptionsCustomization
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
