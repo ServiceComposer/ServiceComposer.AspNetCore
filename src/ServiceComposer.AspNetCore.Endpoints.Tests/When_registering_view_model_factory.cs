@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
@@ -11,11 +12,18 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_registering_view_model_factory
     {
+        class CustomViewModel
+        {
+            public string AValue { get; set; }
+        }
+
         class TestGetHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
             {
+                var vm = request.GetComposedResponseModel<CustomViewModel>();
+                vm.AValue = "some value";
                 return Task.CompletedTask;
             }
         }
@@ -23,11 +31,10 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         class TestViewModelFactory : IViewModelFactory
         {
             public bool Invoked { get; private set; }
-            public DynamicViewModel CreateViewModel(HttpContext httpContext, CompositionContext compositionContext)
+            public object CreateViewModel(HttpContext httpContext, ICompositionContext compositionContext)
             {
                 Invoked = true;
-                var logger = httpContext.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-                return new DynamicViewModel(logger, compositionContext);
+                return new CustomViewModel();
             }
         }
 
@@ -55,11 +62,16 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 }
             ).CreateClient();
 
+            client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal");
             // Act
             var response = await client.GetAsync("/sample/1");
 
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = JObject.Parse(responseString);
+
             // Assert
             Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("some value", responseObj?.SelectToken(nameof(CustomViewModel.AValue))?.Value<string>());
             Assert.True(factory.Invoked);
         }
     }

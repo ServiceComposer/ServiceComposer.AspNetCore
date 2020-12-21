@@ -39,7 +39,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 publisher.Subscribe<AnEvent>((requestId, viewModel, @event, routeData, httpRequest) =>
                 {
                     var id = int.Parse((string)routeData.Values["id"]);
-                    viewModel.SubscriberValue = id;
+                    ((dynamic)viewModel).SubscriberValue = id;
 
                     return Task.CompletedTask;
                 });
