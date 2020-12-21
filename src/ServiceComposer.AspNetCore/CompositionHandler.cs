@@ -107,15 +107,15 @@ namespace ServiceComposer.AspNetCore
                 var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
                 viewModel = new DynamicViewModel(logger, compositionContext);
             }
-            
-            await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
-                .Select(visitor => visitor.Preview(request, viewModel, compositionContext))
-                .ToList());
 
             try
             {
                 request.SetViewModel(viewModel);
                 request.SetCompositionContext(compositionContext);
+
+                await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
+                    .Select(visitor => visitor.Preview(request))
+                    .ToList());
 
                 var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
                 //TODO: if handlers == none we could shortcut to 404 here
