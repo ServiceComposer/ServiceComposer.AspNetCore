@@ -55,7 +55,7 @@ namespace ServiceComposer.AspNetCore
     {
         public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
-            "sitionOptions. This method will be removed in v2.")]
+            "sitionOptions. This method will be treated as an error in v2 and removed in v3.")]
         public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
     }
     [System.Obsolete("EventHandler<TEvent> is obsoleted and will be treated as an error starting v2 and" +
@@ -91,6 +91,7 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    public interface IEndpointScopedViewModelFactory : ServiceComposer.AspNetCore.IViewModelFactory { }
     [System.Obsolete("IHandleRequests is obsoleted and will be treated as an error starting v2 and remo" +
         "ved in v3. Use attribute routing based composition and ICompositionRequestsHandl" +
         "er.", false)]
@@ -160,6 +161,8 @@ namespace ServiceComposer.AspNetCore
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterCompositionHandler<T>() { }
+        public void RegisterEndpointScopedViewModelFactory<T>()
+            where T : ServiceComposer.AspNetCore.IEndpointScopedViewModelFactory { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
     }
