@@ -188,14 +188,14 @@ namespace ServiceComposer.AspNetCore
         }
 
         static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(
-            CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensistiveRouteMatching) where TAttribute : HttpMethodAttribute
+            CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching) where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
                     var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
-                    if (template != null && useCaseInsensistiveRouteMatching)
+                    if (template != null && useCaseInsensitiveRouteMatching)
                     {
                         template = template.ToLowerInvariant();
                     }
