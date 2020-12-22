@@ -266,6 +266,18 @@ namespace ServiceComposer.AspNetCore
                 throw new ArgumentOutOfRangeException(paramName);
             }
 
+            var globalFactoryRegistration = Services.SingleOrDefault(sd => sd.ServiceType == typeof(IViewModelFactory));
+            if (globalFactoryRegistration != null)
+            {
+                var message = $"Only one global {nameof(IViewModelFactory)} is supported.";
+                if (globalFactoryRegistration.ImplementationType != null)
+                {
+                    message += $" {globalFactoryRegistration.ImplementationType.Name} is already registered as a global view model factory.";
+                }
+
+                throw new NotSupportedException(message);
+            }
+
             if (configurationHandlers.TryGetValue(viewModelFactoryType, out var handler))
             {
                 handler(viewModelFactoryType, Services);

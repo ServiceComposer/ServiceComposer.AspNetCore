@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
@@ -48,7 +48,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
-                        options.RegisterViewModelFactory<TestViewModelFactory>();
+                        options.RegisterGlobalViewModelFactory<TestViewModelFactory>();
                     });
                     services.AddRouting();
                 },
@@ -69,6 +69,34 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("some value", responseObj?.SelectToken(nameof(CustomViewModel.AValue))?.Value<string>());
+        }
+
+        [Fact]
+        public void An_exception_is_thrown_if_more_than_one_global_factory_is_registered()
+        {
+            Assert.Throws<NotSupportedException>(() =>
+            {
+                // Arrange
+                var client = new SelfContainedWebApplicationFactoryWithWebHost<When_registering_view_model_factory>
+                (
+                    configureServices: services =>
+                    {
+                        services.AddViewModelComposition(options =>
+                        {
+                            options.AssemblyScanner.Disable();
+                            options.RegisterCompositionHandler<TestGetHandler>();
+                            options.RegisterGlobalViewModelFactory<TestViewModelFactory>();
+                            options.RegisterGlobalViewModelFactory<TestViewModelFactory>();
+                        });
+                        services.AddRouting();
+                    },
+                    configure: app =>
+                    {
+                        app.UseRouting();
+                        app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                    }
+                ).CreateClient();
+            });
         }
     }
 }
