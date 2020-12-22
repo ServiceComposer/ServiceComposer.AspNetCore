@@ -23,7 +23,7 @@ namespace ServiceComposer.AspNetCore
             MapCompositionHandlers(endpoints, false);
         }
 
-        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be removed in v2.")]
+        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
