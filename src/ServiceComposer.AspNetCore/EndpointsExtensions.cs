@@ -171,7 +171,7 @@ namespace ServiceComposer.AspNetCore
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
-                componentsGroup.Select(component => component.ComponentType),
+                componentsGroup.Select(component => component.ComponentType).ToArray(),
                 0)
             {
                 DisplayName = componentsGroup.Key,
@@ -218,8 +218,14 @@ namespace ServiceComposer.AspNetCore
             {
                 return componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
             }
+            else if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(componentType))
+            {
+                return componentType.GetMethod(nameof(IEndpointScopedViewModelFactory.CreateViewModel));
+            }
 
-            throw new NotSupportedException($"Component needs to be either {nameof(ICompositionRequestsHandler)} or {nameof(ICompositionEventsSubscriber)}.");
+            var message = $"Component needs to be either {nameof(ICompositionRequestsHandler)}, " +
+                          $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+            throw new NotSupportedException(message);
         }
     }
 }
