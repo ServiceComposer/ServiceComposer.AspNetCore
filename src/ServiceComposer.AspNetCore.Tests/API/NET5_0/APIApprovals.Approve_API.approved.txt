@@ -163,10 +163,10 @@ namespace ServiceComposer.AspNetCore
         public void RegisterCompositionHandler<T>() { }
         public void RegisterEndpointScopedViewModelFactory<T>()
             where T : ServiceComposer.AspNetCore.IEndpointScopedViewModelFactory { }
+        public void RegisterGlobalViewModelFactory<T>()
+            where T : ServiceComposer.AspNetCore.IViewModelFactory { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
-        public void RegisterViewModelFactory<T>()
-            where T : ServiceComposer.AspNetCore.IViewModelFactory { }
     }
 }
 namespace ServiceComposer.AspNetCore.Gateway

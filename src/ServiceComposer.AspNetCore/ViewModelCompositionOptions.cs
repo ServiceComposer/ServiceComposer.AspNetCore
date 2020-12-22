@@ -141,7 +141,7 @@ namespace ServiceComposer.AspNetCore
                     {
                         foreach (var type in types)
                         {
-                            Services.AddTransient(typeof(IViewModelFactory), type);
+                            RegisterGlobalViewModelFactory(type);
                         }
                     });
 
@@ -242,23 +242,37 @@ namespace ServiceComposer.AspNetCore
             RegisterCompositionComponents(typeof(T));
         }
 
-        public void RegisterViewModelFactory<T>() where T: IViewModelFactory
+        public void RegisterGlobalViewModelFactory<T>() where T: IViewModelFactory
         {
-            var type = typeof(T);
-            if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type))
+            RegisterGlobalViewModelFactory(typeof(T));
+        }
+
+        void RegisterGlobalViewModelFactory(Type viewModelFactoryType)
+        {
+            if (viewModelFactoryType == null)
+            {
+                throw new ArgumentNullException(nameof(viewModelFactoryType));
+            }
+
+            if (!typeof(IViewModelFactory).IsAssignableFrom(viewModelFactoryType))
+            {
+                throw new ArgumentOutOfRangeException($"Type must implement {nameof(IViewModelFactory)}.");
+            }
+
+            if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(viewModelFactoryType))
             {
                 var paramName = $"To register {nameof(IEndpointScopedViewModelFactory)} use " +
                                 $"the {nameof(RegisterEndpointScopedViewModelFactory)} method.";
                 throw new ArgumentOutOfRangeException(paramName);
             }
 
-            if (configurationHandlers.TryGetValue(type, out var handler))
+            if (configurationHandlers.TryGetValue(viewModelFactoryType, out var handler))
             {
-                handler(type, Services);
+                handler(viewModelFactoryType, Services);
             }
             else
             {
-                Services.AddTransient(typeof(IViewModelFactory), type);
+                Services.AddTransient(typeof(IViewModelFactory), viewModelFactoryType);
             }
         }
 #endif
