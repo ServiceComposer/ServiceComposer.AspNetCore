@@ -1,7 +1,6 @@
 ﻿#if NETCOREAPP3_1 || NET5_0
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -15,19 +14,19 @@ namespace ServiceComposer.AspNetCore
 {
     class CompositionEndpointBuilder : EndpointBuilder
     {
-        private readonly Type[] _compositionHandlers;
         public RoutePattern RoutePattern { get; set; }
 
         public int Order { get; set; }
 
-        public CompositionEndpointBuilder(RoutePattern routePattern, IEnumerable<Type> compositionHandlers, int order)
+        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order)
         {
-            _compositionHandlers = compositionHandlers.ToArray();
+            Validate(routePattern, componentsTypes);
+
             RoutePattern = routePattern;
             Order = order;
             RequestDelegate = async context =>
             {
-                var viewModel = await CompositionHandler.HandleComposableRequest(context, _compositionHandlers);
+                var viewModel = await CompositionHandler.HandleComposableRequest(context, componentsTypes);
                 if (viewModel != null)
                 {
                     var json = (string) JsonConvert.SerializeObject(viewModel, GetSettings(context));
@@ -39,6 +38,17 @@ namespace ServiceComposer.AspNetCore
                     await context.Response.WriteAsync(string.Empty);
                 }
             };
+        }
+
+        private void Validate(RoutePattern routePattern, Type[] componentsTypes)
+        {
+            var endpointScopedViewModelFactoriesCount = componentsTypes.Count(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t));
+            if (endpointScopedViewModelFactoriesCount > 1)
+            {
+                var message = $"Only one {nameof(IEndpointScopedViewModelFactory)} is allowed per endpoint." +
+                              $" Endpoint '{routePattern}' is bound to more than one view model factory.";
+                throw new NotSupportedException(message);
+            }
         }
 
         JsonSerializerSettings GetSettings(HttpContext context)
