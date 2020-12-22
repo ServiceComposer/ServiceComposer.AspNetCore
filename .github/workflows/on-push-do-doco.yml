@@ -10,6 +10,7 @@ jobs:
       run: |
         dotnet tool install --global MarkdownSnippets.Tool
         mdsnippets ${GITHUB_WORKSPACE}
+        git add .
       shell: bash
     - name: Push changes
       run: |
