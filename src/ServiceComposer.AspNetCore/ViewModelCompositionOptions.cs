@@ -241,6 +241,26 @@ namespace ServiceComposer.AspNetCore
         {
             RegisterCompositionComponents(typeof(T));
         }
+
+        public void RegisterViewModelFactory<T>() where T: IViewModelFactory
+        {
+            var type = typeof(T);
+            if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type))
+            {
+                var paramName = $"To register {nameof(IEndpointScopedViewModelFactory)} use " +
+                                $"the {nameof(RegisterEndpointScopedViewModelFactory)} method.";
+                throw new ArgumentOutOfRangeException(paramName);
+            }
+
+            if (configurationHandlers.TryGetValue(type, out var handler))
+            {
+                handler(type, Services);
+            }
+            else
+            {
+                Services.AddTransient(typeof(IViewModelFactory), type);
+            }
+        }
 #endif
 
         void RegisterRouteInterceptor(Type type)

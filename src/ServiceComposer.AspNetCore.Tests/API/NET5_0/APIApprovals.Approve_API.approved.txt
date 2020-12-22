@@ -165,6 +165,8 @@ namespace ServiceComposer.AspNetCore
             where T : ServiceComposer.AspNetCore.IEndpointScopedViewModelFactory { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
+        public void RegisterViewModelFactory<T>()
+            where T : ServiceComposer.AspNetCore.IViewModelFactory { }
     }
 }
 namespace ServiceComposer.AspNetCore.Gateway

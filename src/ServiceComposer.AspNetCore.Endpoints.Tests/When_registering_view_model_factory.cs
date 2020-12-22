@@ -30,10 +30,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
         class TestViewModelFactory : IViewModelFactory
         {
-            public bool Invoked { get; private set; }
             public object CreateViewModel(HttpContext httpContext, ICompositionContext compositionContext)
             {
-                Invoked = true;
                 return new CustomViewModel();
             }
         }
@@ -42,16 +40,15 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task ViewModel_is_created_using_custom_factory()
         {
             // Arrange
-            var factory = new TestViewModelFactory();
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_registering_view_model_factory>
             (
                 configureServices: services =>
                 {
-                    services.AddSingleton<IViewModelFactory>(factory);
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
+                        options.RegisterViewModelFactory<TestViewModelFactory>();
                     });
                     services.AddRouting();
                 },
@@ -72,7 +69,6 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("some value", responseObj?.SelectToken(nameof(CustomViewModel.AValue))?.Value<string>());
-            Assert.True(factory.Invoked);
         }
     }
 }
