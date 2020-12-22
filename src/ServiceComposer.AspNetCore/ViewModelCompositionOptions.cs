@@ -22,6 +22,8 @@ namespace ServiceComposer.AspNetCore
             Services.AddSingleton(_compositionMetadataRegistry);
         }
 
+        internal Func<Type, bool> TypesFilter { get; set; } = type => true;
+
         List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
         Dictionary<Type, Action<Type, IServiceCollection>> configurationHandlers = new Dictionary<Type, Action<Type, IServiceCollection>>();
 
@@ -105,7 +107,7 @@ namespace ServiceComposer.AspNetCore
                     {
                         foreach (var type in types)
                         {
-                            RegisterCompositionHandler(type);
+                            RegisterCompositionComponents(type);
                         }
                     });
 
@@ -125,11 +127,45 @@ namespace ServiceComposer.AspNetCore
                             Services.AddTransient(typeof(IViewModelPreviewHandler), type);
                         }
                     });
+
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && typeof(IViewModelFactory).IsAssignableFrom(type)
+                               && !typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            Services.AddTransient(typeof(IViewModelFactory), type);
+                        }
+                    });
+
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            Services.AddTransient(typeof(IEndpointScopedViewModelFactory), type);
+                        }
+                    });
 #endif
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
                     .SelectMany(assembly => assembly.GetTypes())
+                    .Where(TypesFilter)
                     .Distinct()
                     .ToList();
 
@@ -164,14 +200,29 @@ namespace ServiceComposer.AspNetCore
 
         public void RegisterCompositionHandler<T>()
         {
-            RegisterCompositionHandler(typeof(T));
+            RegisterCompositionComponents(typeof(T));
         }
 
-        void RegisterCompositionHandler(Type type)
+        void RegisterCompositionComponents(Type type)
         {
-            if (!(typeof(ICompositionRequestsHandler).IsAssignableFrom(type) || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)))
+            if (
+                !(
+                    typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
+                    || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
+#if NETCOREAPP3_1 || NET5_0
+                    || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
+#endif
+                )
+            )
             {
-                throw new NotSupportedException("Registered types must be ICompositionRequestsHandler or ICompositionEventsSubscriber.");
+#if NETCOREAPP3_1 || NET5_0
+                var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
+                              $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+#else
+                var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)} " +
+                              $"or {nameof(ICompositionEventsSubscriber)}.";
+#endif
+                throw new NotSupportedException(message);
             }
 
             _compositionMetadataRegistry.AddComponent(type);
@@ -184,6 +235,13 @@ namespace ServiceComposer.AspNetCore
                 Services.AddTransient(type);
             }
         }
+
+#if NETCOREAPP3_1 || NET5_0
+        public void RegisterEndpointScopedViewModelFactory<T>() where T: IEndpointScopedViewModelFactory
+        {
+            RegisterCompositionComponents(typeof(T));
+        }
+#endif
 
         void RegisterRouteInterceptor(Type type)
         {
