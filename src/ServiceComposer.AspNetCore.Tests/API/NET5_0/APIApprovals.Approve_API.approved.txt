@@ -1,4 +1,5 @@
 [assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/ServiceComposer/ServiceComposer.AspNetCore.git")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ServiceComposer.AspNetCore.Endpoints.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ServiceComposer.AspNetCore.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo(@"DynamicProxyGenAssembly2, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
@@ -54,7 +55,7 @@ namespace ServiceComposer.AspNetCore
     {
         public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
-            "sitionOptions. This method will be removed in v2.")]
+            "sitionOptions. This method will be treated as an error in v2 and removed in v3.")]
         public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
     }
     [System.Obsolete("EventHandler<TEvent> is obsoleted and will be treated as an error starting v2 and" +
@@ -65,6 +66,8 @@ namespace ServiceComposer.AspNetCore
     {
         [return: System.Runtime.CompilerServices.Dynamic]
         public static object GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+        public static T GetComposedResponseModel<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
+            where T :  class { }
         public static ServiceComposer.AspNetCore.ICompositionContext GetCompositionContext(this Microsoft.AspNetCore.Http.HttpRequest request) { }
     }
     public interface ICompositionContext
@@ -88,6 +91,7 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    public interface IEndpointScopedViewModelFactory : ServiceComposer.AspNetCore.IViewModelFactory { }
     [System.Obsolete("IHandleRequests is obsoleted and will be treated as an error starting v2 and remo" +
         "ved in v3. Use attribute routing based composition and ICompositionRequestsHandl" +
         "er.", false)]
@@ -126,15 +130,19 @@ namespace ServiceComposer.AspNetCore
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
     }
+    public interface IViewModelFactory
+    {
+        object CreateViewModel(Microsoft.AspNetCore.Http.HttpContext httpContext, ServiceComposer.AspNetCore.ICompositionContext compositionContext);
+    }
     public interface IViewModelPreviewHandler
     {
+        System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
         [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel, ICompositionContext compositi" +
             "onContext). Will be treated as an error starting v2 and removed in v3.")]
         System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
         [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel, ICompositionContext compositi" +
             "onContext). Will be treated as an error starting v2 and removed in v3.")]
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
-        System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel, ServiceComposer.AspNetCore.ICompositionContext compositionContext);
     }
     public static class ServiceCollectionExtensions
     {
@@ -153,6 +161,10 @@ namespace ServiceComposer.AspNetCore
         public void RegisterCompositionEventsSubscriber<T>()
             where T : ServiceComposer.AspNetCore.ISubscribeToCompositionEvents { }
         public void RegisterCompositionHandler<T>() { }
+        public void RegisterEndpointScopedViewModelFactory<T>()
+            where T : ServiceComposer.AspNetCore.IEndpointScopedViewModelFactory { }
+        public void RegisterGlobalViewModelFactory<T>()
+            where T : ServiceComposer.AspNetCore.IViewModelFactory { }
         public void RegisterRequestsHandler<T>()
             where T : ServiceComposer.AspNetCore.IHandleRequests { }
     }

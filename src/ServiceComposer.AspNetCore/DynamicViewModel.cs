@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +11,7 @@ namespace ServiceComposer.AspNetCore
         readonly ILogger<DynamicViewModel> _logger;
         readonly CompositionContext _compositionContext;
         readonly ConcurrentDictionary<string, object> _properties = new();
-        
+
         public DynamicViewModel(ILogger<DynamicViewModel> logger, CompositionContext compositionContext)
         {
             _logger = logger;
@@ -25,7 +21,7 @@ namespace ServiceComposer.AspNetCore
 
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {
-            _compositionContext.Subscribe(handler); 
+            _compositionContext.Subscribe(handler);
         }
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)

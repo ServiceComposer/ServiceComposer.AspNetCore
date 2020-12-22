@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +22,24 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
+                                .Contains(type))
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
@@ -53,7 +73,24 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
+                                .Contains(type))
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
@@ -83,12 +120,21 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
-                        options.AssemblyScanner.AddAssemblyFilter(assembly =>
+                        options.TypesFilter = type =>
                         {
-                            return assembly.Contains("TestClassLibraryWithHandlers")
-                                ? AssemblyScanner.FilterResults.Include
-                                : AssemblyScanner.FilterResults.Exclude;
-                        });
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
+                                .Contains(type))
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
                     });
                     services.AddRouting();
                 },

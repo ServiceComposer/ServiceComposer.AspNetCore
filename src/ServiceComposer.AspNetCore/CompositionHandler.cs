@@ -7,9 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -81,7 +78,7 @@ namespace ServiceComposer.AspNetCore
         }
 
 #if NETCOREAPP3_1 || NET5_0
-        internal static async Task<dynamic> HandleComposableRequest(HttpContext context, Type[] handlerTypes)
+        internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
         {
             context.Request.EnableBuffering();
 
@@ -97,25 +94,38 @@ namespace ServiceComposer.AspNetCore
 
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
 
-            var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
             var compositionContext = new CompositionContext(requestId, routeData, request);
-            var viewModel = new DynamicViewModel(logger, compositionContext);
 
-            await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
-                .Select(visitor => visitor.Preview(request, viewModel, compositionContext))
-                .ToList());
+
+
+            object viewModel;
+            var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
+            var viewModelFactory = (IViewModelFactory)context.RequestServices.GetService(factoryType);
+            if (viewModelFactory != null)
+            {
+                viewModel = viewModelFactory.CreateViewModel(context, compositionContext);
+            }
+            else
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
+                viewModel = new DynamicViewModel(logger, compositionContext);
+            }
 
             try
             {
                 request.SetViewModel(viewModel);
                 request.SetCompositionContext(compositionContext);
 
-                var handlers = handlerTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
+                await Task.WhenAll(context.RequestServices.GetServices<IViewModelPreviewHandler>()
+                    .Select(visitor => visitor.Preview(request))
+                    .ToList());
+
+                var handlers = componentsTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
                 //TODO: if handlers == none we could shortcut to 404 here
 
                 foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
                 {
-                    subscriber.Subscribe(viewModel);
+                    subscriber.Subscribe(compositionContext);
                 }
 
                 //TODO: if handlers == none we could shortcut again to 404 here

@@ -23,7 +23,7 @@ namespace ServiceComposer.AspNetCore
             MapCompositionHandlers(endpoints, false);
         }
 
-        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be removed in v2.")]
+        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
@@ -171,7 +171,7 @@ namespace ServiceComposer.AspNetCore
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
-                componentsGroup.Select(component => component.ComponentType),
+                componentsGroup.Select(component => component.ComponentType).ToArray(),
                 0)
             {
                 DisplayName = componentsGroup.Key,
@@ -188,14 +188,14 @@ namespace ServiceComposer.AspNetCore
         }
 
         static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(
-            CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensistiveRouteMatching) where TAttribute : HttpMethodAttribute
+            CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching) where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
                     var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
-                    if (template != null && useCaseInsensistiveRouteMatching)
+                    if (template != null && useCaseInsensitiveRouteMatching)
                     {
                         template = template.ToLowerInvariant();
                     }
@@ -218,8 +218,14 @@ namespace ServiceComposer.AspNetCore
             {
                 return componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
             }
+            else if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(componentType))
+            {
+                return componentType.GetMethod(nameof(IEndpointScopedViewModelFactory.CreateViewModel));
+            }
 
-            throw new NotSupportedException($"Component needs to be either {nameof(ICompositionRequestsHandler)} or {nameof(ICompositionEventsSubscriber)}.");
+            var message = $"Component needs to be either {nameof(ICompositionRequestsHandler)}, " +
+                          $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+            throw new NotSupportedException(message);
         }
     }
 }
