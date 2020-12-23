@@ -1,6 +1,6 @@
 name: Run MarkdownSnippets
 on:
-  pull_request:
+  push:
 jobs:
   documentation:
     runs-on: ubuntu-latest
