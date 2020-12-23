@@ -1,4 +1,4 @@
-name: on-push-do-doco
+name: Run MarkdownSnippets
 on:
   pull_request:
 jobs:
