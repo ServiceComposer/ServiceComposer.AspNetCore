@@ -2,8 +2,8 @@ name: on-push-do-doco
 on:
   push:
 jobs:
-  release:
-    runs-on: windows-latest
+  documentation:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Run MarkdownSnippets
@@ -11,6 +11,9 @@ jobs:
         dotnet tool install --global MarkdownSnippets.Tool
         mdsnippets ${GITHUB_WORKSPACE}
         git add .
+      shell: bash
+    - name: Fix links
+      run: find ${GITHUB_WORKSPACE} -name "*.md" -not -name "*.source.md" -type f -exec sed -i '6,$s/\.source\.md/\.md/g' {} \;
       shell: bash
     - name: Push changes
       run: |
