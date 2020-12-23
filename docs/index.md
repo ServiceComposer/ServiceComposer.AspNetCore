@@ -1,4 +1,4 @@
-<img src="/assets/ServiceComposer.png" width="100" />
+<img src="img/logo.png" width="100" />
 
 # ServiceComposer
 
