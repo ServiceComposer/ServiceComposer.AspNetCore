@@ -23,6 +23,10 @@ ViewModel Composition techniques are designed to address all these concerns. Vie
 
 For more details, and the philosophy behind a Composition Gateway, refer to the [ViewModel Composition series](https://milestone.topics.it/categories/view-model-composition) of article available on [milestone.topics.it](https://milestone.topics.it/).
 
+## Tecnical introduction
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/AxWGAiIg7_0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Usage
 
 ServiceComposer is available for the following platforms:
