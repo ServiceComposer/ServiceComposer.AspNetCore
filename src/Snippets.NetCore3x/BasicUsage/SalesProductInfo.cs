@@ -14,6 +14,7 @@ namespace Snippets.NetCore3x.BasicUsage
         {
             var vm = request.GetComposedResponseModel();
 
+            //retrieve product details from the sales database or service
             vm.ProductId = request.HttpContext.GetRouteValue("id").ToString();
             vm.ProductPrice = 100;
 
