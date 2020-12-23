@@ -6,7 +6,7 @@ ServiceComposer is a ViewModel Composition Gateway. For more details, and the ph
 
 ## Documentation
 
-Documentation is available in the [docs](docs) folder
+Documentation is available @ [https://servicecomposer.github.io/ServiceComposer.AspNetCore/](https://servicecomposer.github.io/ServiceComposer.AspNetCore/).
 
 ## Supported platforms
 
