@@ -1,1 +1,1 @@
-exclude: ['/**/*.source.md']
+exclude: ['**/*.source.md']
