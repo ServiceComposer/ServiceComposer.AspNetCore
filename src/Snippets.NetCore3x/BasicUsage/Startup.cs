@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.Configuration
+namespace Snippets.NetCore3x.BasicUsage
 {
     // begin-snippet: net-core-3x-sample-startup
     public class Startup
