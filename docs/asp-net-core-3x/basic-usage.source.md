@@ -26,6 +26,6 @@ snippet: net-core-3x-basic-usage-sales-handler
 - Build and run the web application project
 - Using a browser or a tool like Postman issue an HTTP Get request to `<url-of-the-web-application>/product/1`
 
-The HTTP response should be a json result containing the properties and values defined in the composition handler classes.
+The HTTP response should be a JSON result containing the properties and values defined in the composition handler classes.
 
 NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
