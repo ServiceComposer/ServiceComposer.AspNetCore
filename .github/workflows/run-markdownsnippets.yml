@@ -1,6 +1,6 @@
-name: on-push-do-doco
+name: Run MarkdownSnippets
 on:
-  push:
+  pull_request:
 jobs:
   documentation:
     runs-on: ubuntu-latest
