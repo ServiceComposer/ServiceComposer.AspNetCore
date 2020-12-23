@@ -27,5 +27,7 @@ For more details, and the philosophy behind a Composition Gateway, refer to the 
 
 ServiceComposer is available for the following platforms:
 
-- [ASP.NET Core 2.x](asp-net-core-2x) (.NET Standard 2.0 compatible)
 - [ASP.NET Core 3.x and .NET 5](asp-net-core-3x)
+- [ASP.NET Core 2.x](asp-net-core-2x) (.NET Standard 2.0 compatible)
+
+Note: Support for ASP.NET Core 2.x will be deprecated in version 1.8.0 and removed in 2.0.0.
