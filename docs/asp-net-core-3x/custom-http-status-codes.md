@@ -17,7 +17,7 @@ public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L33-L45' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-custom-status-code' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L22-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-custom-status-code' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.

@@ -23,7 +23,7 @@ public class Startup
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/Configuration/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > NOTE: To use a `Startup` class Generic Host support is required.
@@ -33,25 +33,52 @@ public class Startup
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
 
-<!-- snippet: net-core-3x-sample-handler -->
-<a id='snippet-net-core-3x-sample-handler'></a>
+<!-- snippet: net-core-3x-basic-usage-marketing-handler -->
+<a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
 ```cs
-public class SampleHandler : ICompositionRequestsHandler
+public class MarketingProductInfo: ICompositionRequestsHandler
 {
-    [HttpGet("/sample/{id}")]
+    [HttpGet("/product/{id}")]
     public Task Handle(HttpRequest request)
     {
+        var vm = request.GetComposedResponseModel();
+
+        vm.ProductName = "Sample product";
+        vm.ProductDescription = "This is a sample product";
+        
         return Task.CompletedTask;
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L10-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/BasicUsage/MarketingProductInfo.cs#L8-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-- Make so that the web application project created at the beginning can load the class library assembly, e.g. by adding a reference to the class library project
-- Build and run the web application project
-- Using a browser or a tool like Postman issue an HTTP Get request to `url-of-the-web-application/sampple/1`
+- Add another class library project and define a composition request handler like the following:
 
-The HTTP respinse should be a json result containing the properties and values defined in the composition handler class.
+<!-- snippet: net-core-3x-basic-usage-sales-handler -->
+<a id='snippet-net-core-3x-basic-usage-sales-handler'></a>
+```cs
+public class SalesProductInfo : ICompositionRequestsHandler
+{
+    [HttpGet("/product/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var vm = request.GetComposedResponseModel();
+
+        vm.ProductId = request.HttpContext.GetRouteValue("id").ToString();
+        vm.ProductPrice = 100;
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore3x/BasicUsage/SalesProductInfo.cs#L9-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+- Make so that the web application project created at the beginning can load both class library assembly, e.g. by adding a reference to the class library projects
+- Build and run the web application project
+- Using a browser or a tool like Postman issue an HTTP Get request to `url-of-the-web-application/product/1`
+
+The HTTP response should be a json result containing the properties and values defined in the composition handler classes.
 
 NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
