@@ -15,5 +15,5 @@ public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L21-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-authorization' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/SampleHandler/SampleHandler.cs#L10-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-handler-with-authorization' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
