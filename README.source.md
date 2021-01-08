@@ -19,26 +19,7 @@ To start using ServiceComposer, follow the outlined steps:
 - Create, in an empty or existing solution, a .NET Core 3.x or later empty web application project named `CompositionGateway`.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
 
-<!-- snippet: net-core-3x-sample-startup -->
-<a id='snippet-net-core-3x-sample-startup'></a>
-```cs
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddRouting();
-        services.AddViewModelComposition();
-    }
-
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-    {
-        app.UseRouting();
-        app.UseEndpoints(builder => builder.MapCompositionHandlers());
-    }
-}
-```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-startup' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
+snippet: net-core-3x-sample-startup
 
 > NOTE: To use a `Startup` class, Generic Host support is required.
 
@@ -47,49 +28,11 @@ public class Startup
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
 
-<!-- snippet: net-core-3x-basic-usage-marketing-handler -->
-<a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
-```cs
-public class MarketingProductInfo: ICompositionRequestsHandler
-{
-    [HttpGet("/product/{id}")]
-    public Task Handle(HttpRequest request)
-    {
-        var vm = request.GetComposedResponseModel();
-
-        //retrieve product details from the marketing database or service
-        vm.ProductName = "Sample product";
-        vm.ProductDescription = "This is a sample product";
-        
-        return Task.CompletedTask;
-    }
-}
-```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
+snippet: net-core-3x-basic-usage-marketing-handler
 
 - Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
 
-<!-- snippet: net-core-3x-basic-usage-sales-handler -->
-<a id='snippet-net-core-3x-basic-usage-sales-handler'></a>
-```cs
-public class SalesProductInfo : ICompositionRequestsHandler
-{
-    [HttpGet("/product/{id}")]
-    public Task Handle(HttpRequest request)
-    {
-        var vm = request.GetComposedResponseModel();
-
-        //retrieve product details from the sales database or service
-        vm.ProductId = request.HttpContext.GetRouteValue("id").ToString();
-        vm.ProductPrice = 100;
-
-        return Task.CompletedTask;
-    }
-}
-```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/SalesProductInfo.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
+snippet: net-core-3x-basic-usage-sales-handler
 
 - Make so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
 - Build and run the web application project
