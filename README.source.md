@@ -8,7 +8,7 @@ Designing a UI when the back-end system consists of dozens (or more) of (micro)s
 
 ## Technical introduction
 
-For a technical introduction and an overview of the problem space, refer to the following presentation available on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0):
+For a technical introduction and an overview of the problem space, refer to the following presentation available on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0).
 
 ## Getting Started
 

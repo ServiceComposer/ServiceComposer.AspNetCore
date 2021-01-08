@@ -9,11 +9,11 @@ jobs:
     - name: Run MarkdownSnippets
       run: |
         dotnet tool install --global MarkdownSnippets.Tool
-        mdsnippets ${GITHUB_WORKSPACE} --write-header false
+        mdsnippets ${GITHUB_WORKSPACE}
         git add .
       shell: bash
     - name: Fix links
-      run: find ${GITHUB_WORKSPACE} -name "*.md" -not -name "*.source.md" -type f -exec sed -i 's/\.source\.md/\.md/g' {} \;
+      run: find ${GITHUB_WORKSPACE} -name "*.md" -not -name "*.source.md" -type f -exec sed -i '6,s/\.source\.md/\.md/g' {} \;
       shell: bash
     - name: Push changes
       run: |
