@@ -97,7 +97,7 @@ public class SalesProductInfo : ICompositionRequestsHandler
 
 The HTTP response should be a JSON result containing the properties and values defined in the composition handler classes.
 
-NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
+> NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
 
 ## Supported platforms
 
@@ -106,7 +106,7 @@ ServiceComposer is available for the following platforms:
 - [ASP.NET Core 3.x and .NET 5](docs)
 - [ASP.NET Core 2.x](docs/asp-net-core-2x) (.NET Standard 2.0 compatible)
 
-_Note_: Support for ASP.NET Core 2.x will be deprecated in version 1.8.0 and removed in 2.0.0.
+> Note: Support for ASP.NET Core 2.x will be deprecated in version 1.8.0 and removed in 2.0.0.
 
 ## Philosophy
 
