@@ -46,7 +46,7 @@ NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure r
 
 ServiceComposer is available for the following platforms:
 
-- [ASP.NET Core 3.x and .NET 5](docs/asp-net-core-3x)
+- [ASP.NET Core 3.x and .NET 5](docs)
 - [ASP.NET Core 2.x](docs/asp-net-core-2x) (.NET Standard 2.0 compatible)
 
 _Note_: Support for ASP.NET Core 2.x will be deprecated in version 1.8.0 and removed in 2.0.0.
