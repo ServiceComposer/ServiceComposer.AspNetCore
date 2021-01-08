@@ -10,8 +10,6 @@ Designing a UI when the back-end system consists of dozens (or more) of (micro)s
 
 For a technical introduction and an overview of the problem space, refer to the following presentation available on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0):
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/AxWGAiIg7_0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 ## Usage
 
 ServiceComposer is available for the following platforms:
