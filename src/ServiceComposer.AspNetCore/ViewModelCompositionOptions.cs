@@ -187,7 +187,11 @@ namespace ServiceComposer.AspNetCore
         public AssemblyScanner AssemblyScanner { get; private set; }
 
         public IServiceCollection Services { get; private set; }
-
+        
+#if NETCOREAPP3_1 || NET5_0
+        public ResponseSerializationOptions ResponseSerialization { get; } = new ResponseSerializationOptions();
+#endif
+        
         public void RegisterRequestsHandler<T>() where T: IHandleRequests
         {
             RegisterRouteInterceptor(typeof(T));

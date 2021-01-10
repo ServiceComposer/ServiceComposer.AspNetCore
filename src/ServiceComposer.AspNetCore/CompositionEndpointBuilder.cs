@@ -1,6 +1,7 @@
 ﻿#if NETCOREAPP3_1 || NET5_0
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +18,21 @@ namespace ServiceComposer.AspNetCore
         public RoutePattern RoutePattern { get; set; }
 
         public int Order { get; set; }
+        
+        public ResponseCasing DefaultResponseCasing { get; }
 
-        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order)
+        private readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
+
+        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing)
         {
             Validate(routePattern, componentsTypes);
+            
+            casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerSettings());
+            casingToSettingsMappings.Add(ResponseCasing.CamelCase, new JsonSerializerSettings() {ContractResolver = new CamelCasePropertyNamesContractResolver()});
 
             RoutePattern = routePattern;
             Order = order;
+            DefaultResponseCasing = defaultResponseCasing;
             RequestDelegate = async context =>
             {
                 var viewModel = await CompositionHandler.HandleComposableRequest(context, componentsTypes);
@@ -53,22 +62,25 @@ namespace ServiceComposer.AspNetCore
 
         JsonSerializerSettings GetSettings(HttpContext context)
         {
-            if (!context.Request.Headers.TryGetValue("Accept-Casing", out StringValues casing))
+            ResponseCasing casing = DefaultResponseCasing;
+            if (context.Request.Headers.TryGetValue("Accept-Casing", out var requestedCasing))
             {
-                casing = "casing/camel";
+                switch (requestedCasing)
+                {
+                    case "casing/pascal":
+                        casing = ResponseCasing.PascalCase;
+                        break;
+                    case "casing/camel":
+                        casing = ResponseCasing.CamelCase;
+                        break;
+                    default:
+                        throw new NotSupportedException(
+                            $"Requested casing ({requestedCasing}) is not supported, " +
+                            $"supported values are: 'casing/pascal' or 'casing/camel'.");
+                }
             }
 
-            switch (casing)
-            {
-                case "casing/pascal":
-                    return new JsonSerializerSettings();
-
-                default: // "casing/camel":
-                    return new JsonSerializerSettings()
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
-                    };
-            }
+            return casingToSettingsMappings[casing];
         }
 
         public override Endpoint Build()
