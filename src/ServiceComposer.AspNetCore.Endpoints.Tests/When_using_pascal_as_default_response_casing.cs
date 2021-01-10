@@ -49,7 +49,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
-                        options.ResponseSerialization.UsePascalCasing();
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandlerThatAppendAStringAndRaisesTestEvent>();
                         options.RegisterCompositionHandler<TestGetSubscriberThatAppendAnotherStringWhenTestEventIsRaised>();
@@ -86,7 +86,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
-                        options.ResponseSerialization.UsePascalCasing();
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandlerThatAppendAStringAndRaisesTestEvent>();
                         options.RegisterCompositionHandler<TestGetSubscriberThatAppendAnotherStringWhenTestEventIsRaised>();
