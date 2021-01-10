@@ -144,6 +144,16 @@ namespace ServiceComposer.AspNetCore
             "onContext). Will be treated as an error starting v2 and removed in v3.")]
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
     }
+    public enum ResponseCasing
+    {
+        CamelCase = 0,
+        PascalCase = 1,
+    }
+    public class ResponseSerializationOptions
+    {
+        public ResponseSerializationOptions() { }
+        public ServiceComposer.AspNetCore.ResponseCasing DefaultResponseCasing { get; set; }
+    }
     public static class ServiceCollectionExtensions
     {
         public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
@@ -152,6 +162,7 @@ namespace ServiceComposer.AspNetCore
     public class ViewModelCompositionOptions
     {
         public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
+        public ServiceComposer.AspNetCore.ResponseSerializationOptions ResponseSerialization { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
