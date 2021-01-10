@@ -24,6 +24,7 @@ snippet: view-model-factory-sales-handler
 
 ## Global view model factories
 
+As already mentioned the default ServiceComposer behavior if no endpoint scoped factories are registered is to create a `dynamic` object instance. It's possible to replace this behavior by defining a class the implements the `IViewModelFactory` interface. If an `IViewModelFactory` type is defined it'll be used to create all view models not handled by endpoint scoped factories.
 
 ## Resolution order
 
