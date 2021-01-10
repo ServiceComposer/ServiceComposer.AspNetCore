@@ -26,6 +26,9 @@ public class ProductViewModel
 <!-- endSnippet -->
 
 View models have no requirements other than being serializable. They are POC objects.
+
+## Endpoint scoped view model factories
+
 The second step is to define a factory for the view model. Create a class the implements the `IEndpointScopedViewModelFactory` interface:
 
 <!-- snippet: view-model-factory-product-view-model-factory -->
@@ -72,3 +75,14 @@ public class SalesProductInfo : ICompositionRequestsHandler
 ```
 <sup><a href='/src/Snippets.NetCore3x/ViewModelFactory/SalesProductInfo.cs#L8-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-sales-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+## Global view model factories
+
+
+## Resolution order
+
+View model factories are resolved, and used, in the following order:
+
+1. `IEndpointScopedViewModelFactory`: If an endpoint scoped factory is defined for the current route it'll be used to create a view model instance
+2. `IViewModelFactory`: If no endpoint scoped factory exist bound to the current route and a global view model factory is registered it'll be used
+3. If no global view model factory exist the default ServiceComposer factory creates a `dynamic` view model instance to use to serve the current request
