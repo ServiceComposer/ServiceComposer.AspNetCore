@@ -13,7 +13,7 @@ namespace Snippets.NetCore3x.DefaultCasing
             {
                 options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
             });
-            // end-snippet
         }
+        // end-snippet
     }
 }
