@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
+#pragma warning disable 618
     class DynamicViewModel : DynamicObject, IPublishCompositionEvents, ICompositionEventsPublisher, ICompositionContext
+#pragma warning restore 618
     {
         readonly ILogger<DynamicViewModel> _logger;
         readonly CompositionContext _compositionContext;
@@ -19,7 +21,9 @@ namespace ServiceComposer.AspNetCore
             _compositionContext.CurrentViewModel = this;
         }
 
+#pragma warning disable 618
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
+#pragma warning restore 618
         {
             _compositionContext.Subscribe(handler);
         }

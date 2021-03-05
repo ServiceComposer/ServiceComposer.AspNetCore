@@ -8,13 +8,17 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ServiceComposer.AspNetCore
 {
+#pragma warning disable 618
     class CompositionContext : ICompositionContext, IPublishCompositionEvents, ICompositionEventsPublisher
+#pragma warning restore 618
     {
         readonly RouteData _routeData;
         readonly HttpRequest _httpRequest;
+#pragma warning disable 618
         readonly ConcurrentDictionary<Type, List<EventHandler<object>>> _subscriptions = new();
+#pragma warning restore 618
         readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new();
-        
+
         public CompositionContext(string requestId, RouteData routeData, HttpRequest httpRequest)
         {
             _routeData = routeData;
@@ -24,7 +28,7 @@ namespace ServiceComposer.AspNetCore
 
         //TODO: Remove once old style is dropped
         internal dynamic CurrentViewModel { get; set; }
-        
+
         public string RequestId { get; }
         public Task RaiseEvent(object @event)
         {
@@ -45,7 +49,8 @@ namespace ServiceComposer.AspNetCore
 
             return Task.CompletedTask;
         }
-        
+
+#pragma warning disable 618
         public void Subscribe<TEvent>(EventHandler<TEvent> handler)
         {
             if (!_subscriptions.TryGetValue(typeof(TEvent), out var handlers))
@@ -56,6 +61,7 @@ namespace ServiceComposer.AspNetCore
 
             handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent) @event, routeData, query));
         }
+#pragma warning restore 618
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
         {
@@ -67,11 +73,11 @@ namespace ServiceComposer.AspNetCore
 
             handlers.Add((@event, request) => handler((TEvent) @event, request));
         }
-        
+
         public void CleanupSubscribers()
-        { 
+        {
             _subscriptions.Clear();
             _compositionEventsSubscriptions.Clear();
-        } 
+        }
     }
 }

@@ -53,7 +53,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 vm.AString = content?.SelectToken("AString")?.Value<string>();
             }
         }
-        
+
         class TestStringSubcriber : ICompositionEventsSubscriber
         {
             [HttpPost("/sample/{id}")]
@@ -63,7 +63,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 {
                     var vm = request.GetComposedResponseModel();
                     vm.AValue = @event.AValue;
-                    
+
                     return Task.CompletedTask;
                 });
             }
@@ -86,13 +86,14 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.RegisterCompositionHandler<TestStrinHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.RegisterCompositionHandler<TestStringSubcriber>();
+                        options.EnableWriteSupport();
                     });
                     services.AddRouting();
                 },
                 configure: app =>
                 {
                     app.UseRouting();
-                    app.UseEndpoints(builder => builder.MapCompositionHandlers(enableWriteSupport: true));
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             ).CreateClient();
 
