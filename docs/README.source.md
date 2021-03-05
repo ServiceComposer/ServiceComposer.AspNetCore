@@ -10,3 +10,7 @@ By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically
 ## Response serialization casing
 
 ServiceComposer serializes responses using a JSON serializer. By default responses are serialized using camel casing. Consumers can influence the response casing of a specific request by adding to the request an `Accept-Casing` custom HTTP header. For more information refer to the [response serialization casing](response-serialization-casing.source.md) section.
+
+### Custom JSON response serialization settings
+
+It's possible to customize the [response serialization settings on a case-by-case](custom-json-response-serialization-settings.source.md) by suppliying at configuration time a customization function.

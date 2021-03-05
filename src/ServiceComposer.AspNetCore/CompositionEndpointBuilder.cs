@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
-using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -18,7 +18,7 @@ namespace ServiceComposer.AspNetCore
         public RoutePattern RoutePattern { get; set; }
 
         public int Order { get; set; }
-        
+
         public ResponseCasing DefaultResponseCasing { get; }
 
         private readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
@@ -26,7 +26,7 @@ namespace ServiceComposer.AspNetCore
         public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing)
         {
             Validate(routePattern, componentsTypes);
-            
+
             casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerSettings());
             casingToSettingsMappings.Add(ResponseCasing.CamelCase, new JsonSerializerSettings() {ContractResolver = new CamelCasePropertyNamesContractResolver()});
 
@@ -80,7 +80,23 @@ namespace ServiceComposer.AspNetCore
                 }
             }
 
-            return casingToSettingsMappings[casing];
+            JsonSerializerSettings customSettings = null;
+            var customSettingProvider = context.RequestServices.GetService<Func<HttpRequest, JsonSerializerSettings>>();
+            if (customSettingProvider != null)
+            {
+                customSettings = customSettingProvider(context.Request);
+                if (customSettings != null && casing == ResponseCasing.CamelCase && customSettings.ContractResolver is not CamelCasePropertyNamesContractResolver)
+                {
+                    throw new ArgumentException($"Current HttpRequest is requesting camel case serialization. " +
+                                                $"The supplied custom settings are not using as ContractResolver an " +
+                                                $"instance of {nameof(CamelCasePropertyNamesContractResolver)}. Either " +
+                                                $"configure custom settings to use {nameof(CamelCasePropertyNamesContractResolver)} " +
+                                                $"as contract resolver by setting the property ContractResolver, or change the request " +
+                                                $"casing to be pascal case.");
+                }
+            }
+
+            return customSettings ?? casingToSettingsMappings[casing];
         }
 
         public override Endpoint Build()

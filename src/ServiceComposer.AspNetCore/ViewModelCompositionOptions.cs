@@ -20,6 +20,9 @@ namespace ServiceComposer.AspNetCore
 
             Services.AddSingleton(this);
             Services.AddSingleton(_compositionMetadataRegistry);
+#if NETCOREAPP3_1 || NET5_0
+            ResponseSerialization = new ResponseSerializationOptions(Services);
+#endif
         }
 
         internal Func<Type, bool> TypesFilter { get; set; } = type => true;
@@ -187,11 +190,11 @@ namespace ServiceComposer.AspNetCore
         public AssemblyScanner AssemblyScanner { get; private set; }
 
         public IServiceCollection Services { get; private set; }
-        
+
 #if NETCOREAPP3_1 || NET5_0
-        public ResponseSerializationOptions ResponseSerialization { get; } = new ResponseSerializationOptions();
+        public ResponseSerializationOptions ResponseSerialization { get; }
 #endif
-        
+
         public void RegisterRequestsHandler<T>() where T: IHandleRequests
         {
             RegisterRouteInterceptor(typeof(T));

@@ -151,8 +151,9 @@ namespace ServiceComposer.AspNetCore
     }
     public class ResponseSerializationOptions
     {
-        public ResponseSerializationOptions() { }
+        public ResponseSerializationOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public ServiceComposer.AspNetCore.ResponseCasing DefaultResponseCasing { get; set; }
+        public void UseCustomJsonSerializerSettings(System.Func<Microsoft.AspNetCore.Http.HttpRequest, Newtonsoft.Json.JsonSerializerSettings> jsonSerializerSettingsConfig) { }
     }
     public static class ServiceCollectionExtensions
     {
