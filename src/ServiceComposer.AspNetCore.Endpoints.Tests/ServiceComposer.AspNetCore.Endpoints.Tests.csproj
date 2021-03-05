@@ -5,6 +5,10 @@
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ServiceComposer.AspNetCore\ServiceComposer.AspNetCore.csproj" />
     <ProjectReference Include="..\TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj" />

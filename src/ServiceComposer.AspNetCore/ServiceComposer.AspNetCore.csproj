@@ -19,6 +19,10 @@
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
    <ItemGroup>
     <None Include="..\..\assets\ServiceComposer.png" Pack="true" PackagePath="\" />
   </ItemGroup>
