@@ -18,6 +18,11 @@ namespace ServiceComposer.AspNetCore
             routes["post"] = compositionOverControllerPostComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerPostComponents));
         }
 
+        public void AddPatchComponentsSource(Dictionary<string, Type[]> compositionOverControllerPatchComponents)
+        {
+            routes["patch"] = compositionOverControllerPatchComponents ?? throw new ArgumentNullException(nameof(compositionOverControllerPatchComponents));
+        }
+
         public Type[] HandlersForRoute(string routePatternRawText, string requestMethod)
         {
             var results = empty;

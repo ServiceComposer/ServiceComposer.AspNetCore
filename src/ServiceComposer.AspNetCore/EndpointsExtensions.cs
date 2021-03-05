@@ -17,6 +17,7 @@ namespace ServiceComposer.AspNetCore
     {
         static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
         static Dictionary<string, Type[]> compositionOverControllerPostComponents = new Dictionary<string, Type[]>();
+        static Dictionary<string, Type[]> compositionOverControllerPatchComponents = new Dictionary<string, Type[]>();
 
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
@@ -39,6 +40,7 @@ namespace ServiceComposer.AspNetCore
                 var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
                 compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
                 compositionOverControllersRoutes.AddPostComponentsSource(compositionOverControllerPostComponents);
+                compositionOverControllersRoutes.AddPatchComponentsSource(compositionOverControllerPatchComponents);
             }
 
             var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
@@ -119,9 +121,17 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing);
-
-                AppendToDataSource(dataSources, builder);
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources,
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
+                {
+                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
+                    compositionOverControllerPatchComponents[componentsGroup.Key] = componentTypes;
+                }
+                else
+                {
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing);
+                    AppendToDataSource(dataSources, builder);
+                }
             }
         }
 
