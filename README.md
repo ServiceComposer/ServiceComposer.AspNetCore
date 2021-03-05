@@ -13,6 +13,15 @@ ServiceComposer is a ViewModel Composition Gateway.
 
 Designing a UI when the back-end system consists of dozens (or more) of (micro)services is challenging. We have separation and autonomy on the back end, but this all needs to come back together on the front-end. ViewModel Composition stops it from turning into a mess of spaghetti code and prevents simple actions from causing an inefficient torrent of web requests.
 
+<!-- toc -->
+## Contents
+
+  * [Technical introduction](#technical-introduction)
+  * [Getting Started](#getting-started)
+  * [Documentation and supported platforms](#documentation-and-supported-platforms)
+  * [Philosophy](#philosophy)
+    * [Service boundaries](#service-boundaries)<!-- endToc -->
+
 ## Technical introduction
 
 For a technical introduction and an overview of the problem space, refer to the following presentation available on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0).
