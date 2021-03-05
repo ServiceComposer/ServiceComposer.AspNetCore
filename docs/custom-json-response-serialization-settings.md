@@ -7,6 +7,8 @@ To change this file edit the source file and then run MarkdownSnippets.
 
 # Custom JSON response serialization settings
 
+Supported in: v1.8.0
+
 By default each response is serialized using [Json.Net](https://www.newtonsoft.com/json/help/html/Introduction.htm) and serialization settings (`JsonSerializerSettings`) are determined by the [requested response casing](response-serialization-casing.md). If the requested casing is camel casing, the default, the folowing serialization settings are applied to the response:
 
 <!-- snippet: net-core-3x-camel-serialization-settings -->
