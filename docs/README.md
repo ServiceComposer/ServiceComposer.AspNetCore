@@ -7,7 +7,7 @@ ServiceComposer can be added to existing or new ASP.NET Core projects, or it can
 
 If resources are shared across more than one handler they must be [thread-safe](thread-safety.md).
 
-## ASP.Net Model Binding
+[Upgrade guides](upgrade-guides) are available to easy the migration from one version to another when needed.
 
 When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.
 
