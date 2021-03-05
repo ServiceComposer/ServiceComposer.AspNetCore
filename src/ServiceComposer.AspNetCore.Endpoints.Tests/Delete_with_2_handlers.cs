@@ -20,7 +20,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             {
                 var vm = request.GetComposedResponseModel();
                 vm.ANumber = expectedNumber;
-                
+
                 return Task.CompletedTask;
             }
         }
@@ -32,7 +32,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             {
                 var vm = request.GetComposedResponseModel();
                 vm.AString = expectedString;
-                
+
                 return Task.CompletedTask;
             }
         }
@@ -50,13 +50,14 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestStrinHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
+                        options.EnableWriteSupport();
                     });
                     services.AddRouting();
                 },
                 configure: app =>
                 {
                     app.UseRouting();
-                    app.UseEndpoints(builder => builder.MapCompositionHandlers(enableWriteSupport: true));
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             ).CreateClient();
 

@@ -20,7 +20,9 @@ namespace ServiceComposer.AspNetCore
 
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
+#pragma warning disable 618
             MapCompositionHandlers(endpoints, false);
+#pragma warning restore 618
         }
 
         [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
@@ -49,12 +51,12 @@ namespace ServiceComposer.AspNetCore
             if (enableWriteSupport || options.IsWriteSupportEnabled)
             {
                 MapPostComponents(
-                    compositionMetadataRegistry, 
+                    compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing);
                 MapPutComponents(
-                    compositionMetadataRegistry, 
+                    compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing);

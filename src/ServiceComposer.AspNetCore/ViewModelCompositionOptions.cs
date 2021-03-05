@@ -88,7 +88,9 @@ namespace ServiceComposer.AspNetCore
                         var typeInfo = type.GetTypeInfo();
                         return !typeInfo.IsInterface
                             && !typeInfo.IsAbstract
+#pragma warning disable 618
                             && typeof(IInterceptRoutes).IsAssignableFrom(type);
+#pragma warning restore 618
                     },
                     registrationHandler: types =>
                     {
@@ -195,12 +197,16 @@ namespace ServiceComposer.AspNetCore
         public ResponseSerializationOptions ResponseSerialization { get; }
 #endif
 
+#pragma warning disable 618
         public void RegisterRequestsHandler<T>() where T: IHandleRequests
+#pragma warning restore 618
         {
             RegisterRouteInterceptor(typeof(T));
         }
 
+#pragma warning disable 618
         public void RegisterCompositionEventsSubscriber<T>() where T : ISubscribeToCompositionEvents
+#pragma warning restore 618
         {
             RegisterRouteInterceptor(typeof(T));
         }
@@ -304,7 +310,9 @@ namespace ServiceComposer.AspNetCore
             }
             else
             {
+#pragma warning disable 618
                 Services.AddTransient(typeof(IInterceptRoutes), type);
+#pragma warning restore 618
             }
         }
     }

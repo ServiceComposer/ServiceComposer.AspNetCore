@@ -23,18 +23,24 @@ namespace ServiceComposer.AspNetCore
 
             try
             {
+#pragma warning disable 618
                 var interceptors = context.RequestServices.GetServices<IInterceptRoutes>()
+#pragma warning restore 618
                     .Where(a => a.Matches(routeData, request.Method, request))
                     .ToArray();
 
+#pragma warning disable 618
                 foreach (var subscriber in interceptors.OfType<ISubscribeToCompositionEvents>())
+#pragma warning restore 618
                 {
                     subscriber.Subscribe(viewModel);
                 }
 
                 var pending = new List<Task>();
 
+#pragma warning disable 618
                 foreach (var handler in interceptors.OfType<IHandleRequests>())
+#pragma warning restore 618
                 {
                     pending.Add
                     (
@@ -56,7 +62,9 @@ namespace ServiceComposer.AspNetCore
                     }
                     catch (Exception ex)
                     {
+#pragma warning disable 618
                         var errorHandlers = interceptors.OfType<IHandleRequestsErrors>();
+#pragma warning restore 618
                         if (errorHandlers.Any())
                         {
                             foreach (var handler in errorHandlers)
@@ -85,14 +93,20 @@ namespace ServiceComposer.AspNetCore
             var request = context.Request;
             var routeData = context.GetRouteData();
 
+#pragma warning disable 618
             var requestId = request.Headers.GetComposedRequestIdHeaderOr(() =>
+#pragma warning restore 618
             {
                 var id = Guid.NewGuid().ToString();
+#pragma warning disable 618
                 context.Request.Headers.AddComposedRequestIdHeader(id);
+#pragma warning restore 618
                 return id;
             });
 
+#pragma warning disable 618
             context.Response.Headers.AddComposedRequestIdHeader(requestId);
+#pragma warning restore 618
 
             var compositionContext = new CompositionContext(requestId, routeData, request);
 
