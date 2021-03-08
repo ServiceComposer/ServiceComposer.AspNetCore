@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -14,6 +16,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
@@ -26,74 +29,53 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         {
             private readonly IModelBinderFactory modelBinderFactory;
             IModelMetadataProvider modelMetadataProvider;
-            private IOptions<JsonOptions> jsonOptions;
+            private IOptions<MvcOptions> mvcOptions;
 
             public TestIntegerHandler(IModelBinderFactory modelBinderFactory,
-                IModelMetadataProvider modelMetadataProvider, IOptions<JsonOptions> jsonOptions)
+                IModelMetadataProvider modelMetadataProvider, IOptions<MvcOptions> mvcOptions)
             {
                 this.modelBinderFactory = modelBinderFactory;
                 this.modelMetadataProvider = modelMetadataProvider;
-                this.jsonOptions = jsonOptions;
+                this.mvcOptions = mvcOptions;
             }
 
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await Bind<IntegerRequestModel>(request.HttpContext);
-                
+                var model = await Bind<RequestWrapper>(request.HttpContext);
+
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = model.ANumber; 
+                vm.ANumber = model.Body.ANumber;
             }
 
             async Task<T> Bind<T>(HttpContext context)
             {
-                var routeProvider = new RouteValueProvider(BindingSource.Path, context.Request.RouteValues);
-                var queryProvider = new QueryStringValueProvider(BindingSource.Query, context.Request.Query,
-                    CultureInfo.InvariantCulture);
-                var compositeValueProvider = new CompositeValueProvider
-                {
-                    routeProvider,
-                    queryProvider
-                };
-                IValueProvider formProvider = null;
-                
-                if (context.Request.HasFormContentType)
-                {
-                    formProvider = new FormValueProvider(BindingSource.Form, context.Request.Form,
-                        CultureInfo.CurrentCulture);
-                    ;
-                    compositeValueProvider.Add(formProvider);
-                }
-                else
-                {
-                    var request = context.Request;
-                    request.Body.Position = 0;
-                    using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-                    var body = await reader.ReadToEndAsync();
-                    var content = JObject.Parse(body);
-                    compositeValueProvider.Add(new JsonBodyValueProvider(content));
-                }
-                
-                var modelMetadata = modelMetadataProvider.GetMetadataForType(typeof(T));
-            
-                // .NET 5 only
-                // if (modelMetadata.BoundConstructor != null)
-                // {
-                //     throw new NotSupportedException("Record type not supported");
-                // }
-            
+                var modelType = typeof(T);
                 var modelState = new ModelStateDictionary();
-            
+                var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
+                var actionDescriptor = new ActionDescriptor();
+                var actionContext = new ActionContext(context, context.GetRouteData(), actionDescriptor, modelState);
+                var valueProvider = await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
+
+#if NET5_0
+
+                if (modelMetadata.BoundConstructor != null)
+                {
+                    throw new NotSupportedException("Record type not supported");
+                }
+
+                #endif
+
                 var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
-                    new ActionContext(context, context.GetRouteData(), new ActionDescriptor(), modelState),
-                    compositeValueProvider,
+                    actionContext,
+                    valueProvider,
                     modelMetadata,
                     bindingInfo: null,
                     modelName: "");
-            
-                modelBindingContext.Model = Activator.CreateInstance(typeof(T));
+
+                modelBindingContext.Model = Activator.CreateInstance(modelType);
                 modelBindingContext.PropertyFilter = _ => true; // All props
-            
+
                 var factoryContext = new ModelBinderFactoryContext()
                 {
                     Metadata = modelMetadata,
@@ -104,16 +86,13 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         BindingSource = modelMetadata.BindingSource,
                         PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
                     },
-            
-                    // We're using the model metadata as the cache token here so that TryUpdateModelAsync calls
-                    // for the same model type can share a binder. This won't overlap with normal model binding
-                    // operations because they use the ParameterDescriptor for the token.
                     CacheToken = modelMetadata,
                 };
-                var binder = modelBinderFactory.CreateBinder(factoryContext);
-            
-                await binder.BindModelAsync(modelBindingContext);
-            
+
+                await modelBinderFactory
+                    .CreateBinder(factoryContext)
+                    .BindModelAsync(modelBindingContext);
+
                 return (T)modelBindingContext.Result.Model;
             }
         }
@@ -199,7 +178,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public ValueProviderResult GetValue(string key)
         {
             var token = jObject.SelectToken(key);
-            
+
             return new ValueProviderResult(token.ToString());
         }
     }
@@ -208,6 +187,12 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     {
         public string AString { get; set; }
         public int ANumber { get; set; }
+    }
+
+    class RequestWrapper
+    {
+        [FromBody]
+        public RequestModel Body { get; set; }
     }
 
     class IntegerRequestModel
