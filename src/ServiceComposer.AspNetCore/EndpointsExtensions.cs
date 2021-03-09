@@ -47,33 +47,38 @@ namespace ServiceComposer.AspNetCore
                 compositionMetadataRegistry,
                 endpoints.DataSources,
                 options.CompositionOverControllersOptions,
-                options.ResponseSerialization.DefaultResponseCasing);
+                options.ResponseSerialization.DefaultResponseCasing,
+                options.ResponseSerialization.UseOutputFormatters);
             if (enableWriteSupport || options.IsWriteSupportEnabled)
             {
                 MapPostComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
-                    options.ResponseSerialization.DefaultResponseCasing);
+                    options.ResponseSerialization.DefaultResponseCasing,
+                    options.ResponseSerialization.UseOutputFormatters);
                 MapPutComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
-                    options.ResponseSerialization.DefaultResponseCasing);
+                    options.ResponseSerialization.DefaultResponseCasing,
+                    options.ResponseSerialization.UseOutputFormatters);
                 MapPatchComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
-                    options.ResponseSerialization.DefaultResponseCasing);
+                    options.ResponseSerialization.DefaultResponseCasing,
+                    options.ResponseSerialization.UseOutputFormatters);
                 MapDeleteComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
-                    options.ResponseSerialization.DefaultResponseCasing);
+                    options.ResponseSerialization.DefaultResponseCasing,
+                    options.ResponseSerialization.UseOutputFormatters);
             }
         }
 
-        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing)
+        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
@@ -87,13 +92,13 @@ namespace ServiceComposer.AspNetCore
                 }
                 else
                 {
-                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing);
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters);
                     AppendToDataSource(dataSources, builder);
                 }
             }
         }
 
-        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing)
+        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
@@ -107,43 +112,43 @@ namespace ServiceComposer.AspNetCore
                 }
                 else
                 {
-                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing);
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters);
                     AppendToDataSource(dataSources, builder);
                 }
             }
         }
 
-        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing)
+        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
         }
 
-        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing)
+        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
         }
 
-        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing)
+        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
@@ -189,13 +194,17 @@ namespace ServiceComposer.AspNetCore
         }
 
         private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
-            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, HttpMethodMetadata methodMetadata, ResponseCasing defaultCasing)
+            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
+            HttpMethodMetadata methodMetadata,
+            ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
                 componentsGroup.Select(component => component.ComponentType).ToArray(),
                 0,
-                defaultCasing)
+                defaultCasing,
+                useOutputFormatters)
             {
                 DisplayName = componentsGroup.Key,
             };

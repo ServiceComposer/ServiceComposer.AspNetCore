@@ -2,12 +2,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Mime;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -15,16 +23,18 @@ namespace ServiceComposer.AspNetCore
 {
     class CompositionEndpointBuilder : EndpointBuilder
     {
+        private readonly bool useOutputFormatters;
+        private readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
+
         public RoutePattern RoutePattern { get; set; }
 
         public int Order { get; set; }
 
         public ResponseCasing DefaultResponseCasing { get; }
 
-        private readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
-
-        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing)
+        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing, bool useOutputFormatters)
         {
+            this.useOutputFormatters = useOutputFormatters;
             Validate(routePattern, componentsTypes);
 
             casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerSettings());
@@ -38,9 +48,58 @@ namespace ServiceComposer.AspNetCore
                 var viewModel = await CompositionHandler.HandleComposableRequest(context, componentsTypes);
                 if (viewModel != null)
                 {
-                    var json = (string) JsonConvert.SerializeObject(viewModel, GetSettings(context));
-                    context.Response.ContentType = "application/json; charset=utf-8";
-                    await context.Response.WriteAsync(json);
+                    if (useOutputFormatters)
+                    {
+                        OutputFormatterSelector formatterSelector;
+                        IHttpResponseStreamWriterFactory writerFactory;
+                        IOptions<MvcOptions> options;
+                        try
+                        {
+                            formatterSelector = context.RequestServices.GetRequiredService<OutputFormatterSelector>();
+                            writerFactory = context.RequestServices.GetRequiredService<IHttpResponseStreamWriterFactory>();
+                            options = context.RequestServices.GetRequiredService<IOptions<MvcOptions>>();
+                        }
+                        catch (InvalidOperationException e)
+                        {
+                            throw new InvalidOperationException("Unable to resolve one of the services required to support output formatting. " +
+                                                                "Make sure the application is configured to use MVC services by calling either " +
+                                                                $"services.{nameof(MvcServiceCollectionExtensions.AddControllers)}(), or " +
+                                                                $"services.{nameof(MvcServiceCollectionExtensions.AddControllersWithViews)}(), or " +
+                                                                $"services.{nameof(MvcServiceCollectionExtensions.AddMvc)}(), or " +
+                                                                $"services.{nameof(MvcServiceCollectionExtensions.AddRazorPages)}().", e);
+                        }
+
+                        var outputFormatterWriteContext = new OutputFormatterWriteContext(context, writerFactory.CreateWriter, viewModel.GetType(), viewModel);
+
+                        if (!context.Request.Headers.TryGetValue(HeaderNames.Accept, out var accept))
+                        {
+                            accept = MediaTypeNames.Application.Json;
+                        }
+
+                        var mediaTypes = new MediaTypeCollection
+                        {
+                            accept
+                        };
+
+                        //TODO: log list of configured formatters
+                        var selectedFormatter = formatterSelector.SelectFormatter(
+                            outputFormatterWriteContext,
+                            options.Value.OutputFormatters, mediaTypes);
+                        if (selectedFormatter == null)
+                        {
+                            //TODO: log
+                            context.Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                            return;
+                        }
+
+                        await selectedFormatter.WriteAsync(outputFormatterWriteContext);
+                    }
+                    else
+                    {
+                        var json = (string) JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                        context.Response.ContentType = "application/json; charset=utf-8";
+                        await context.Response.WriteAsync(json);
+                    }
                 }
                 else
                 {
