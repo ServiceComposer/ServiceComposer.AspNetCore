@@ -70,6 +70,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
+                    //TODO: this need to be moved into something like options.EnableModelBinding();
                     services.AddSingleton<Binder>();
                     
                     services.AddViewModelComposition(options =>
@@ -80,6 +81,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.EnableWriteSupport();
                     });
                     services.AddRouting();
+                    
+                    //TODO: this is a requirement when using model binding. How to enforce it?
                     services.AddControllers();
                 },
                 configure: app =>
