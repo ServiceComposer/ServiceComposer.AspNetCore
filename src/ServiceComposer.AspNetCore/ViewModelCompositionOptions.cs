@@ -78,6 +78,8 @@ namespace ServiceComposer.AspNetCore
                     options.Filters.Add(typeof(CompositionOverControllersActionFilter));
                 });
             }
+
+            Services.AddSingleton<RequestModelBinder>();
 #endif
 
             if (AssemblyScanner.IsEnabled)
