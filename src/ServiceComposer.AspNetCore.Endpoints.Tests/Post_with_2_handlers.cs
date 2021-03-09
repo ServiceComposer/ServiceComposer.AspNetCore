@@ -155,7 +155,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task<T> Bind<T>(HttpRequest request) where T : new()
         {
             //always rewind the stream; otherwise,
-            //if multiple handler concurrently bind
+            //if multiple handlers concurrently bind
             //different models only the first one succeeds
             request.Body.Position = 0;
 
