@@ -124,6 +124,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
+                    services.AddSingleton<Binder>();
+                    
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
