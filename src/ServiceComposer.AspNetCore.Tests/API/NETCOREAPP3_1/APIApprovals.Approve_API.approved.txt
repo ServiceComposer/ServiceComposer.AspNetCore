@@ -70,6 +70,11 @@ namespace ServiceComposer.AspNetCore
             where T :  class { }
         public static ServiceComposer.AspNetCore.ICompositionContext GetCompositionContext(this Microsoft.AspNetCore.Http.HttpRequest request) { }
     }
+    public static class HttpRequestModelBinderExtension
+    {
+        public static System.Threading.Tasks.Task<T> Bind<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
+            where T : new() { }
+    }
     public interface ICompositionContext
     {
         string RequestId { get; }
