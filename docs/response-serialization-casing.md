@@ -11,6 +11,8 @@ ServiceComposer serializes responses using a JSON serializer. By default respons
 
 ## Default response serialization casing
 
+_Available starting with v1.8.0_
+
 Default response serialization is camel casing. It's possible to configure a different default response serialization casing when configuring ServiceComposer:
 
 <!-- snippet: net-core-3x-default-casing -->
