@@ -12,6 +12,8 @@ categories:
     labels:
       - 'dependencies'
       - 'maintenance'
+exclude-labels:
+  - 'skip-changelog'
 template: |
   ## What’s Changed
 
