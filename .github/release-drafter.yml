@@ -8,7 +8,7 @@ categories:
       - 'fix'
       - 'bugfix'
       - 'bug'
-  - title: 'Maintenance & Dependencies'
+  - title: '🧰 Maintenance & Dependencies'
     labels:
       - 'dependencies'
       - 'maintenance'
