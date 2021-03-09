@@ -27,89 +27,40 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     {
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            private readonly IModelBinderFactory modelBinderFactory;
-            IModelMetadataProvider modelMetadataProvider;
-            private IOptions<MvcOptions> mvcOptions;
-
-            public TestIntegerHandler(IModelBinderFactory modelBinderFactory,
-                IModelMetadataProvider modelMetadataProvider, IOptions<MvcOptions> mvcOptions)
+            Binder binder;
+            
+            public TestIntegerHandler(Binder binder)
             {
-                this.modelBinderFactory = modelBinderFactory;
-                this.modelMetadataProvider = modelMetadataProvider;
-                this.mvcOptions = mvcOptions;
+                this.binder = binder;
             }
 
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await Bind<RequestWrapper>(request.HttpContext);
+                var model = await binder.Bind<IntegerRequest>(request);
 
                 var vm = request.GetComposedResponseModel();
                 vm.ANumber = model.Body.ANumber;
-            }
-
-            async Task<T> Bind<T>(HttpContext context)
-            {
-                var modelType = typeof(T);
-                var modelState = new ModelStateDictionary();
-                var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
-                var actionDescriptor = new ActionDescriptor();
-                var actionContext = new ActionContext(context, context.GetRouteData(), actionDescriptor, modelState);
-                var valueProvider = await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
-
-#if NET5_0
-
-                if (modelMetadata.BoundConstructor != null)
-                {
-                    throw new NotSupportedException("Record type not supported");
-                }
-
-                #endif
-
-                var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
-                    actionContext,
-                    valueProvider,
-                    modelMetadata,
-                    bindingInfo: null,
-                    modelName: "");
-
-                modelBindingContext.Model = Activator.CreateInstance(modelType);
-                modelBindingContext.PropertyFilter = _ => true; // All props
-
-                var factoryContext = new ModelBinderFactoryContext()
-                {
-                    Metadata = modelMetadata,
-                    BindingInfo = new BindingInfo()
-                    {
-                        BinderModelName = modelMetadata.BinderModelName,
-                        BinderType = modelMetadata.BinderType,
-                        BindingSource = modelMetadata.BindingSource,
-                        PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
-                    },
-                    CacheToken = modelMetadata,
-                };
-
-                await modelBinderFactory
-                    .CreateBinder(factoryContext)
-                    .BindModelAsync(modelBindingContext);
-
-                return (T)modelBindingContext.Result.Model;
             }
         }
 
 
         class TestStrinHandler : ICompositionRequestsHandler
         {
+            Binder binder;
+
+            public TestStrinHandler(Binder binder)
+            {
+                this.binder = binder;
+            }
+            
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                request.Body.Position = 0;
-                using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-                var body = await reader.ReadToEndAsync();
-                var content = JObject.Parse(body);
+                var model = await binder.Bind<StringRequest>(request);
 
                 var vm = request.GetComposedResponseModel();
-                vm.AString = content?.SelectToken("AString")?.Value<string>();
+                vm.AString = model.Body.AString;
             }
         }
 
