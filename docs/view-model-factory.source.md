@@ -1,5 +1,7 @@
 # Strongly typed view models
 
+_Available starting with v1.8.0_
+
 By default ServiceComposer uses C# `dynamic` object instances to serve view models to requests handler, when the `SalesProductInfo` handler, used in the getting started sample, requires the view model, the call to `GetComposedResponseModel()` returns a `dynamic` instance.
 
 The first step to use strongly typed view models is to define the view model class:
