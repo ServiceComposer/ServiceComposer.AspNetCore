@@ -1,4 +1,9 @@
 name: Release Drafter
+on:
+  push:
+    branches:
+      - master
+      - release-*
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
