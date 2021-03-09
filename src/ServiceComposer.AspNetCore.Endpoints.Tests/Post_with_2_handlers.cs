@@ -134,7 +134,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.EnableWriteSupport();
                     });
                     services.AddRouting();
-                    services.AddControllers(options => { });
+                    services.AddControllers();
                 },
                 configure: app =>
                 {
