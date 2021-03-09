@@ -8,9 +8,10 @@ categories:
       - 'fix'
       - 'bugfix'
       - 'bug'
-  - title: 'Dependencies'
+  - title: 'Maintenance & Dependencies'
     labels:
       - 'dependencies'
+      - 'maintenance'
 template: |
   ## What’s Changed
 
