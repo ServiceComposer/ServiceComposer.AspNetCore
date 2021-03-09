@@ -144,10 +144,11 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             ).CreateClient();
 
             client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal");
-            var model = new RequestModel();
-            model.AString = expectedString;
-            model.ANumber = expectedNumber;
-            var json = (string) JsonConvert.SerializeObject(model);
+            var json = JsonConvert.SerializeObject(new ClientRequestModel
+            {
+                AString = expectedString,
+                ANumber = expectedNumber
+            });
             var stringContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
             stringContent.Headers.ContentLength = json.Length;
 
