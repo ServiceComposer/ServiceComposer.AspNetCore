@@ -22,17 +22,10 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     {
         class TestIntegerHandler : ICompositionRequestsHandler
         {
-            Binder binder;
-            
-            public TestIntegerHandler(Binder binder)
-            {
-                this.binder = binder;
-            }
-
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await binder.Bind<IntegerRequest>(request);
+                var model = await request.Bind<IntegerRequest>();
 
                 var vm = request.GetComposedResponseModel();
                 vm.ANumber = model.Body.ANumber;
@@ -40,19 +33,12 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         }
 
 
-        class TestStrinHandler : ICompositionRequestsHandler
+        class TestStringHandler : ICompositionRequestsHandler
         {
-            Binder binder;
-
-            public TestStrinHandler(Binder binder)
-            {
-                this.binder = binder;
-            }
-            
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await binder.Bind<StringRequest>(request);
+                var model = await request.Bind<StringRequest>();
 
                 var vm = request.GetComposedResponseModel();
                 vm.AString = model.Body.AString;
@@ -72,16 +58,16 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 {
                     //TODO: this need to be moved into something like options.EnableModelBinding();
                     services.AddSingleton<Binder>();
-                    
+
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.EnableWriteSupport();
                     });
                     services.AddRouting();
-                    
+
                     //TODO: this is a requirement when using model binding. How to enforce it?
                     services.AddControllers();
                 },
@@ -137,6 +123,30 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     class StringModel
     {
         public string AString { get; set; }
+    }
+
+    static class BinderRequestExtension
+    {
+        public static Task<T> Bind<T>(this HttpRequest request) where T : new()
+        {
+            var context = request.HttpContext;
+            Binder binder;
+            try
+            {
+                binder = context.RequestServices.GetRequiredService<Binder>();
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new InvalidOperationException("Unable to resolve one of the services required to support model binding. " +
+                                                    "Make sure the application is configured to use MVC services by calling either " +
+                                                    $"services.{nameof(MvcServiceCollectionExtensions.AddControllers)}(), or " +
+                                                    $"services.{nameof(MvcServiceCollectionExtensions.AddControllersWithViews)}(), or " +
+                                                    $"services.{nameof(MvcServiceCollectionExtensions.AddMvc)}(), or " +
+                                                    $"services.{nameof(MvcServiceCollectionExtensions.AddRazorPages)}().", e);
+            }
+
+            return binder.Bind<T>(request);
+        }
     }
 
     class Binder
