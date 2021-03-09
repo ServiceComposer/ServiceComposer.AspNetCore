@@ -161,46 +161,28 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         }
     }
 
-    internal class JsonBodyValueProvider : IValueProvider
-    {
-        private readonly JObject jObject;
-
-        public JsonBodyValueProvider(JObject jObject)
-        {
-            this.jObject = jObject;
-        }
-
-        public bool ContainsPrefix(string prefix)
-        {
-            return false;
-        }
-
-        public ValueProviderResult GetValue(string key)
-        {
-            var token = jObject.SelectToken(key);
-
-            return new ValueProviderResult(token.ToString());
-        }
-    }
-
-    class RequestModel
+    class ClientRequestModel
     {
         public string AString { get; set; }
         public int ANumber { get; set; }
     }
 
-    class RequestWrapper
+    class IntegerRequest
     {
-        [FromBody]
-        public RequestModel Body { get; set; }
+        [FromBody] public IntegerModel Body { get; set; }
     }
 
-    class IntegerRequestModel
+    class StringRequest
+    {
+        [FromBody] public StringModel Body { get; set; }
+    }
+
+    class IntegerModel
     {
         public int ANumber { get; set; }
     }
 
-    class StringRequestModel
+    class StringModel
     {
         public string AString { get; set; }
     }
