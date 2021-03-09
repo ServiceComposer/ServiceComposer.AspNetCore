@@ -48,8 +48,11 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStrinHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();
+                    services.AddControllers()
+                        .AddNewtonsoftJson();
                 },
                 configure: app =>
                 {

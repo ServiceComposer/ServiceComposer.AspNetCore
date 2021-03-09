@@ -21,6 +21,15 @@ namespace ServiceComposer.AspNetCore
         {
             services.AddSingleton(jsonSerializerSettingsConfig);
         }
+
+        /// <summary>
+        /// Configures ServiceComposer to use the MVC defined output formatters.
+        /// To use output formatters MVC service must be configured either by calling
+        /// services.AddControllers(), or services.AddControllersAndViews(), or
+        /// services.AddMvc(), or services.AddAddRazorPages().
+        /// Default value if <c>false</c>.
+        /// </summary>
+        public bool UseOutputFormatters { get; set; }
     }
 
     public enum ResponseCasing
