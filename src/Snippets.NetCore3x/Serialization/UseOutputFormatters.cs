@@ -16,4 +16,19 @@ namespace Snippets.NetCore3x.Serialization
         }
         // end-snippet
     }
+
+    public class UseNewtonsoftOutputFormatter
+    {
+        // begin-snippet: net-core-3x-use-newtonsoft-output-formatters
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddViewModelComposition(options =>
+            {
+                options.ResponseSerialization.UseOutputFormatters = true;
+            });
+            services.AddControllers()
+                .AddNewtonsoftJson();
+        }
+        // end-snippet
+    }
 }
