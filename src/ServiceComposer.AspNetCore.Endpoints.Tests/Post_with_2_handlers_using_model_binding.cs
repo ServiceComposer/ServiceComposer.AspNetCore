@@ -13,22 +13,12 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
-    public class Post_with_2_handlers_using_model_binding
+    public partial class Post_with_2_handlers_using_model_binding
     {
         class ClientRequestModel
         {
             public string AString { get; set; }
             public int ANumber { get; set; }
-        }
-
-        class IntegerRequest
-        {
-            [FromBody] public IntegerModel Body { get; set; }
-        }
-
-        class StringRequest
-        {
-            [FromBody] public StringModel Body { get; set; }
         }
 
         class IntegerModel
@@ -46,7 +36,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await request.Bind<IntegerRequest>();
+                var model = await request.Bind<BodyRequest<IntegerModel>>();
 
                 var vm = request.GetComposedResponseModel();
                 vm.ANumber = model.Body.ANumber;
@@ -59,7 +49,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)
             {
-                var model = await request.Bind<StringRequest>();
+                var model = await request.Bind<BodyRequest<StringModel>>();
 
                 var vm = request.GetComposedResponseModel();
                 vm.AString = model.Body.AString;
