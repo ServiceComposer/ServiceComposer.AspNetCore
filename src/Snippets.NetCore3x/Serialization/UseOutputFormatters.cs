@@ -14,7 +14,6 @@ namespace Snippets.NetCore3x.Serialization
             });
             services.AddControllers();
         }
-
         // end-snippet
     }
 }
