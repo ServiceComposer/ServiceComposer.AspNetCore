@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -34,6 +35,8 @@ namespace ServiceComposer.AspNetCore
             }
 
             var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
+            options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider.GetRequiredService<ILogger<ResponseSerializationOptions>>());
+
             if (options.CompositionOverControllersOptions.IsEnabled)
             {
                 var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
