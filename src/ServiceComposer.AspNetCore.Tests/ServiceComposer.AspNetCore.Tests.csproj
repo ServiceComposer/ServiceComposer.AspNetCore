@@ -48,11 +48,6 @@
       <ParentFile>APIApprovals</ParentFile>
       <DependentUpon>APIApprovals.cs</DependentUpon>
     </None>
-    <None Update="API\NET5_0\APIApprovals.Approve_API.approved.txt.orig">
-      <ParentExtension>.cs</ParentExtension>
-      <ParentFile>APIApprovals</ParentFile>
-      <DependentUpon>APIApprovals.cs</DependentUpon>
-    </None>
   </ItemGroup>
 
 </Project>

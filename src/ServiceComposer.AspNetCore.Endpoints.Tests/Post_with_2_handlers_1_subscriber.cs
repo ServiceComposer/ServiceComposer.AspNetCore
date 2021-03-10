@@ -120,5 +120,57 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             Assert.Equal(expectedNumber, responseObj?.SelectToken("ANumber")?.Value<int>());
             Assert.Equal($"ANumber: {expectedNumber}.", responseObj?.SelectToken("AValue")?.Value<string>());
         }
+
+        [Fact]
+        public async Task Returns_expected_response_using_output_formatters()
+        {
+            // Arrange
+            var expectedString = "this is a string value";
+            var expectedNumber = 32;
+
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Post_with_2_handlers>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestIntegerHandler>();
+                        options.RegisterCompositionHandler<TestStringSubcriber>();
+                        options.EnableWriteSupport();
+                        options.ResponseSerialization.UseOutputFormatters = true;
+                    });
+                    services.AddRouting();
+                    services.AddControllers().AddNewtonsoftJson();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            dynamic model = new ExpandoObject();
+            model.AString = expectedString;
+            model.ANumber = expectedNumber;
+
+            var json = (string) JsonConvert.SerializeObject(model);
+            var stringContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            stringContent.Headers.ContentLength = json.Length;
+
+            // Act
+            var response = await client.PostAsync("/sample/1", stringContent);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = JObject.Parse(responseString);
+
+            Assert.Equal(expectedString, responseObj?.SelectToken("AString")?.Value<string>());
+            Assert.Equal(expectedNumber, responseObj?.SelectToken("ANumber")?.Value<int>());
+            Assert.Equal($"ANumber: {expectedNumber}.", responseObj?.SelectToken("AValue")?.Value<string>());
+        }
     }
 }
