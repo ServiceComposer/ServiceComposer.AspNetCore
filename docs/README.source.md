@@ -7,10 +7,8 @@ ServiceComposer can be added to existing or new ASP.NET Core projects, or it can
 
 By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. For more information refer to the [Authentication and Authorization](authentication-authorization.source.md) section
 
-## Response serialization casing
+## Serialization
 
-ServiceComposer serializes responses using a JSON serializer. By default responses are serialized using camel casing. Consumers can influence the response casing of a specific request by adding to the request an `Accept-Casing` custom HTTP header. For more information refer to the [response serialization casing](response-serialization-casing.source.md) section.
+By default ServiceComposer serializes responses using the Newtonsoft JSON serializer. The built-in serialization support can be configured to seriazlie responses using a camel case or pascal case approach on a per request basis by adding to the request an `Accept-Casing` custom HTTP header. For more information refer to the [response serialization casing](response-serialization-casing.source.md) section. Or it's possible to take full control over the [response serialization settings on a case-by-case](custom-json-response-serialization-settings.source.md) by suppliying at configuration time a customization function.
 
-### Custom JSON response serialization settings
-
-It's possible to customize the [response serialization settings on a case-by-case](custom-json-response-serialization-settings.source.md) by suppliying at configuration time a customization function.
+Starting with version 1.9.0, regular MVC Output Formatters can be used to serialize the response model, and honor the `Accept` HTTP header set by clients. When using output formatters the serialization casing is controlled by the formatter configuration and not by ServiceComposer. For more information on using putput formatters refers to the [output formatters serialization section](output-formatters-serialization.source.md).
