@@ -75,6 +75,8 @@ public void ConfigureServices(IServiceCollection services)
 
 > If, for reasons outside the scope of composing responses, there is the need to use MVC, or Razor Pages, or just controllers and views, any of the MVC configuration options will add support for model binding.
 
+THe first step is to define the models, for example in the above sample the body model will look like the following C# class:
+
 <!-- snippet: net-core-3x-model-binding-model -->
 <a id='snippet-net-core-3x-model-binding-model'></a>
 ```cs
@@ -85,6 +87,10 @@ class BodyModel
 ```
 <sup><a href='/src/Snippets.NetCore3x/ModelBinding/ModelBindingUsageHandler.cs#L8-L13' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-model' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+> The class name is irrelevant
+
+Once we have a model for the body, a model that represent the incoming request is needed. In in a scenario in which there is the need to bind the body and the id from the route, the following request model can be used:
 
 <!-- snippet: net-core-3x-model-binding-request -->
 <a id='snippet-net-core-3x-model-binding-request'></a>
@@ -97,6 +103,10 @@ class RequestModel
 ```
 <sup><a href='/src/Snippets.NetCore3x/ModelBinding/ModelBindingUsageHandler.cs#L15-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-request' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+> The class name is irrelevant. The name of the properties marked as `FromRoute` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
+
+Once the models are defined they can be used as follows:
 
 <!-- snippet: net-core-3x-model-binding-bind-body-and-route-data -->
 <a id='snippet-net-core-3x-model-binding-bind-body-and-route-data'></a>
@@ -114,3 +124,5 @@ public async Task Handle(HttpRequest request)
 ```
 <sup><a href='/src/Snippets.NetCore3x/ModelBinding/ModelBindingUsageHandler.cs#L25-L37' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+For more information and options when using model binding refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
