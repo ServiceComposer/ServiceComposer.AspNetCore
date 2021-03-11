@@ -33,6 +33,6 @@ public async Task Handle(HttpRequest request)
     //use the content object instance as needed
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ModelBinding/RawBodyUsageHandler.cs#L13-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-raw-body-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/ModelBinding/RawBodyUsageHandler.cs#L14-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-raw-body-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
