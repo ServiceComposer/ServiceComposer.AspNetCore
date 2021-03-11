@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore;
 
@@ -20,6 +21,22 @@ namespace Snippets.NetCore3x.ModelBinding
             var content = JObject.Parse(body);
 
             //use the content object instance as needed
+        }
+        // end-snippet
+    }
+
+    class RawRouteDataUsageHandler : ICompositionRequestsHandler
+    {
+        // begin-snippet: net-core-3x-model-binding-raw-route-data-usage
+        [HttpPost("/sample/{id}")]
+        public Task Handle(HttpRequest request)
+        {
+            var routeData = request.HttpContext.GetRouteData();
+            var id = int.Parse(routeData.Values["id"].ToString());
+
+            //use the id value as needed
+
+            return Task.CompletedTask;
         }
         // end-snippet
     }
