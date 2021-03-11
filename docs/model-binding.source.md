@@ -38,7 +38,7 @@ Once we have a model for the body, a model that represent the incoming request i
 
 snippet: net-core-3x-model-binding-request
 
-> The class name is irrelevant. The name of the properties marked as `FromRoute` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
+> The class name is irrelevant. The name of the properties marked as `[FromRoute]` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
 
 Once the models are defined they can be used as follows:
 
