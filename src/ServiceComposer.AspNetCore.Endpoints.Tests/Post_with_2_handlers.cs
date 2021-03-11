@@ -1,4 +1,5 @@
-﻿using System.Dynamic;
+﻿using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;
@@ -17,6 +18,71 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class Post_with_2_handlers
     {
+        public static IEnumerable<object[]> Variants()
+        {
+            yield return new object[]
+            {
+                new TestVariant
+                {
+                    Description = "Read Json body",
+                    CompositionOptions = options =>
+                    {
+                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestIntegerHandler>();
+                    },
+                    ConfigureHttpClient = client => client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal")
+                }
+            };
+            yield return new object[]
+            {
+                new TestVariant
+                {
+                    Description = "Model binding",
+                    CompositionOptions = options =>
+                    {
+                        options.RegisterCompositionHandler<TestIntegerHandler_USE_ModelBinding>();
+                        options.RegisterCompositionHandler<TestStringHandler_USE_ModelBinding>();
+                    },
+                    ConfigureServices = services => services.AddControllers(),
+                    ConfigureHttpClient = client => client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal")
+                }
+            };
+        }
+
+        class TestIntegerHandler_USE_ModelBinding : ICompositionRequestsHandler
+        {
+            class IntegerModel
+            {
+                public int ANumber { get; set; }
+            }
+
+            [HttpPost("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
+            {
+                var model = await request.Bind<BodyRequest<IntegerModel>>();
+
+                var vm = request.GetComposedResponseModel();
+                vm.ANumber = model.Body.ANumber;
+            }
+        }
+
+        class TestStringHandler_USE_ModelBinding : ICompositionRequestsHandler
+        {
+            class StringModel
+            {
+                public string AString { get; set; }
+            }
+
+            [HttpPost("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
+            {
+                var model = await request.Bind<BodyRequest<StringModel>>();
+
+                var vm = request.GetComposedResponseModel();
+                vm.AString = model.Body.AString;
+            }
+        }
+
         class TestIntegerHandler : ICompositionRequestsHandler
         {
             [HttpPost("/sample/{id}")]
@@ -47,34 +113,39 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        [Fact]
-        public async Task Returns_expected_response()
+        [Theory]
+        [MemberData(nameof(Variants))]
+        public async Task Returns_expected_response(TestVariant variant)
         {
             // Arrange
             var expectedString = "this is a string value";
             var expectedNumber = 32;
 
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Post_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
-                        options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.EnableWriteSupport();
+
+                        variant.CompositionOptions?.Invoke(options);
                     });
                     services.AddRouting();
+
+                    variant.ConfigureServices?.Invoke(services);
                 },
                 configure: app =>
                 {
                     app.UseRouting();
                     app.UseEndpoints(builder => builder.MapCompositionHandlers());
+
+                    variant.Configure?.Invoke(app);
                 }
             ).CreateClient();
 
-            client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal");
+            variant.ConfigureHttpClient?.Invoke(client);
 
             dynamic model = new ExpandoObject();
             model.AString = expectedString;
