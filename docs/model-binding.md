@@ -104,7 +104,7 @@ class RequestModel
 <sup><a href='/src/Snippets.NetCore3x/ModelBinding/ModelBindingUsageHandler.cs#L15-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-request' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-> The class name is irrelevant. The name of the properties marked as `FromRoute` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
+> The class name is irrelevant. The name of the properties marked as `[FromRoute]` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
 
 Once the models are defined they can be used as follows:
 
