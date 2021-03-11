@@ -30,10 +30,9 @@ public async Task Handle(HttpRequest request)
     var body = await reader.ReadToEndAsync();
     var content = JObject.Parse(body);
 
-    var vm = request.GetComposedResponseModel();
-    vm.AString = content?.SelectToken("AString")?.Value<string>();
+    //use the content object instance as needed
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ModelBinding/RawBodyUsageHandler.cs#L13-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-raw-body-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/ModelBinding/RawBodyUsageHandler.cs#L13-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-model-binding-raw-body-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
