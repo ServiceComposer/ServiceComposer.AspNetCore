@@ -19,8 +19,7 @@ namespace Snippets.NetCore3x.ModelBinding
             var body = await reader.ReadToEndAsync();
             var content = JObject.Parse(body);
 
-            var vm = request.GetComposedResponseModel();
-            vm.AString = content?.SelectToken("AString")?.Value<string>();
+            //use the content object instance as needed
         }
         // end-snippet
     }
