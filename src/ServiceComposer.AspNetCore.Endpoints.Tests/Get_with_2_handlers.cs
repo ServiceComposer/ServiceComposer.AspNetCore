@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
@@ -14,13 +13,17 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
     {
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpGet("/sample/{id}")]
-            public Task Handle(HttpRequest request)
+            class Model
             {
-                var routeData = request.HttpContext.GetRouteData();
+                [FromRoute]public int id { get; set; }
+            }
+
+            [HttpGet("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
+            {
+                var model = await request.Bind<Model>();
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
-                return Task.CompletedTask;
+                vm.ANumber = model.id;
             }
         }
 
@@ -39,7 +42,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Returns_expected_response()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
@@ -50,6 +53,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                     });
                     services.AddRouting();
+                    services.AddControllers();
                 },
                 configure: app =>
                 {
@@ -76,7 +80,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Returns_expected_response_using_output_formatters()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {

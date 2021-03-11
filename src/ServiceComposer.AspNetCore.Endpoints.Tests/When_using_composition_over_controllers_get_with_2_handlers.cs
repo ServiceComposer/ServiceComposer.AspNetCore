@@ -26,27 +26,29 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
     public class When_using_composition_over_controllers_get_with_2_handlers
     {
+        class Model
+        {
+            [FromRoute]public int id { get; set; }
+        }
         class CaseInsensitiveRoute_TestGetIntegerHandler : ICompositionRequestsHandler
         {
             [HttpGet("/api/compositionovercontroller/{id}")]
-            public Task Handle(HttpRequest request)
+            public async Task Handle(HttpRequest request)
             {
-                var routeData = request.HttpContext.GetRouteData();
+                var model = await request.Bind<Model>();
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
-                return Task.CompletedTask;
+                vm.ANumber = model.id;
             }
         }
 
         class CaseSensitiveRoute_TestGetIntegerHandler : ICompositionRequestsHandler
         {
             [HttpGet("/api/CompositionOverController/{id}")]
-            public Task Handle(HttpRequest request)
+            public async Task Handle(HttpRequest request)
             {
-                var routeData = request.HttpContext.GetRouteData();
+                var model = await request.Bind<Model>();
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
-                return Task.CompletedTask;
+                vm.ANumber = model.id;
             }
         }
 
@@ -65,7 +67,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Returns_expected_response()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
@@ -108,7 +110,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Returns_expected_response_with_case_insensitive_routes()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
@@ -151,7 +153,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Fails_if_composition_over_controllers_is_disabled()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
