@@ -11,6 +11,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class Get_with_2_handlers
     {
+        [Route("sample")]
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
             class Model
@@ -18,7 +19,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 [FromRoute]public int id { get; set; }
             }
 
-            [HttpGet("/sample/{id}")]
+            [HttpGet("/{id}")]
             public async Task Handle(HttpRequest request)
             {
                 var model = await request.Bind<Model>();
@@ -27,9 +28,10 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
+        [Route("/sample/")]
         class TestGetStringHandler : ICompositionRequestsHandler
         {
-            [HttpGet("/sample/{id}")]
+            [HttpGet("{id}")]
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
