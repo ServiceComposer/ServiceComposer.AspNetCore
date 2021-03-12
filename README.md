@@ -124,7 +124,7 @@ ServiceComposer is available for the following platforms:
 - ASP.NET Core 3.x and .NET 5: [documentation is available in the docs folder](docs)
 - ASP.NET Core 2.x: [documentation is available in the docs/asp-net-core-2x folder](docs/asp-net-core-2x) (.NET Standard 2.0 compatible)
 
-> Note: Support for ASP.NET Core 2.x will be deprecated in version 1.8.0 and removed in 2.0.0.
+> Note: Support for ASP.NET Core 2.x has been deprecated in version 1.8.0 and will be removed in 2.0.0.
 
 ## Philosophy
 
