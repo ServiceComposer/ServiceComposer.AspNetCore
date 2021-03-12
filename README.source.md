@@ -30,11 +30,11 @@ snippet: net-core-3x-sample-startup
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
 
-snippet: net-core-3x-basic-usage-marketing-handler
+snippet: net-core-3x-basic-usage-sales-handler
 
 - Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
 
-snippet: net-core-3x-basic-usage-sales-handler
+snippet: net-core-3x-basic-usage-marketing-handler
 
 - Make so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
 - Build and run the web application project
