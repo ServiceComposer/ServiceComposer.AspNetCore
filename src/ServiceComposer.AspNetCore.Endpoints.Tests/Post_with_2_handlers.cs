@@ -27,7 +27,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     Description = "Read Json body",
                     CompositionOptions = options =>
                     {
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                     },
                     ConfigureHttpClient = client => client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal")
@@ -98,7 +98,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestStrinHandler : ICompositionRequestsHandler
+        class TestStringHandler : ICompositionRequestsHandler
         {
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)

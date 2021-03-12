@@ -28,7 +28,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     CompositionOptions = options =>
                     {
                         options.RegisterCompositionHandler<TestIntegerHandler_NO_ModelBinding>();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestStringSubcriber>();
                     },
                     ConfigureHttpClient = client => client.DefaultRequestHeaders.Add("Accept-Casing", "casing/pascal")
@@ -42,7 +42,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     CompositionOptions = options =>
                     {
                         options.RegisterCompositionHandler<TestIntegerHandler_USE_ModelBinding>();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestStringSubcriber>();
                     },
                     ConfigureServices = services => services.AddControllers(),
@@ -57,7 +57,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     CompositionOptions = options =>
                     {
                         options.RegisterCompositionHandler<TestIntegerHandler_NO_ModelBinding>();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestStringSubcriber>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     },
@@ -72,7 +72,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     CompositionOptions = options =>
                     {
                         options.RegisterCompositionHandler<TestIntegerHandler_USE_ModelBinding>();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestStringSubcriber>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     },
@@ -122,7 +122,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestStrinHandler : ICompositionRequestsHandler
+        class TestStringHandler : ICompositionRequestsHandler
         {
             [HttpPost("/sample/{id}")]
             public async Task Handle(HttpRequest request)

@@ -25,7 +25,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestStrinHandler : ICompositionRequestsHandler
+        class TestStringHandler : ICompositionRequestsHandler
         {
             [HttpDelete("/sample/{id}")]
             public Task Handle(HttpRequest request)
@@ -48,7 +48,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.EnableWriteSupport();
                     });

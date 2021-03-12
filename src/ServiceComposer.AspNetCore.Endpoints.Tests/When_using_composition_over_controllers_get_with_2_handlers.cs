@@ -52,7 +52,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestGetStrinHandler : ICompositionRequestsHandler
+        class TestGetStringHandler : ICompositionRequestsHandler
         {
             [HttpGet("/api/CompositionOverController/{id}")]
             public Task Handle(HttpRequest request)
@@ -74,7 +74,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseSensitiveRoute_TestGetIntegerHandler>();
                         options.EnableCompositionOverControllers();
                     });
@@ -117,7 +117,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
                         options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
                     });
@@ -160,7 +160,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
                     });
                     services.AddRouting();

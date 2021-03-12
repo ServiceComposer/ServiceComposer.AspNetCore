@@ -40,7 +40,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestGetStrinHandler : ICompositionRequestsHandler
+        class TestGetStringHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
@@ -62,7 +62,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                     });
                     services.AddControllers();
@@ -109,7 +109,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });

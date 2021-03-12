@@ -62,7 +62,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        class TestStrinHandler : ICompositionRequestsHandler
+        class TestStringHandler : ICompositionRequestsHandler
         {
             [HttpPost("/api/CompositionOverControllerPost/{id}")]
             public async Task Handle(HttpRequest request)
@@ -91,7 +91,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestStrinHandler>();
+                        options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.EnableCompositionOverControllers();
                         options.EnableWriteSupport();
@@ -143,7 +143,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         //             services.AddViewModelComposition(options =>
         //             {
         //                 options.AssemblyScanner.Disable();
-        //                 options.RegisterCompositionHandler<TestGetStrinHandler>();
+        //                 options.RegisterCompositionHandler<TestGetStringHandler>();
         //                 options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
         //                 options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
         //             });
@@ -186,7 +186,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         //             services.AddViewModelComposition(options =>
         //             {
         //                 options.AssemblyScanner.Disable();
-        //                 options.RegisterCompositionHandler<TestGetStrinHandler>();
+        //                 options.RegisterCompositionHandler<TestGetStringHandler>();
         //                 options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
         //             });
         //             services.AddRouting();
