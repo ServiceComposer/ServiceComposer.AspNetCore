@@ -21,17 +21,21 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
-            [HttpGet("/sample/{id}")]
-            public Task Handle(HttpRequest request)
+            class Model
             {
-                var routeData = request.HttpContext.GetRouteData();
+                [FromRoute]public int id { get; set; }
+            }
+
+            [HttpGet("/sample/{id}")]
+            public async Task Handle(HttpRequest request)
+            {
+                var model = await request.Bind<Model>();
                 var vm = request.GetComposedResponseModel<TestViewModel>();
-                vm.ANumber = int.Parse(routeData.Values["id"].ToString());
-                return Task.CompletedTask;
+                vm.ANumber = model.id;
             }
         }
 
-        class TestGetStrinHandler : ICompositionRequestsHandler
+        class TestGetStringHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
@@ -55,18 +59,19 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Uses_defined_factory()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                         options.RegisterEndpointScopedViewModelFactory<TestFactory>();
                     });
                     services.AddRouting();
+                    services.AddControllers();
                 },
                 configure: app =>
                 {
@@ -93,14 +98,14 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Uses_defined_factory_and_output_formatters()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_2_handlers>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<TestGetStrinHandler>();
+                        options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<TestGetIntegerHandler>();
                         options.RegisterEndpointScopedViewModelFactory<TestFactory>();
                         options.ResponseSerialization.UseOutputFormatters = true;
