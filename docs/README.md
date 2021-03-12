@@ -10,9 +10,9 @@ To change this file edit the source file and then run MarkdownSnippets.
 Starting ASP.NET Core 3.x ServiceComposer leverages the new Endpoints support to plugin into the request handling pipeline.
 ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET Core console applications.
 
-## Authentication and Authorization
+## ASP.Net Model Binding
 
-By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. For more information refer to the [Authentication and Authorization](authentication-authorization.md) section
+When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.
 
 ## Serialization
 
@@ -20,6 +20,6 @@ By default ServiceComposer serializes responses using the Newtonsoft JSON serial
 
 Starting with version 1.9.0, regular MVC Output Formatters can be used to serialize the response model, and honor the `Accept` HTTP header set by clients. When using output formatters the serialization casing is controlled by the formatter configuration and not by ServiceComposer. For more information on using putput formatters refers to the [output formatters serialization section](output-formatters-serialization.md).
 
-## ASP.Net Model Binding
+## Authentication and Authorization
 
-When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.
+By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. For more information refer to the [Authentication and Authorization](authentication-authorization.md) section
