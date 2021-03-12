@@ -213,8 +213,9 @@ namespace ServiceComposer.AspNetCore
             };
             builder.Metadata.Add(methodMetadata);
 
-            var attributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes());
-            foreach (var attribute in attributes)
+            var methodAttributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes());
+            var classAttributes = componentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes());
+            foreach (var attribute in methodAttributes.Concat(classAttributes))
             {
                 builder.Metadata.Add(attribute);
             }
@@ -230,9 +231,13 @@ namespace ServiceComposer.AspNetCore
                 {
                     var method = ExtractMethod(componentType);
                     var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
-                    if (template != null && useCaseInsensitiveRouteMatching)
+                    if (template != null)
                     {
-                        template = template.ToLowerInvariant();
+                        template = PrefixWithRouteTemplateIfAny(componentType, template);
+                        if (useCaseInsensitiveRouteMatching)
+                        {
+                            template = template.ToLowerInvariant();
+                        }
                     }
 
                     return (componentType, method, template);
@@ -241,6 +246,17 @@ namespace ServiceComposer.AspNetCore
                 .GroupBy(component => component.Template);
 
             return getComponentsGroupedByTemplate;
+        }
+
+        static string PrefixWithRouteTemplateIfAny(Type componentType, string template)
+        {
+            var routeTemplate = componentType.GetCustomAttribute<RouteAttribute>()?.Template;
+            if (routeTemplate == null)
+            {
+                return template;
+            }
+
+            return string.Concat(routeTemplate.Trim('/'), "/", template);
         }
 
         static MethodInfo ExtractMethod(Type componentType)
