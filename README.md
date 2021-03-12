@@ -63,29 +63,6 @@ public class Startup
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
 
-<!-- snippet: net-core-3x-basic-usage-marketing-handler -->
-<a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
-```cs
-public class MarketingProductInfo: ICompositionRequestsHandler
-{
-    [HttpGet("/product/{id}")]
-    public Task Handle(HttpRequest request)
-    {
-        var vm = request.GetComposedResponseModel();
-
-        //retrieve product details from the marketing database or service
-        vm.ProductName = "Sample product";
-        vm.ProductDescription = "This is a sample product";
-        
-        return Task.CompletedTask;
-    }
-}
-```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
-
-- Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
-
 <!-- snippet: net-core-3x-basic-usage-sales-handler -->
 <a id='snippet-net-core-3x-basic-usage-sales-handler'></a>
 ```cs
@@ -105,6 +82,29 @@ public class SalesProductInfo : ICompositionRequestsHandler
 }
 ```
 <sup><a href='/src/Snippets.NetCore3x/BasicUsage/SalesProductInfo.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+- Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
+
+<!-- snippet: net-core-3x-basic-usage-marketing-handler -->
+<a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
+```cs
+public class MarketingProductInfo: ICompositionRequestsHandler
+{
+    [HttpGet("/product/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var vm = request.GetComposedResponseModel();
+
+        //retrieve product details from the marketing database or service
+        vm.ProductName = "Sample product";
+        vm.ProductDescription = "This is a sample product";
+        
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore3x/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 - Make so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
