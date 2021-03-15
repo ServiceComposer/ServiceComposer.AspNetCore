@@ -230,7 +230,7 @@ namespace ServiceComposer.AspNetCore
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
-                    var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
+                    var template = method.GetCustomAttribute<TAttribute>()?.Template;
                     if (template != null)
                     {
                         template = PrefixWithRouteTemplateIfAny(componentType, template);
