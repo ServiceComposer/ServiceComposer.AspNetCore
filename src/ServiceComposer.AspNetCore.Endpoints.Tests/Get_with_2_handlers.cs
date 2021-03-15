@@ -19,7 +19,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 [FromRoute]public int id { get; set; }
             }
 
-            [HttpGet("/{id}")]
+            [HttpGet("{id}")]
             public async Task Handle(HttpRequest request)
             {
                 var model = await request.Bind<Model>();
@@ -28,7 +28,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             }
         }
 
-        [Route("/sample/")]
+        [Route("sample")]
         class TestGetStringHandler : ICompositionRequestsHandler
         {
             [HttpGet("{id}")]
