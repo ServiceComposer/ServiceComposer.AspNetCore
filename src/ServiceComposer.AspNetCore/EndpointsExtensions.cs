@@ -240,7 +240,7 @@ namespace ServiceComposer.AspNetCore
                         }
                     }
 
-                    return (componentType, method, template);
+                    return (componentType, method, template?.TrimStart('/'));
                 })
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
