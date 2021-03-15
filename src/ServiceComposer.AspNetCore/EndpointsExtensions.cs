@@ -213,8 +213,9 @@ namespace ServiceComposer.AspNetCore
             };
             builder.Metadata.Add(methodMetadata);
 
-            var attributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes());
-            foreach (var attribute in attributes)
+            var methodAttributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes());
+            var classAttributes = componentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes());
+            foreach (var attribute in methodAttributes.Concat(classAttributes))
             {
                 builder.Metadata.Add(attribute);
             }
@@ -229,18 +230,38 @@ namespace ServiceComposer.AspNetCore
                 .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
-                    var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
-                    if (template != null && useCaseInsensitiveRouteMatching)
+                    var template = method.GetCustomAttribute<TAttribute>()?.Template;
+                    if (template != null)
                     {
-                        template = template.ToLowerInvariant();
+                        template = PrefixWithRouteTemplateIfAny(componentType, template);
+                        if (useCaseInsensitiveRouteMatching)
+                        {
+                            template = template.ToLowerInvariant();
+                        }
                     }
 
-                    return (componentType, method, template);
+                    return (componentType, method, template?.TrimStart('/'));
                 })
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
 
             return getComponentsGroupedByTemplate;
+        }
+
+        static string PrefixWithRouteTemplateIfAny(Type componentType, string template)
+        {
+            if (template.StartsWith('/') || template.StartsWith("~/"))
+            {
+                return template;
+            }
+
+            var routeTemplate = componentType.GetCustomAttribute<RouteAttribute>()?.Template;
+            if (routeTemplate == null)
+            {
+                return template;
+            }
+
+            return string.Concat(routeTemplate, "/", template);
         }
 
         static MethodInfo ExtractMethod(Type componentType)
