@@ -250,13 +250,18 @@ namespace ServiceComposer.AspNetCore
 
         static string PrefixWithRouteTemplateIfAny(Type componentType, string template)
         {
+            if (template.StartsWith('/') || template.StartsWith("~/"))
+            {
+                return template;
+            }
+
             var routeTemplate = componentType.GetCustomAttribute<RouteAttribute>()?.Template;
             if (routeTemplate == null)
             {
                 return template;
             }
 
-            return string.Concat(routeTemplate.Trim('/'), "/", template);
+            return string.Concat(routeTemplate, "/", template);
         }
 
         static MethodInfo ExtractMethod(Type componentType)
