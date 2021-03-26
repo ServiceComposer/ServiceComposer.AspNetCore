@@ -9,6 +9,7 @@ assignees: ''
 
 - [ ] tag the repo
 - [ ] create draft release notes
+   - [ ] mention contributors
 - [ ] push to Nuget
 - [ ] publish release notes
 - [ ] close this issue
