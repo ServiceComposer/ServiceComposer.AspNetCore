@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+#if NETCOREAPP3_1 || NET5_0
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
+#endif
 
 namespace ServiceComposer.AspNetCore
 {
@@ -79,7 +84,24 @@ namespace ServiceComposer.AspNetCore
                 });
             }
 
-            Services.AddSingleton<RequestModelBinder>();
+            Services.AddSingleton(container =>
+            {
+                var modelBinderFactory = container.GetService<IModelBinderFactory>();
+                var modelMetadataProvider = container.GetService<IModelMetadataProvider>();
+                var mvcOptions = container.GetService<IOptions<MvcOptions>>();
+
+                if (modelBinderFactory == null || modelMetadataProvider == null || mvcOptions == null)
+                {
+                    throw new InvalidOperationException("Unable to resolve one of the services required to support model binding. " +
+                                                        "Make sure the application is configured to use MVC services by calling either " +
+                                                        $"services.{nameof(MvcServiceCollectionExtensions.AddControllers)}(), or " +
+                                                        $"services.{nameof(MvcServiceCollectionExtensions.AddControllersWithViews)}(), or " +
+                                                        $"services.{nameof(MvcServiceCollectionExtensions.AddMvc)}(), or " +
+                                                        $"services.{nameof(MvcServiceCollectionExtensions.AddRazorPages)}().");
+                }
+
+                return new RequestModelBinder(modelBinderFactory, modelMetadataProvider, mvcOptions);
+            });
 #endif
 
             if (AssemblyScanner.IsEnabled)
