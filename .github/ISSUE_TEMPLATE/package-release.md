@@ -7,10 +7,13 @@ assignees: ''
 
 ---
 
-- [ ] tag the repo
-- [ ] create draft release notes
-   - [ ] mention contributors
-- [ ] push to Nuget
-- [ ] publish release notes
+- Prepare the release
+  - [ ] tag the repo
+  - [ ] push to Nuget
+- Release notes:
+  - [ ] edit release notes as necessary, e.g. to mention contributors
+  - [ ] associate draft with the created tag
+  - [ ] publish
+- Clean-up
 - [ ] close this issue
 - [ ] close the milestone
