@@ -29,7 +29,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public async Task Startup_should_not_fail()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithHost<Dummy>
+            using var webApp = new SelfContainedWebApplicationFactoryWithHost<Dummy>
             (
                 configureServices: services =>
                 {
@@ -55,7 +55,9 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                         options.ValidateOnBuild = true;
                     });
                 }
-            }.CreateClient();
+            };
+
+            var client = webApp.CreateClient();
 
             // Act
             var response = await client.GetAsync("/empty-response/1");
