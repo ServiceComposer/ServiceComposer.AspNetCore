@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ApprovalTests" Version="5.4.7" />
+    <PackageReference Include="ApprovalTests" Version="5.5.0" />
     <PackageReference Include="FakeItEasy" Version="7.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
