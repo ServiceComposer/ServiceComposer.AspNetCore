@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -82,6 +83,39 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
             Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
             Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
+        }
+
+        [Fact]
+        public async Task Throws_if_output_formatters_are_not_enabled()
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(async () => 
+            {
+                // Arrange
+                var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+                (
+                    configureServices: services =>
+                    {
+                        services.AddViewModelComposition(options =>
+                        {
+                            options.AssemblyScanner.Disable();
+                            options.RegisterCompositionHandler<TestGetStringHandler>();
+                            options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                            options.ResponseSerialization.UseOutputFormatters = false;
+                        });
+                        services.AddRouting();
+                        services.AddControllers()
+                            .AddNewtonsoftJson();
+                    },
+                    configure: app =>
+                    {
+                        app.UseRouting();
+                        app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                    }
+                ).CreateClient();
+
+                // Act
+                var response = await client.GetAsync("/sample/1");
+            });
         }
     }
 }

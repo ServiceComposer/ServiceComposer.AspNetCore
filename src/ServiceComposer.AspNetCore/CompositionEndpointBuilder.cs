@@ -48,9 +48,17 @@ namespace ServiceComposer.AspNetCore
                 var viewModel = await CompositionHandler.HandleComposableRequest(context, componentsTypes);
                 if (viewModel != null)
                 {
+                    var containsActionResult = context.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
+                    if(!useOutputFormatters && containsActionResult)
+                    {
+                        throw new NotSupportedException($"Setting an action results requires output formatters supports. " +
+                            $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
+                            $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
+                    }
+
                     if (useOutputFormatters)
                     {
-                        if (context.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey))
+                        if (containsActionResult)
                         {
                             await context.ExecuteResultAsync(context.Items[HttpRequestExtensions.ComposedActionResultKey] as IActionResult);
                         }
