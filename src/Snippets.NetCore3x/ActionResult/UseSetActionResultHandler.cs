@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.ActionResult
@@ -28,4 +29,17 @@ namespace Snippets.NetCore3x.ActionResult
         }
     }
     // end-snippet
+
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // begin-snippet: net-core-3x-action-results-required-config
+            services.AddViewModelComposition(options =>
+            {
+                options.ResponseSerialization.UseOutputFormatters = true;
+            });
+            // end-snippet
+        }
+    }
 }
