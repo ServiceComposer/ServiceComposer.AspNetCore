@@ -14,6 +14,10 @@ ServiceComposer can be added to existing or new ASP.NET Core projects, or it can
 
 When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.
 
+### ASP.Net MVC Action results
+
+MVC Action results support allow composition handlers to set custom response results for specific scenarios, like for example, handling bad requests or validation error thoat would nornmally require throwing an exception. For more information on action results refer to the [MVC Action results](action-results.md) section.
+
 ## Authentication and Authorization
 
 By virtue of leveraging ASP.NET Core 3.x Endpoints ServiceComposer automatically supports authentication and authorization metadata attributes to express authentication and authorization requirements on routes. For more information refer to the [Authentication and Authorization](authentication-authorization.md) section
