@@ -33,5 +33,5 @@ public class UseSetActionResultHandler : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ActionResult/UseSetActionResultHandler.cs#L9-L30' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-action-results' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets.NetCore3x/ActionResult/UseSetActionResultHandler.cs#L10-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-action-results' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
