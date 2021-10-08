@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +14,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_setting_action_result
     {
+        const string expectedError = "I'm not sure I like the Id property value";
+
         class TestGetIntegerHandler : ICompositionRequestsHandler
         {
             class Model
@@ -27,7 +30,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
                 var problems = new ValidationProblemDetails(new Dictionary<string, string[]>() 
                 {
-                    { "Id", new []{ "I'm not sure I like the Id property value" } }
+                    { "Id", new []{ expectedError } }
                 });
                 var result = new BadRequestObjectResult(problems);
 
@@ -77,12 +80,17 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             var responseString = await response.Content.ReadAsStringAsync();
-            var responseObj = JObject.Parse(responseString);
+            dynamic responseObj = JObject.Parse(responseString);
 
-            Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
-            Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
+            dynamic errors = responseObj.errors;
+            var idErrors = (JArray)errors["Id"];
+
+            var error = idErrors[0].Value<string>();
+
+            Assert.Equal(expectedError, error);
         }
 
         [Fact]
