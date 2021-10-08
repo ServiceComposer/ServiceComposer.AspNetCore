@@ -69,6 +69,7 @@ namespace ServiceComposer.AspNetCore
         public static T GetComposedResponseModel<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
             where T :  class { }
         public static ServiceComposer.AspNetCore.ICompositionContext GetCompositionContext(this Microsoft.AspNetCore.Http.HttpRequest request) { }
+        public static void SetActionResult(this Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Mvc.ActionResult actionResult) { }
     }
     public static class HttpRequestModelBinderExtension
     {

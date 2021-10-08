@@ -2,6 +2,7 @@
 
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -9,13 +10,13 @@ namespace ServiceComposer.AspNetCore
     {
         internal static readonly string ComposedResponseModelKey = "composed-response-model";
         internal static readonly string CompositionContextKey = "composition-context";
+        internal static readonly string ComposedActionResultKey = "composed-action-result";
 
         public static dynamic GetComposedResponseModel(this HttpRequest request)
         {
             return request.HttpContext.Items[ComposedResponseModelKey];
         }
 
-#if NETCOREAPP3_1 || NET5_0
         public static T GetComposedResponseModel<T>(this HttpRequest request) where T : class
         {
             var vm = request.HttpContext.Items[ComposedResponseModelKey];
@@ -29,7 +30,14 @@ namespace ServiceComposer.AspNetCore
                           $"and that the created view model is of type {typeof(T).Name}.";
             throw new InvalidCastException(message);
         }
-#endif
+
+        public static void SetActionResult(this HttpRequest request, ActionResult actionResult)
+        {
+            if (!request.HttpContext.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey))
+            {
+                request.HttpContext.Items.Add(HttpRequestExtensions.ComposedActionResultKey, actionResult);
+            }
+        }
 
         internal static void SetViewModel(this HttpRequest request, dynamic viewModel)
         {
