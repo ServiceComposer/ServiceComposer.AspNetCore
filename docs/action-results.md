@@ -35,3 +35,16 @@ public class UseSetActionResultHandler : ICompositionRequestsHandler
 ```
 <sup><a href='/src/Snippets.NetCore3x/ActionResult/UseSetActionResultHandler.cs#L10-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-action-results' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+Using MVC action results require enabling output formatters support:
+
+<!-- snippet: net-core-3x-action-results-required-config -->
+<a id='snippet-net-core-3x-action-results-required-config'></a>
+```cs
+services.AddViewModelComposition(options =>
+{
+    options.ResponseSerialization.UseOutputFormatters = true;
+});
+```
+<sup><a href='/src/Snippets.NetCore3x/ActionResult/UseSetActionResultHandler.cs#L37-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-action-results-required-config' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
