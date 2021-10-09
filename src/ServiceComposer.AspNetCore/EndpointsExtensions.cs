@@ -26,7 +26,8 @@ namespace ServiceComposer.AspNetCore
 #pragma warning restore 618
         }
 
-        [Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
+        [Obsolete(
+            "To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
@@ -35,16 +36,19 @@ namespace ServiceComposer.AspNetCore
             }
 
             var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
-            options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider.GetRequiredService<ILogger<ResponseSerializationOptions>>());
+            options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider
+                .GetRequiredService<ILogger<ResponseSerializationOptions>>());
 
             if (options.CompositionOverControllersOptions.IsEnabled)
             {
-                var compositionOverControllersRoutes = endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
+                var compositionOverControllersRoutes =
+                    endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
                 compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
                 compositionOverControllersRoutes.AddPostComponentsSource(compositionOverControllerPostComponents);
             }
 
-            var compositionMetadataRegistry = endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
+            var compositionMetadataRegistry =
+                endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
 
             MapGetComponents(
                 compositionMetadataRegistry,
@@ -81,13 +85,18 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
+        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+            ICollection<EndpointDataSource> dataSources,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
-            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources,
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
+                    componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
                 {
                     var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
@@ -95,19 +104,25 @@ namespace ServiceComposer.AspNetCore
                 }
                 else
                 {
-                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters);
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup,
+                        new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters);
                     AppendToDataSource(dataSources, builder);
                 }
             }
         }
 
-        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
+        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+            ICollection<EndpointDataSource> dataSources,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
-            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(componentsGroup, dataSources,
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
+                    componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
                 {
                     var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
@@ -115,49 +130,66 @@ namespace ServiceComposer.AspNetCore
                 }
                 else
                 {
-                    var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters);
+                    var builder = CreateCompositionEndpointBuilder(componentsGroup,
+                        new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters);
                     AppendToDataSource(dataSources, builder);
                 }
             }
         }
 
-        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
+        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+            ICollection<EndpointDataSource> dataSources,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
-            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,
+                    new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
         }
 
-        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
+        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+            ICollection<EndpointDataSource> dataSources,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
-            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,
+                    new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
         }
 
-        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry, ICollection<EndpointDataSource> dataSources, CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing, bool useOutputFormatters)
+        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+            ICollection<EndpointDataSource> dataSources,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            bool useOutputFormatters)
         {
-            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+            var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                var builder = CreateCompositionEndpointBuilder(componentsGroup, new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters);
+                var builder = CreateCompositionEndpointBuilder(componentsGroup,
+                    new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters);
 
                 AppendToDataSource(dataSources, builder);
             }
         }
 
-        private static void AppendToDataSource(ICollection<EndpointDataSource> dataSources, CompositionEndpointBuilder builder)
+        private static void AppendToDataSource(ICollection<EndpointDataSource> dataSources,
+            CompositionEndpointBuilder builder)
         {
             var dataSource = dataSources.OfType<CompositionEndpointDataSource>().FirstOrDefault();
             if (dataSource == null)
@@ -170,7 +202,8 @@ namespace ServiceComposer.AspNetCore
         }
 
         private static bool ThereIsAlreadyAnEndpointForTheSameTemplate(
-            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup, ICollection<EndpointDataSource> dataSources,
+            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
+            ICollection<EndpointDataSource> dataSources,
             bool useCaseInsensistiveRouteMatching, out Endpoint endpoint)
         {
             foreach (var dataSource in dataSources)
@@ -222,20 +255,31 @@ namespace ServiceComposer.AspNetCore
             return builder;
         }
 
-        static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>> SelectComponentsGroupedByTemplate<TAttribute>(
-            CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching) where TAttribute : HttpMethodAttribute
+        static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>>
+            SelectComponentsGroupedByTemplate<TAttribute>(
+                CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching)
+            where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
-                .Select<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
+                .SelectMany<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
                 {
                     var method = ExtractMethod(componentType);
-                    var template = method.GetCustomAttribute<TAttribute>()?.Template.TrimStart('/');
-                    if (template != null && useCaseInsensitiveRouteMatching)
-                    {
-                        template = template.ToLowerInvariant();
-                    }
+                    var componentsAndTemplate = method.GetCustomAttributes<TAttribute>()?
+                        .Select(a =>
+                        {
+                            var template = a.Template.TrimStart('/');
+                            return (componentType, method, useCaseInsensitiveRouteMatching
+                                ? template.ToLowerInvariant()
+                                : template);
+                        }).ToArray();
 
-                    return (componentType, method, template);
+                    // var groupsCount = componentsAndTemplate.GroupBy(c => c.Item3).Count();
+                    // if (groupsCount != componentsAndTemplate.Length)
+                    // {
+                    //     throw new NotSupportedException("Multiple attributes of the same type with the same template are not supported.");
+                    // }
+
+                    return componentsAndTemplate;
                 })
                 .Where(component => component.Template != null)
                 .GroupBy(component => component.Template);
