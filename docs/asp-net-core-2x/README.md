@@ -10,7 +10,28 @@ Create a new .NET Core console project and add a reference to the following NuGe
 
 Configure the `Startup` class like follows:
 
-snippet: net-core-2x-sample-startup
+<!-- snippet: net-core-2x-sample-startup -->
+<a id='snippet-net-core-2x-sample-startup'></a>
+```cs
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddRouting();
+        services.AddViewModelComposition();
+    }
+
+    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+    {
+        app.RunCompositionGateway(routeBuilder =>
+        {
+            routeBuilder.MapComposableGet("{controller}/{id:int}");
+        });
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore2x/Startup.cs#L9-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-2x-sample-startup' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 > Note: define routes so to match your project needs. `ServiceComposer` adds provides all the required `MapComposable*` `IRouteBuilder` extension methods to map routes for every HTTP supported Verb.
 
@@ -27,7 +48,27 @@ More details on how to implement `IHandleRequests` and `ISubscribeToCompositionE
 
 The response status code can be set in requests handlers and it'll be honored by the composition pipeline. To set a custom response status code the following snippet can be used:
 
-snippet: net-core-2x-sample-handler-with-custom-status-code
+<!-- snippet: net-core-2x-sample-handler-with-custom-status-code -->
+<a id='snippet-net-core-2x-sample-handler-with-custom-status-code'></a>
+```cs
+public class SampleHandlerWithCustomStatusCode : IHandleRequests
+{
+    public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
+    {
+        return true;
+    }
+
+    public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+    {
+        var response = request.HttpContext.Response;
+        response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets.NetCore2x/SampleHandler/SampleHandler.cs#L9-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-2x-sample-handler-with-custom-status-code' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 NOTE: Requests handlers are executed in parallel in a non-deterministic way, setting the response code in more than one handler can have unpredictable effects.
 
