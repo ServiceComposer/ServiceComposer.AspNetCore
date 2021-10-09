@@ -9,7 +9,7 @@ jobs:
     - name: Run MarkdownSnippets
       run: |
         dotnet tool install --global MarkdownSnippets.Tool
-        mdsnippets ${GITHUB_WORKSPACE}
+        mdsnippets ${GITHUB_WORKSPACE}-c InPlaceOverwrite
         git add .
       shell: bash
     - name: Fix links
