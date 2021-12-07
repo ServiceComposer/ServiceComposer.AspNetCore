@@ -16,10 +16,6 @@ branches:
   - master
   - /release-.*/
   - /^\d+\.\d+\.\d+(-\S*)?$/
-  
-skip_commits:
-  files:
-    - '**/*.source.md'
 
 test: off
 deploy: off
