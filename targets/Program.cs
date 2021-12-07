@@ -14,8 +14,6 @@ internal class Program
             Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
             solution =>
             {
-               Run("nuget", $"restore \"{solution}\"");
-               Run(sdk.GetDotnetCliPath(), $"restore \"{solution}\"");
                Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release");
             });
 
