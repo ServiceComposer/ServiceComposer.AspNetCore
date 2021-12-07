@@ -1,6 +1,4 @@
-﻿#if NETCOREAPP3_1 || NET5_0
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -24,5 +22,3 @@ namespace ServiceComposer.AspNetCore
         }
     }
 }
-
-#endif

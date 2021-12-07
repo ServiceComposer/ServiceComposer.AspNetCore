@@ -8,8 +8,8 @@ _Available starting with v1.8.0_
 
 Default response serialization is camel casing. It's possible to configure a different default response serialization casing when configuring ServiceComposer:
 
-<!-- snippet: net-core-3x-default-casing -->
-<a id='snippet-net-core-3x-default-casing'></a>
+<!-- snippet: default-casing -->
+<a id='snippet-default-casing'></a>
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
@@ -20,7 +20,7 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/DefaultCasing/Startup.cs#L8-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-default-casing' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/DefaultCasing/Startup.cs#L8-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-default-casing' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Requests containing the `Accept-Casing` custom HTTP header will still be honored.

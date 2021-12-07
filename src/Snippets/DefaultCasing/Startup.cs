@@ -1,21 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.Serialization
+namespace Snippets.NetCore3x.DefaultCasing
 {
     public class Startup
     {
-        // begin-snippet: net-core-3x-custom-serialization-settings
+        // begin-snippet: default-casing
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting();
             services.AddViewModelComposition(options =>
             {
-                options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
-                {
-                    return new JsonSerializerSettings();
-                });
+                options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
             });
         }
         // end-snippet

@@ -6,7 +6,7 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.BasicUsage
 {
-    // begin-snippet: net-core-3x-basic-usage-sales-handler
+    // begin-snippet: basic-usage-sales-handler
     public class SalesProductInfo : ICompositionRequestsHandler
     {
         [HttpGet("/product/{id}")]

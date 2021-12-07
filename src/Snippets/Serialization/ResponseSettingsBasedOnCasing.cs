@@ -7,7 +7,7 @@ namespace Snippets.NetCore3x.Serialization
     {
         void Camel()
         {
-            // begin-snippet: net-core-3x-camel-serialization-settings
+            // begin-snippet: camel-serialization-settings
             var settings = new JsonSerializerSettings()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -17,7 +17,7 @@ namespace Snippets.NetCore3x.Serialization
 
         void Pascal()
         {
-            // begin-snippet: net-core-3x-pascal-serialization-settings
+            // begin-snippet: pascal-serialization-settings
             var settings = new JsonSerializerSettings();
             // end-snippet
         }

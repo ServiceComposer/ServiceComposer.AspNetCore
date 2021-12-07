@@ -1,4 +1,4 @@
-﻿namespace Snippets.NetCore3x.ViewModelFactory
+﻿namespace Snipptes.ViewModelFactory
 {
     // begin-snippet: view-model-factory-product-view-model
     public class ProductViewModel

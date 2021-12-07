@@ -11,7 +11,7 @@ namespace Snippets.NetCore3x.ModelBinding
 {
     class RawBodyUsageHandler : ICompositionRequestsHandler
     {
-        // begin-snippet: net-core-3x-model-binding-raw-body-usage
+        // begin-snippet: model-binding-raw-body-usage
         [HttpPost("/sample/{id}")]
         public async Task Handle(HttpRequest request)
         {
@@ -27,7 +27,7 @@ namespace Snippets.NetCore3x.ModelBinding
 
     class RawRouteDataUsageHandler : ICompositionRequestsHandler
     {
-        // begin-snippet: net-core-3x-model-binding-raw-route-data-usage
+        // begin-snippet: model-binding-raw-route-data-usage
         [HttpPost("/sample/{id}")]
         public Task Handle(HttpRequest request)
         {

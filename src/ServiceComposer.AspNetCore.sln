@@ -1,18 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore", "ServiceComposer.AspNetCore\ServiceComposer.AspNetCore.csproj", "{5D70C2D3-7F78-48E6-8EB9-BC8E85B850D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.Tests", "ServiceComposer.AspNetCore.Tests\ServiceComposer.AspNetCore.Tests.csproj", "{37843543-9921-4A2E-A62E-EC64E08A8BA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.Tests", "ServiceComposer.AspNetCore.Tests\ServiceComposer.AspNetCore.Tests.csproj", "{37843543-9921-4A2E-A62E-EC64E08A8BA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClassLibraryWithHandlers", "TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj", "{138F9349-BE91-43F9-BADE-1FE88B7FCC84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClassLibraryWithHandlers", "TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj", "{138F9349-BE91-43F9-BADE-1FE88B7FCC84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snippets.NetCore3x", "Snippets.NetCore3x\Snippets.NetCore3x.csproj", "{AB49C808-380F-4871-96DC-6DB2914AA100}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.Endpoints.Tests", "ServiceComposer.AspNetCore.Endpoints.Tests\ServiceComposer.AspNetCore.Endpoints.Tests.csproj", "{C4DB74A3-854B-46D1-B4B7-176BEB304E92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snippets.NetCore2x", "Snippets.NetCore2x\Snippets.NetCore2x.csproj", "{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.Endpoints.Tests", "ServiceComposer.AspNetCore.Endpoints.Tests\ServiceComposer.AspNetCore.Endpoints.Tests.csproj", "{C4DB74A3-854B-46D1-B4B7-176BEB304E92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snippets", "Snippets\Snippets.csproj", "{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +30,14 @@ Global
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{138F9349-BE91-43F9-BADE-1FE88B7FCC84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB49C808-380F-4871-96DC-6DB2914AA100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB49C808-380F-4871-96DC-6DB2914AA100}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB49C808-380F-4871-96DC-6DB2914AA100}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB49C808-380F-4871-96DC-6DB2914AA100}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2C54E84-5D65-4135-8EC9-9DCDF552CBA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4DB74A3-854B-46D1-B4B7-176BEB304E92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

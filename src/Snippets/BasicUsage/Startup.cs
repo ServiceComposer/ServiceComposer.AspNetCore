@@ -2,11 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
-using ServiceComposer.AspNetCore.Gateway;
 
-namespace Snippets.NetCore2x
+namespace Snippets.NetCore3x.BasicUsage
 {
-    // begin-snippet: net-core-2x-sample-startup
+    // begin-snippet: sample-startup
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
@@ -17,10 +16,8 @@ namespace Snippets.NetCore2x
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            app.RunCompositionGateway(routeBuilder =>
-            {
-                routeBuilder.MapComposableGet("{controller}/{id:int}");
-            });
+            app.UseRouting();
+            app.UseEndpoints(builder => builder.MapCompositionHandlers());
         }
     }
     // end-snippet
