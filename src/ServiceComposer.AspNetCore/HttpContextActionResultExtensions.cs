@@ -1,5 +1,4 @@
-﻿#if NETCOREAPP3_1 || NET5_0
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
@@ -42,4 +41,3 @@ namespace ServiceComposer.AspNetCore
         }
     }
 }
-#endif

@@ -3,20 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-#if NETCOREAPP3_1 || NET5_0
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-#endif
 
 namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
-#if NETCOREAPP3_1 || NET5_0
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
-#endif
 
         internal ViewModelCompositionOptions(IServiceCollection services)
         {
@@ -25,9 +21,7 @@ namespace ServiceComposer.AspNetCore
 
             Services.AddSingleton(this);
             Services.AddSingleton(_compositionMetadataRegistry);
-#if NETCOREAPP3_1 || NET5_0
             ResponseSerialization = new ResponseSerializationOptions(Services);
-#endif
         }
 
         internal Func<Type, bool> TypesFilter { get; set; } = type => true;
@@ -50,7 +44,6 @@ namespace ServiceComposer.AspNetCore
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
 
-#if NETCOREAPP3_1 || NET5_0
         internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
 
         public void EnableCompositionOverControllers()
@@ -70,11 +63,9 @@ namespace ServiceComposer.AspNetCore
         {
             IsWriteSupportEnabled = true;
         }
-#endif
 
         internal void InitializeServiceCollection()
         {
-#if NETCOREAPP3_1 || NET5_0
             if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
@@ -102,7 +93,6 @@ namespace ServiceComposer.AspNetCore
 
                 return new RequestModelBinder(modelBinderFactory, modelMetadataProvider, mvcOptions);
             });
-#endif
 
             if (AssemblyScanner.IsEnabled)
             {
@@ -140,7 +130,6 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
-#if NETCOREAPP3_1 || NET5_0
                 AddTypesRegistrationHandler(
                     typesFilter: type =>
                     {
@@ -189,7 +178,6 @@ namespace ServiceComposer.AspNetCore
                             Services.AddTransient(typeof(IEndpointScopedViewModelFactory), type);
                         }
                     });
-#endif
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
@@ -217,9 +205,7 @@ namespace ServiceComposer.AspNetCore
 
         public IServiceCollection Services { get; private set; }
 
-#if NETCOREAPP3_1 || NET5_0
         public ResponseSerializationOptions ResponseSerialization { get; }
-#endif
 
 #pragma warning disable 618
         public void RegisterRequestsHandler<T>() where T: IHandleRequests
@@ -246,19 +232,13 @@ namespace ServiceComposer.AspNetCore
                 !(
                     typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
                     || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
-#if NETCOREAPP3_1 || NET5_0
                     || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
-#endif
                 )
             )
             {
-#if NETCOREAPP3_1 || NET5_0
                 var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
                               $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
-#else
-                var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)} " +
-                              $"or {nameof(ICompositionEventsSubscriber)}.";
-#endif
+
                 throw new NotSupportedException(message);
             }
 
@@ -273,7 +253,6 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-#if NETCOREAPP3_1 || NET5_0
         public void RegisterEndpointScopedViewModelFactory<T>() where T: IEndpointScopedViewModelFactory
         {
             RegisterCompositionComponents(typeof(T));
@@ -324,7 +303,6 @@ namespace ServiceComposer.AspNetCore
                 Services.AddTransient(typeof(IViewModelFactory), viewModelFactoryType);
             }
         }
-#endif
 
         void RegisterRouteInterceptor(Type type)
         {
