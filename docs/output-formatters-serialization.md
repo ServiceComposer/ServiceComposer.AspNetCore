@@ -5,7 +5,7 @@ _Available starting with v1.9.0_
 Enabling output formatters support is a metter of:
 
 <!-- snippet: use-output-formatters -->
-<a id='snippet-net-core-3x-use-output-formatters'></a>
+<a id='snippet-use-output-formatters'></a>
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
@@ -16,7 +16,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddControllers();
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/Serialization/UseOutputFormatters.cs#L8-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L8-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The required steps are:
@@ -31,7 +31,7 @@ The required steps are:
 The above configuration uses the new `System.Text.Json` serializer as the default json serializer to format json responses. The `System.Text.Json` serializer does not support serializing `dynamic` objects. It's possible to plug-in the Newtonsoft Json.Net serializer as output formatter by adding a package reference to the `Microsoft.AspNetCore.Mvc.NewtonsoftJson` package, and using the following configuration:
 
 <!-- snippet: use-newtonsoft-output-formatters -->
-<a id='snippet-net-core-3x-use-newtonsoft-output-formatters'></a>
+<a id='snippet-use-newtonsoft-output-formatters'></a>
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
@@ -43,5 +43,5 @@ public void ConfigureServices(IServiceCollection services)
         .AddNewtonsoftJson();
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/Serialization/UseOutputFormatters.cs#L22-L32' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L22-L32' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->

@@ -17,7 +17,7 @@ public class ProductViewModel
     public string ProductDescription { get; set; }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ViewModelFactory/ProductViewModel.cs#L3-L11' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ViewModelFactory/ProductViewModel.cs#L3-L11' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 View models have no requirements other than being serializable. They are POC objects.
@@ -42,7 +42,7 @@ class ProductViewModelFactory : IEndpointScopedViewModelFactory
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ViewModelFactory/ProductViewModelFactory.cs#L8-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model-factory' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ViewModelFactory/ProductViewModelFactory.cs#L8-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model-factory' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 View model factories are scoped to endpoints, they need to be identified when handling routes and thus they need to be decorated with a routing attribute and a route template. Each rout that needs a strongly typed view model needs a different factory.
@@ -68,7 +68,7 @@ public class SalesProductInfo : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/ViewModelFactory/SalesProductInfo.cs#L8-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-sales-handler' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ViewModelFactory/SalesProductInfo.cs#L8-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-sales-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Global view model factories

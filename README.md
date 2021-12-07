@@ -29,7 +29,7 @@ To start using ServiceComposer, follow the outlined steps:
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
 
 <!-- snippet: sample-startup -->
-<a id='snippet-net-core-3x-sample-startup'></a>
+<a id='snippet-sample-startup'></a>
 ```cs
 public class Startup
 {
@@ -46,7 +46,7 @@ public class Startup
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-sample-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > NOTE: To use a `Startup` class, Generic Host support is required.
@@ -57,7 +57,7 @@ public class Startup
 - Define the class similar to the following:
 
 <!-- snippet: basic-usage-sales-handler -->
-<a id='snippet-net-core-3x-basic-usage-sales-handler'></a>
+<a id='snippet-basic-usage-sales-handler'></a>
 ```cs
 public class SalesProductInfo : ICompositionRequestsHandler
 {
@@ -74,13 +74,13 @@ public class SalesProductInfo : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/SalesProductInfo.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/BasicUsage/SalesProductInfo.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 - Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
 
 <!-- snippet: basic-usage-marketing-handler -->
-<a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
+<a id='snippet-basic-usage-marketing-handler'></a>
 ```cs
 public class MarketingProductInfo: ICompositionRequestsHandler
 {
@@ -97,7 +97,7 @@ public class MarketingProductInfo: ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets.NetCore3x/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-net-core-3x-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 - Make so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
