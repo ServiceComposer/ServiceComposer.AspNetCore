@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -12,6 +12,7 @@ namespace ServiceComposer.AspNetCore
 {
     public class CompositionHandler
     {
+        [Obsolete(message: "HandleRequest is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error: false)]
         public static async Task<(dynamic ViewModel, int StatusCode)> HandleRequest(string requestId,
             HttpContext context)
         {
