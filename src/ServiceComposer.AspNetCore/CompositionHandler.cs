@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -86,7 +86,6 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-#if NETCOREAPP3_1 || NET5_0
         internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
         {
             context.Request.EnableBuffering();
@@ -110,8 +109,6 @@ namespace ServiceComposer.AspNetCore
 #pragma warning restore 618
 
             var compositionContext = new CompositionContext(requestId, routeData, request);
-
-
 
             object viewModel;
             var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
@@ -179,6 +176,5 @@ namespace ServiceComposer.AspNetCore
                 compositionContext.CleanupSubscribers();
             }
         }
-#endif
     }
 }
