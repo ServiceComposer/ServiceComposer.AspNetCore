@@ -41,6 +41,9 @@ namespace ServiceComposer.AspNetCore
     public class CompositionHandler
     {
         public CompositionHandler() { }
+        [System.Obsolete("HandleRequest is obsoleted and will be treated as an error starting v2 and remove" +
+            "d in v3. Use attribute routing based composition, MapCompositionHandlers, and MV" +
+            "C Endpoints.", false)]
         [return: System.Runtime.CompilerServices.Dynamic(new bool[] {
                 false,
                 false,
