@@ -25,6 +25,7 @@ x64/
 x86/
 [Bb]in/
 [Oo]bj/
+/nugets
 
 # Visual Studio 2015 cache/options directory
 .vs/
