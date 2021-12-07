@@ -28,7 +28,7 @@ To start using ServiceComposer, follow the outlined steps:
 - Create, in an empty or existing solution, a .NET Core 3.x or later empty web application project named `CompositionGateway`.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
 
-<!-- snippet: net-core-3x-sample-startup -->
+<!-- snippet: sample-startup -->
 <a id='snippet-net-core-3x-sample-startup'></a>
 ```cs
 public class Startup
@@ -56,7 +56,7 @@ public class Startup
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
 
-<!-- snippet: net-core-3x-basic-usage-sales-handler -->
+<!-- snippet: basic-usage-sales-handler -->
 <a id='snippet-net-core-3x-basic-usage-sales-handler'></a>
 ```cs
 public class SalesProductInfo : ICompositionRequestsHandler
@@ -79,7 +79,7 @@ public class SalesProductInfo : ICompositionRequestsHandler
 
 - Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
 
-<!-- snippet: net-core-3x-basic-usage-marketing-handler -->
+<!-- snippet: basic-usage-marketing-handler -->
 <a id='snippet-net-core-3x-basic-usage-marketing-handler'></a>
 ```cs
 public class MarketingProductInfo: ICompositionRequestsHandler

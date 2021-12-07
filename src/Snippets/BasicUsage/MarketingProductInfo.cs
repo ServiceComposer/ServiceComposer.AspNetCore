@@ -5,7 +5,7 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.BasicUsage
 {
-    // begin-snippet: net-core-3x-basic-usage-marketing-handler
+    // begin-snippet: basic-usage-marketing-handler
     public class MarketingProductInfo: ICompositionRequestsHandler
     {
         [HttpGet("/product/{id}")]

@@ -3,19 +3,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.ViewModelFactory
+namespace Snipptes.ViewModelFactory
 {
-    // begin-snippet: view-model-factory-sales-handler
-    public class SalesProductInfo : ICompositionRequestsHandler
+    // begin-snippet: view-model-factory-marketing-handler
+    public class MarketingProductInfo: ICompositionRequestsHandler
     {
         [HttpGet("/product/{id}")]
         public Task Handle(HttpRequest request)
         {
             var vm = request.GetComposedResponseModel<ProductViewModel>();
 
-            //retrieve product details from the sales database or service
-            vm.ProductPrice = 100;
-
+            //retrieve product details from the marketing database or service
+            vm.ProductName = "Sample product";
+            vm.ProductDescription = "This is a sample product";
+            
             return Task.CompletedTask;
         }
     }

@@ -7,7 +7,7 @@ namespace Snippets.NetCore3x
     {
         public CompositionOverControllers(IServiceCollection services)
         {
-            // begin-snippet: net-core-3x-enable-composition-over-controllers
+            // begin-snippet: enable-composition-over-controllers
             services.AddViewModelComposition(options =>
             {
                 options.EnableCompositionOverControllers();

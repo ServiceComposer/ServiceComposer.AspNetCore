@@ -5,7 +5,7 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.BasicUsage
 {
-    // begin-snippet: net-core-3x-sample-startup
+    // begin-snippet: sample-startup
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)

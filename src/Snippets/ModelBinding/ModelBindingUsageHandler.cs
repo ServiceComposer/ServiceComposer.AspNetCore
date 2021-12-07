@@ -5,14 +5,14 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.ModelBinding
 {
-    // begin-snippet: net-core-3x-model-binding-model
+    // begin-snippet: model-binding-model
     class BodyModel
     {
         public string AString { get; set; }
     }
     // end-snippet
 
-    // begin-snippet: net-core-3x-model-binding-request
+    // begin-snippet: model-binding-request
     class RequestModel
     {
         [FromRoute] public int id { get; set; }
@@ -22,7 +22,7 @@ namespace Snippets.NetCore3x.ModelBinding
 
     class ModelBindingUsageHandler : ICompositionRequestsHandler
     {
-        // begin-snippet: net-core-3x-model-binding-bind-body-and-route-data
+        // begin-snippet: model-binding-bind-body-and-route-data
         [HttpPost("/sample/{id}")]
         public async Task Handle(HttpRequest request)
         {

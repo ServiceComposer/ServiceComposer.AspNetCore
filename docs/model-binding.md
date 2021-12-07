@@ -12,7 +12,7 @@ Composition handlers get access to the incoming `HttpRequest`. If the incoming r
 
 by using the following code:
 
-<!-- snippet: net-core-3x-model-binding-raw-body-usage -->
+<!-- snippet: model-binding-raw-body-usage -->
 <a id='snippet-net-core-3x-model-binding-raw-body-usage'></a>
 ```cs
 [HttpPost("/sample/{id}")]
@@ -31,7 +31,7 @@ public async Task Handle(HttpRequest request)
 
 Something similar applies to getting data from the route, or from the query string, or the incoming form. For example:
 
-<!-- snippet: net-core-3x-model-binding-raw-route-data-usage -->
+<!-- snippet: model-binding-raw-route-data-usage -->
 <a id='snippet-net-core-3x-model-binding-raw-route-data-usage'></a>
 ```cs
 [HttpPost("/sample/{id}")]
@@ -54,7 +54,7 @@ It's possible to leverage ASP.Net built-in support for model binding to avoid ac
 
 To start using model binding configure the ASP.Net application to add MVC components:
 
-<!-- snippet: net-core-3x-model-binding-add-controllers -->
+<!-- snippet: model-binding-add-controllers -->
 <a id='snippet-net-core-3x-model-binding-add-controllers'></a>
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -70,7 +70,7 @@ public void ConfigureServices(IServiceCollection services)
 
 THe first step is to define the models, for example in the above sample the body model will look like the following C# class:
 
-<!-- snippet: net-core-3x-model-binding-model -->
+<!-- snippet: model-binding-model -->
 <a id='snippet-net-core-3x-model-binding-model'></a>
 ```cs
 class BodyModel
@@ -85,7 +85,7 @@ class BodyModel
 
 Once we have a model for the body, a model that represent the incoming request is needed. In in a scenario in which there is the need to bind the body and the id from the route, the following request model can be used:
 
-<!-- snippet: net-core-3x-model-binding-request -->
+<!-- snippet: model-binding-request -->
 <a id='snippet-net-core-3x-model-binding-request'></a>
 ```cs
 class RequestModel
@@ -101,7 +101,7 @@ class RequestModel
 
 Once the models are defined they can be used as follows:
 
-<!-- snippet: net-core-3x-model-binding-bind-body-and-route-data -->
+<!-- snippet: model-binding-bind-body-and-route-data -->
 <a id='snippet-net-core-3x-model-binding-bind-body-and-route-data'></a>
 ```cs
 [HttpPost("/sample/{id}")]

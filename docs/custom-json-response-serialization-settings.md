@@ -4,7 +4,7 @@ _Available starting with v1.8.0_
 
 By default each response is serialized using [Json.Net](https://www.newtonsoft.com/json/help/html/Introduction.htm) and serialization settings (`JsonSerializerSettings`) are determined by the [requested response casing](response-serialization-casing.source.md). If the requested casing is camel casing, the default, the folowing serialization settings are applied to the response:
 
-<!-- snippet: net-core-3x-camel-serialization-settings -->
+<!-- snippet: camel-serialization-settings -->
 <a id='snippet-net-core-3x-camel-serialization-settings'></a>
 ```cs
 var settings = new JsonSerializerSettings()
@@ -17,7 +17,7 @@ var settings = new JsonSerializerSettings()
 
 If the requested case is pascal, the following settings are applied:
 
-<!-- snippet: net-core-3x-pascal-serialization-settings -->
+<!-- snippet: pascal-serialization-settings -->
 <a id='snippet-net-core-3x-pascal-serialization-settings'></a>
 ```cs
 var settings = new JsonSerializerSettings();
@@ -27,7 +27,7 @@ var settings = new JsonSerializerSettings();
 
 It's possible to customize the response serialization settings on a case-by-case using the following configuration:
 
-<!-- snippet: net-core-3x-custom-serialization-settings -->
+<!-- snippet: custom-serialization-settings -->
 <a id='snippet-net-core-3x-custom-serialization-settings'></a>
 ```cs
 public void ConfigureServices(IServiceCollection services)

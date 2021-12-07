@@ -5,7 +5,7 @@ namespace Snippets.NetCore3x.Serialization
 {
     public class UseOutputFormatters
     {
-        // begin-snippet: net-core-3x-use-output-formatters
+        // begin-snippet: use-output-formatters
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddViewModelComposition(options =>
@@ -19,7 +19,7 @@ namespace Snippets.NetCore3x.Serialization
 
     public class UseNewtonsoftOutputFormatter
     {
-        // begin-snippet: net-core-3x-use-newtonsoft-output-formatters
+        // begin-snippet: use-newtonsoft-output-formatters
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddViewModelComposition(options =>

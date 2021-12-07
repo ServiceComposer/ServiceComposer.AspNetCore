@@ -7,7 +7,7 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.NetCore3x.ActionResult
 {
-    // begin-snippet: net-core-3x-action-results
+    // begin-snippet: action-results
     public class UseSetActionResultHandler : ICompositionRequestsHandler
     {
         [HttpGet("/product/{id}")]
@@ -34,7 +34,7 @@ namespace Snippets.NetCore3x.ActionResult
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            // begin-snippet: net-core-3x-action-results-required-config
+            // begin-snippet: action-results-required-config
             services.AddViewModelComposition(options =>
             {
                 options.ResponseSerialization.UseOutputFormatters = true;

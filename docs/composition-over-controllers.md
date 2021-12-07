@@ -2,7 +2,7 @@
 
 ServiceComposer can be used to enhance a MVC web application by adding compostion support to Controllers. ServiceComposer can be configured to use a technique called "Composition over controllers":
 
-<!-- snippet: net-core-3x-enable-composition-over-controllers -->
+<!-- snippet: enable-composition-over-controllers -->
 <a id='snippet-net-core-3x-enable-composition-over-controllers'></a>
 ```cs
 services.AddViewModelComposition(options =>
