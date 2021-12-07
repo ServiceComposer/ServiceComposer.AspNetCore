@@ -143,11 +143,11 @@ namespace ServiceComposer.AspNetCore
     public interface IViewModelPreviewHandler
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
-        [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel, ICompositionContext compositi" +
-            "onContext). Will be treated as an error starting v2 and removed in v3.")]
+        [System.Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and rem" +
+            "oved in v3.")]
         System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
-        [System.Obsolete("Use Preview(HttpRequest request, dynamic viewModel, ICompositionContext compositi" +
-            "onContext). Will be treated as an error starting v2 and removed in v3.")]
+        [System.Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and rem" +
+            "oved in v3.")]
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
     }
     public enum ResponseCasing
