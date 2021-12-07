@@ -12,6 +12,7 @@ namespace ServiceComposer.AspNetCore
 {
     public class CompositionHandler
     {
+        [Obsolete(message: "HandleRequest is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error: false)]
         public static async Task<(dynamic ViewModel, int StatusCode)> HandleRequest(string requestId,
             HttpContext context)
         {
@@ -85,7 +86,6 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-#if NETCOREAPP3_1 || NET5_0
         internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
         {
             context.Request.EnableBuffering();
@@ -109,8 +109,6 @@ namespace ServiceComposer.AspNetCore
 #pragma warning restore 618
 
             var compositionContext = new CompositionContext(requestId, routeData, request);
-
-
 
             object viewModel;
             var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
@@ -178,6 +176,5 @@ namespace ServiceComposer.AspNetCore
                 compositionContext.CleanupSubscribers();
             }
         }
-#endif
     }
 }

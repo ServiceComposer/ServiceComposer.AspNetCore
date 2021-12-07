@@ -12,7 +12,10 @@ internal class Program
 
         Target("build",
             Directory.EnumerateFiles("src", "*.sln", SearchOption.AllDirectories),
-            solution => Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release"));
+            solution =>
+            {
+               Run(sdk.GetDotnetCliPath(), $"build \"{solution}\" --configuration Release");
+            });
 
         Target("test", DependsOn("build"),
             Directory.EnumerateFiles("src", "*.Tests.csproj", SearchOption.AllDirectories),

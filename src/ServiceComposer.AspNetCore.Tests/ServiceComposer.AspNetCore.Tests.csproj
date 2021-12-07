@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,11 +15,16 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
+	<PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
+	  <PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
@@ -38,6 +43,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="API\NET6_0\APIApprovals.Approve_API.approved.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
+      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+    </None>
     <None Update="API\NET5_0\APIApprovals.Approve_API.approved.txt">
       <ParentExtension>.cs</ParentExtension>
       <ParentFile>APIApprovals</ParentFile>
