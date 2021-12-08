@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
-    public class CompositionHandler
+    public static class CompositionHandler
     {
         [Obsolete(message: "HandleRequest is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error: false)]
         public static async Task<(dynamic ViewModel, int StatusCode)> HandleRequest(string requestId,
@@ -66,9 +66,10 @@ namespace ServiceComposer.AspNetCore
 #pragma warning disable 618
                         var errorHandlers = interceptors.OfType<IHandleRequestsErrors>();
 #pragma warning restore 618
-                        if (errorHandlers.Any())
+                        var errorHandlersEnumerable = errorHandlers as IHandleRequestsErrors[] ?? errorHandlers.ToArray();
+                        if (errorHandlersEnumerable.Any())
                         {
-                            foreach (var handler in errorHandlers)
+                            foreach (var handler in errorHandlersEnumerable)
                             {
                                 await handler.OnRequestError(requestId, ex, viewModel, routeData, request);
                             }
@@ -147,7 +148,7 @@ namespace ServiceComposer.AspNetCore
 
                 if (pending.Count == 0)
                 {
-                    context.Response.StatusCode = (int) StatusCodes.Status404NotFound;
+                    context.Response.StatusCode = StatusCodes.Status404NotFound;
                     return null;
                 }
                 else

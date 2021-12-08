@@ -9,9 +9,8 @@ namespace ServiceComposer.AspNetCore
 {
     static class HttpContextActionResultExtensions
     {
-        private static readonly RouteData EmptyRouteData = new RouteData();
-
-        private static readonly ActionDescriptor EmptyActionDescriptor = new ActionDescriptor();
+        static readonly RouteData EmptyRouteData = new();
+        static readonly ActionDescriptor EmptyActionDescriptor = new();
 
         /// <summary>
         /// Write a model to the response.

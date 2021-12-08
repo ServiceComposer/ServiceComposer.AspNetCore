@@ -37,7 +37,7 @@ namespace ServiceComposer.AspNetCore
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            _properties.AddOrUpdate(binder.Name, value, (key, existingValue) => value);
+            _properties.AddOrUpdate(binder.Name, value, (_, _) => value);
             return true;
         }
 
@@ -90,9 +90,6 @@ namespace ServiceComposer.AspNetCore
             return _compositionContext.RaiseEvent(@event);
         }
 
-        string ICompositionContext.RequestId
-        {
-            get { return _compositionContext.RequestId; }
-        }
+        string ICompositionContext.RequestId => _compositionContext.RequestId;
     }
 }

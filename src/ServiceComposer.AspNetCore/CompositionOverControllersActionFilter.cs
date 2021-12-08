@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ServiceComposer.AspNetCore
 {
-    internal class CompositionOverControllersActionFilter : IAsyncResultFilter
+    class CompositionOverControllersActionFilter : IAsyncResultFilter
     {
-        private readonly CompositionOverControllersRoutes _compositionOverControllersRoutes;
-        private readonly CompositionOverControllersOptions _compositionOverControllersOptions;
+        readonly CompositionOverControllersRoutes _compositionOverControllersRoutes;
+        readonly CompositionOverControllersOptions _compositionOverControllersOptions;
 
         public CompositionOverControllersActionFilter(CompositionOverControllersRoutes compositionOverControllersRoutes, ViewModelCompositionOptions viewModelCompositionOptions)
         {
@@ -41,7 +41,7 @@ namespace ServiceComposer.AspNetCore
 
                             break;
                         }
-                        case ObjectResult objectResult when objectResult.Value == null:
+                        case ObjectResult { Value: null } objectResult:
                         {
                             //WebAPI
                             objectResult.Value = viewModel;

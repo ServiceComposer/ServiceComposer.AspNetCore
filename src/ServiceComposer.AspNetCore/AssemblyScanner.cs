@@ -14,7 +14,7 @@ namespace ServiceComposer.AspNetCore
             Include
         }
 
-        static string[] assemblySearchPatternsToUse =
+        static readonly string[] assemblySearchPatternsToUse =
         {
             "*.dll",
             "*.exe"
@@ -33,29 +33,26 @@ namespace ServiceComposer.AspNetCore
             IsEnabled = false;
         }
 
-        List<Func<string, FilterResults>> assemblyFilters = new List<Func<string, FilterResults>>();
+        readonly List<Func<string, FilterResults>> assemblyFilters = new List<Func<string, FilterResults>>();
 
         internal IEnumerable<Assembly> Scan()
         {
             var assemblies = new List<Assembly>();
 
-            Func<string, bool> fullPathsFilter = fullPath =>
+            bool FullPathsFilter(string fullPath)
             {
-                return assemblyFilters.All(filter =>
-                {
-                    return filter(fullPath) == FilterResults.Include;
-                });
-            };
+                return assemblyFilters.All(filter => filter(fullPath) == FilterResults.Include);
+            }
 
             foreach (var patternToUse in assemblySearchPatternsToUse)
             {
                 var assembliesFullPaths = Directory
                     .GetFiles(AppContext.BaseDirectory, patternToUse, DirectorySearchOptions)
-                    .Where(fullPathsFilter);
+                    .Where(FullPathsFilter);
 
                 foreach (var assemblyFullPath in assembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out var reason);
+                    AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out _);
                     if (shouldLoad)
                     {
                         assemblies.Add(Assembly.LoadFrom(assemblyFullPath));
@@ -68,11 +65,11 @@ namespace ServiceComposer.AspNetCore
             {
                 var platformAssembliesFullPaths = platformAssembliesString
                     .Split(Path.PathSeparator)
-                    .Where(fullPathsFilter);
+                    .Where((Func<string, bool>)FullPathsFilter);
 
                 foreach (var platformAssemblyFullPath in platformAssembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out var reason);
+                    AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out _);
                     if (shouldLoad)
                     {
                         assemblies.Add(Assembly.LoadFrom(platformAssemblyFullPath));

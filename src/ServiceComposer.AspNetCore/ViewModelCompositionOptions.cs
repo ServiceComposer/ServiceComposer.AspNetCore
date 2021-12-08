@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +25,10 @@ namespace ServiceComposer.AspNetCore
             ResponseSerialization = new ResponseSerializationOptions(Services);
         }
 
-        internal Func<Type, bool> TypesFilter { get; set; } = type => true;
+        internal Func<Type, bool> TypesFilter { get; set; } = _ => true;
 
-        List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new List<(Func<Type, bool>, Action<IEnumerable<Type>>)>();
-        Dictionary<Type, Action<Type, IServiceCollection>> configurationHandlers = new Dictionary<Type, Action<Type, IServiceCollection>>();
+        readonly List<(Func<Type, bool>, Action<IEnumerable<Type>>)> typesRegistrationHandlers = new();
+        readonly Dictionary<Type, Action<Type, IServiceCollection>> configurationHandlers = new();
 
         public void AddServicesConfigurationHandler(Type serviceType, Action<Type, IServiceCollection> configurationHandler)
         {
@@ -69,7 +70,7 @@ namespace ServiceComposer.AspNetCore
             if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
-                Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+                Services.Configure<MvcOptions>(options =>
                 {
                     options.Filters.Add(typeof(CompositionOverControllersActionFilter));
                 });
@@ -190,6 +191,7 @@ namespace ServiceComposer.AspNetCore
                 foreach (var optionsCustomization in optionsCustomizations)
                 {
                     var oc = (IViewModelCompositionOptionsCustomization)Activator.CreateInstance(optionsCustomization);
+                    Debug.Assert(oc != null, nameof(oc) + " != null");
                     oc.Customize(this);
                 }
 
@@ -201,9 +203,9 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        public AssemblyScanner AssemblyScanner { get; private set; }
+        public AssemblyScanner AssemblyScanner { get; }
 
-        public IServiceCollection Services { get; private set; }
+        public IServiceCollection Services { get; }
 
         public ResponseSerializationOptions ResponseSerialization { get; }
 

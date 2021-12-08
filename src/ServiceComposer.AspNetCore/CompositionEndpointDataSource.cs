@@ -22,7 +22,7 @@ namespace ServiceComposer.AspNetCore
         }
 
         public override IReadOnlyList<Endpoint> Endpoints => _endpointBuilders
-            .OrderBy(builder=>builder.Order)
+            .OrderBy(builder => builder.Order)
             .Select(builder => builder.Build()).ToArray();
     }
 }

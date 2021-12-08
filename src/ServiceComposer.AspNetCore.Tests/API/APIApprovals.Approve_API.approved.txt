@@ -15,10 +15,9 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
-    public class ComposedRequestIdHeader
+    public static class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
-        public ComposedRequestIdHeader() { }
     }
     public static class ComposedRequestIdHeaderExtensions
     {
@@ -36,9 +35,8 @@ namespace ServiceComposer.AspNetCore
         public static string GetComposedRequestIdHeaderOr(this Microsoft.AspNetCore.Http.IHeaderDictionary headers, System.Func<string> defaultValue) { }
     }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
-    public class CompositionHandler
+    public static class CompositionHandler
     {
-        public CompositionHandler() { }
         [System.Obsolete("HandleRequest is obsoleted and will be treated as an error starting v2 and remove" +
             "d in v3. Use attribute routing based composition, MapCompositionHandlers, and MV" +
             "C Endpoints.", false)]
