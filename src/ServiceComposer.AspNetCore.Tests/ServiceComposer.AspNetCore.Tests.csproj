@@ -43,7 +43,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="API\NET5_0\APIApprovals.Approve_API.approved.txt">
+    <None Update="API\NETCOREAPP2_1\APIApprovals.Approve_API.approved.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
+      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+    </None>
+    <None Update="API\NET\APIApprovals.Approve_API.approved.txt">
       <ParentExtension>.cs</ParentExtension>
       <ParentFile>APIApprovals</ParentFile>
       <DependentUpon>APIApprovals.cs</DependentUpon>
