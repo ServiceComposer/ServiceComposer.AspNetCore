@@ -8,7 +8,6 @@ on:
       - master
       - release-*
   pull_request:
-  pull_request_target:
   workflow_dispatch:
 env:
   DOTNET_NOLOGO: true
@@ -26,15 +25,8 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v2.4.0
         with:
-          fetch-depth: 0
-      - name: Checkout for Dependabot
-        if: github.event_name == 'pull_request_target'
-        uses: actions/checkout@v2.4.0
-        with:
-          ref: 'refs/pull/${{ github.event.number }}/merge'
           fetch-depth: 0
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v1.9.0
