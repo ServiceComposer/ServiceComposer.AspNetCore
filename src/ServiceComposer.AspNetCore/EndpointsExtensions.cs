@@ -14,8 +14,8 @@ namespace ServiceComposer.AspNetCore
 {
     public static class EndpointsExtensions
     {
-        static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
-        static Dictionary<string, Type[]> compositionOverControllerPostComponents = new Dictionary<string, Type[]>();
+        static readonly Dictionary<string, Type[]> compositionOverControllerGetComponents = new();
+        static readonly Dictionary<string, Type[]> compositionOverControllerPostComponents = new();
 
         public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
@@ -95,7 +95,7 @@ namespace ServiceComposer.AspNetCore
             {
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
-                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
                     var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
                     compositionOverControllerGetComponents[componentsGroup.Key] = componentTypes;
@@ -121,7 +121,7 @@ namespace ServiceComposer.AspNetCore
             {
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
-                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var endpoint))
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
                     var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
                     compositionOverControllerPostComponents[componentsGroup.Key] = componentTypes;
@@ -199,10 +199,10 @@ namespace ServiceComposer.AspNetCore
             dataSource.AddEndpointBuilder(builder);
         }
 
-        private static bool ThereIsAlreadyAnEndpointForTheSameTemplate(
+        static bool ThereIsAlreadyAnEndpointForTheSameTemplate(
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
             ICollection<EndpointDataSource> dataSources,
-            bool useCaseInsensistiveRouteMatching, out Endpoint endpoint)
+            bool useCaseInsensitiveRouteMatching, out Endpoint endpoint)
         {
             foreach (var dataSource in dataSources)
             {
@@ -214,7 +214,7 @@ namespace ServiceComposer.AspNetCore
                 endpoint = dataSource.Endpoints.OfType<RouteEndpoint>()
                     .SingleOrDefault(e =>
                     {
-                        var rawTemplate = useCaseInsensistiveRouteMatching
+                        var rawTemplate = useCaseInsensitiveRouteMatching
                             ? e.RoutePattern.RawText.ToLowerInvariant()
                             : e.RoutePattern.RawText;
                         return rawTemplate == componentsGroup.Key;

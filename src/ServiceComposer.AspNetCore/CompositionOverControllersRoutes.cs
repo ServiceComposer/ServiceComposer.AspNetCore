@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace ServiceComposer.AspNetCore
 {
-    internal class CompositionOverControllersRoutes
+    class CompositionOverControllersRoutes
     {
-        private readonly Type[] empty = new Type[0];
-        private Dictionary<string, Dictionary<string, Type[]>> routes = new Dictionary<string, Dictionary<string, Type[]>>();
+        readonly Type[] empty = Type.EmptyTypes;
+        readonly Dictionary<string, Dictionary<string, Type[]>> routes = new();
 
         public void AddGetComponentsSource(Dictionary<string, Type[]> compositionOverControllerGetComponents)
         {
