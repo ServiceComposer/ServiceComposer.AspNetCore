@@ -15,7 +15,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
-	<PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+	<PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
