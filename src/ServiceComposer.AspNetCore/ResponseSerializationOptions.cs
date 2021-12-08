@@ -22,7 +22,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        public ResponseSerializationOptions(IServiceCollection services)
+        internal ResponseSerializationOptions(IServiceCollection services)
         {
             this.services = services;
         }
