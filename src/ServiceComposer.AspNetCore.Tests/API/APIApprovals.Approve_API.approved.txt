@@ -15,10 +15,9 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
-    public class ComposedRequestIdHeader
+    public static class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
-        public ComposedRequestIdHeader() { }
     }
     public static class ComposedRequestIdHeaderExtensions
     {

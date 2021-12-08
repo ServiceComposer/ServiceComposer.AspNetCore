@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 namespace ServiceComposer.AspNetCore
 {
-    public class ComposedRequestIdHeader
+    public static class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
     }

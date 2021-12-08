@@ -8,8 +8,8 @@ namespace ServiceComposer.AspNetCore
 {
     public class ResponseSerializationOptions
     {
-        IServiceCollection services;
-        private bool usingCustomJsonSerializerSettings;
+        readonly IServiceCollection services;
+        bool usingCustomJsonSerializerSettings;
         const ResponseCasing defaultCasing = ResponseCasing.CamelCase;
 
         internal void ValidateConfiguration(ILogger<ResponseSerializationOptions> logger)
