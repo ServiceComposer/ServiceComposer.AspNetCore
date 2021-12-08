@@ -28,25 +28,10 @@
     <None Include="..\..\assets\ServiceComposer.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-	<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[6.0.0, 7.0.0)" />
-	<PackageReference Include="System.Reflection.Metadata" Version="[6.0.0, 7.0.0)" />
-  </ItemGroup>
-	
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[5.0.0, 6.0.0)" />
-	<PackageReference Include="System.Reflection.Metadata" Version="[5.0.0, 6.0.0)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[3.1.5, 4.0.0)" />
-	<PackageReference Include="System.Reflection.Metadata" Version="[1.8.1, 5.0.0)" />
-  </ItemGroup>
-
   <ItemGroup>
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[3.1.5, 7.0.0)" />
+	<PackageReference Include="System.Reflection.Metadata" Version="[1.8.1, 7.0.0)" />
     <PackageReference Include="Newtonsoft.Json" Version="[12.0.3, 14.0.0)" />
     <PackageReference Include="System.ValueTuple" Version="[4.5.0, 5.0.0)" />
   </ItemGroup>
