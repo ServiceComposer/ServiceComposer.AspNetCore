@@ -1,4 +1,4 @@
-name: Run MarkdownSnippets
+name: MarkdownSnippets
 on:
   push:
     branches:
@@ -7,6 +7,7 @@ on:
       - '*.*'
 jobs:
   documentation:
+    name: Process documentation
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
