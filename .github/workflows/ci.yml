@@ -13,7 +13,7 @@ env:
   DOTNET_NOLOGO: true
 jobs:
   build:
-    name: ${{ matrix.name }}
+    name: Build and test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
