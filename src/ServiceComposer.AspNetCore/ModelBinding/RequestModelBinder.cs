@@ -1,4 +1,4 @@
-﻿#if NET5_0 || NETCOREAPP3_1
+﻿#if NET5_0_OR_GREATER || NETCOREAPP3_1
 
 using System;
 using System.Threading.Tasks;
@@ -41,7 +41,7 @@ namespace ServiceComposer.AspNetCore
             var valueProvider =
                 await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             if (modelMetadata.BoundConstructor != null)
             {
                 throw new NotSupportedException("Record type not supported");

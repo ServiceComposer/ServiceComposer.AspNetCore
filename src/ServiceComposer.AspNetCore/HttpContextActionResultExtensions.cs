@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP3_1 || NET5_0
+﻿#if NETCOREAPP3_1 || NET5_0_OR_GREATER
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
