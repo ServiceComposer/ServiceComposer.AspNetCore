@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
@@ -14,7 +14,7 @@ namespace ServiceComposer.AspNetCore
     public class ViewModelCompositionOptions
     {
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 #endif
 
@@ -25,7 +25,7 @@ namespace ServiceComposer.AspNetCore
 
             Services.AddSingleton(this);
             Services.AddSingleton(_compositionMetadataRegistry);
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
             ResponseSerialization = new ResponseSerializationOptions(Services);
 #endif
         }
@@ -50,7 +50,7 @@ namespace ServiceComposer.AspNetCore
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
 
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
         internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
 
         public void EnableCompositionOverControllers()
@@ -74,7 +74,7 @@ namespace ServiceComposer.AspNetCore
 
         internal void InitializeServiceCollection()
         {
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
             if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
@@ -140,7 +140,7 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
                 AddTypesRegistrationHandler(
                     typesFilter: type =>
                     {
@@ -217,7 +217,7 @@ namespace ServiceComposer.AspNetCore
 
         public IServiceCollection Services { get; private set; }
 
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
         public ResponseSerializationOptions ResponseSerialization { get; }
 #endif
 
@@ -246,13 +246,13 @@ namespace ServiceComposer.AspNetCore
                 !(
                     typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
                     || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
                     || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
 #endif
                 )
             )
             {
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
                 var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
                               $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
 #else
@@ -273,7 +273,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-#if NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
         public void RegisterEndpointScopedViewModelFactory<T>() where T: IEndpointScopedViewModelFactory
         {
             RegisterCompositionComponents(typeof(T));
