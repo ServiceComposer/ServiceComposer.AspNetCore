@@ -3,6 +3,10 @@
 Starting ASP.NET Core 3.x ServiceComposer leverages the new Endpoints support to plugin into the request handling pipeline.
 ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET Core console applications.
 
+## Note about thread safety
+
+If resources are shared across more than one handler they must be [thread-safe](thread-safety.md).
+
 ## ASP.Net Model Binding
 
 When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.
