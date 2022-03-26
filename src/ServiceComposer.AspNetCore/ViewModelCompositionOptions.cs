@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace ServiceComposer.AspNetCore
@@ -15,9 +16,10 @@ namespace ServiceComposer.AspNetCore
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 
-        internal ViewModelCompositionOptions(IServiceCollection services)
+        internal ViewModelCompositionOptions(IServiceCollection services, IConfiguration configuration = null)
         {
             Services = services;
+            Configuration = configuration;
             AssemblyScanner = new AssemblyScanner();
 
             Services.AddSingleton(this);
@@ -206,6 +208,8 @@ namespace ServiceComposer.AspNetCore
         public AssemblyScanner AssemblyScanner { get; }
 
         public IServiceCollection Services { get; }
+        
+        public IConfiguration Configuration { get; }
 
         public ResponseSerializationOptions ResponseSerialization { get; }
 
