@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -19,16 +20,16 @@ namespace ServiceComposer.AspNetCore
         static Dictionary<string, Type[]> compositionOverControllerGetComponents = new Dictionary<string, Type[]>();
         static Dictionary<string, Type[]> compositionOverControllerPostComponents = new Dictionary<string, Type[]>();
 
-        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
+        public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
 #pragma warning disable 618
-            MapCompositionHandlers(endpoints, false);
+            return MapCompositionHandlers(endpoints, false);
 #pragma warning restore 618
         }
 
         [Obsolete(
             "To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
-        public static void MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
+        public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
             {
@@ -83,6 +84,9 @@ namespace ServiceComposer.AspNetCore
                     options.ResponseSerialization.DefaultResponseCasing,
                     options.ResponseSerialization.UseOutputFormatters);
             }
+            
+            var dataSource = endpoints.DataSources.OfType<CompositionEndpointDataSource>().FirstOrDefault();
+            return dataSource;
         }
 
         private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
