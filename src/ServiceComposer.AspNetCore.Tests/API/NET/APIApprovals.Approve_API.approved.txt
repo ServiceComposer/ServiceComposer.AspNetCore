@@ -51,10 +51,10 @@ namespace ServiceComposer.AspNetCore
     }
     public static class EndpointsExtensions
     {
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
             "sitionOptions. This method will be treated as an error in v2 and removed in v3.")]
-        public static void MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
     }
     [System.Obsolete("EventHandler<TEvent> is obsoleted and will be treated as an error starting v2 and" +
         " removed in v3. Use attribute routing based composition, and CompositionEventHan" +
