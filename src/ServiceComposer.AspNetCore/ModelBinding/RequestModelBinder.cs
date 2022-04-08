@@ -39,12 +39,10 @@ namespace ServiceComposer.AspNetCore
             var valueProvider =
                 await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
 
-#if NET5_0
             if (modelMetadata.BoundConstructor != null)
             {
                 throw new NotSupportedException("Record type not supported");
             }
-#endif
 
             var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
                 actionContext,
