@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 #if NETCOREAPP3_1 || NET5_0_OR_GREATER
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 #endif
 
@@ -13,13 +16,15 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
+        readonly IConfiguration _configuration;
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
 #if NETCOREAPP3_1 || NET5_0_OR_GREATER
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 #endif
 
-        internal ViewModelCompositionOptions(IServiceCollection services)
+        internal ViewModelCompositionOptions(IServiceCollection services, IConfiguration configuration = null)
         {
+            _configuration = configuration;
             Services = services;
             AssemblyScanner = new AssemblyScanner();
 
@@ -218,6 +223,21 @@ namespace ServiceComposer.AspNetCore
         public IServiceCollection Services { get; private set; }
 
 #if NETCOREAPP3_1 || NET5_0_OR_GREATER
+        public IConfiguration Configuration
+        {
+            get
+            {
+                if (_configuration is null)
+                {
+                    throw new ArgumentException("No configuration instance has been set. " +
+                                                "To access the application configuration call the " +
+                                                "AddViewModelComposition overload te accepts an " +
+                                                "IConfiguration instance.");
+                }
+                return _configuration;
+            }
+        }
+
         public ResponseSerializationOptions ResponseSerialization { get; }
 #endif
 
