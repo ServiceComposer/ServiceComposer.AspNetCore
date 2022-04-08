@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,22 +8,27 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 #endif
 
 namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
-        readonly IConfiguration _configuration;
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
 #if NETCOREAPP3_1 || NET5_0_OR_GREATER
+        readonly IConfiguration _configuration;
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 #endif
 
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
         internal ViewModelCompositionOptions(IServiceCollection services, IConfiguration configuration = null)
+#else
+        internal ViewModelCompositionOptions(IServiceCollection services)
+#endif
         {
+#if NETCOREAPP3_1 || NET5_0_OR_GREATER
             _configuration = configuration;
+#endif
             Services = services;
             AssemblyScanner = new AssemblyScanner();
 
