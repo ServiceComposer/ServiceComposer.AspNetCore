@@ -162,12 +162,13 @@ namespace ServiceComposer.AspNetCore
     }
     public static class ServiceCollectionExtensions
     {
-        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config) { }
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration = null) { }
+        public static void AddViewModelComposition(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ViewModelCompositionOptions> config, Microsoft.Extensions.Configuration.IConfiguration configuration = null) { }
     }
     public class ViewModelCompositionOptions
     {
         public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
+        public Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
         public ServiceComposer.AspNetCore.ResponseSerializationOptions ResponseSerialization { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
