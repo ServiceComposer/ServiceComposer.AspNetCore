@@ -13,13 +13,14 @@ namespace ServiceComposer.AspNetCore
 {
     public class ViewModelCompositionOptions
     {
+        readonly IConfiguration _configuration;
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes = new CompositionOverControllersRoutes();
 
         internal ViewModelCompositionOptions(IServiceCollection services, IConfiguration configuration = null)
         {
+            _configuration = configuration;
             Services = services;
-            Configuration = configuration;
             AssemblyScanner = new AssemblyScanner();
 
             Services.AddSingleton(this);
@@ -208,8 +209,21 @@ namespace ServiceComposer.AspNetCore
         public AssemblyScanner AssemblyScanner { get; }
 
         public IServiceCollection Services { get; }
-        
-        public IConfiguration Configuration { get; }
+
+        public IConfiguration Configuration
+        {
+            get
+            {
+                if (_configuration is null)
+                {
+                    throw new ArgumentException("No configuration instance has been set. " +
+                                                "To access the application configuration call the " +
+                                                "AddViewModelComposition overload te accepts an " +
+                                                "IConfiguration instance.");
+                }
+                return _configuration;
+            }
+        }
 
         public ResponseSerializationOptions ResponseSerialization { get; }
 
