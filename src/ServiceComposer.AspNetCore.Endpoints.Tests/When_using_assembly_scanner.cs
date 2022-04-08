@@ -4,11 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Castle.Core.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
 using TestClassLibraryWithHandlers;
 using Xunit;
+using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
@@ -31,8 +33,12 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                                 return true;
                             }
 
-                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
-                                .Contains(type))
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
                             {
                                 return true;
                             }
@@ -56,12 +62,22 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             Assert.True(response.IsSuccessStatusCode);
         }
 
-        private static bool _invoked = false;
-        class Customizations : IViewModelCompositionOptionsCustomization
+        static bool _invokedCustomizations = false;
+        class EmptyCustomizations : IViewModelCompositionOptionsCustomization
         {
             public void Customize(ViewModelCompositionOptions options)
             {
-                _invoked = true;
+                _invokedCustomizations = true;
+            }
+        }
+        
+        
+        static IConfiguration _customizationsThatAccessTheConfigurationConfig;
+        class CustomizationsThatAccessTheConfiguration : IViewModelCompositionOptionsCustomization
+        {
+            public void Customize(ViewModelCompositionOptions options)
+            {
+                _customizationsThatAccessTheConfigurationConfig = options.Configuration;
             }
         }
 
@@ -82,8 +98,12 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                                 return true;
                             }
 
-                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
-                                .Contains(type))
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
                             {
                                 return true;
                             }
@@ -105,7 +125,96 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(_invoked);
+            Assert.True(_invokedCustomizations);
+        }
+        
+        [Fact]
+        public void Options_customization_throws_if_configuration_is_not_available()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+                (
+                    configureServices: services =>
+                    {
+                        services.AddViewModelComposition(options =>
+                        {
+                            options.TypesFilter = type =>
+                            {
+                                if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                                {
+                                    return true;
+                                }
+
+                                if (type == typeof(EmptyCustomizations))
+                                {
+                                    return false;
+                                }
+
+                                if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                                {
+                                    return true;
+                                }
+
+                                return false;
+                            };
+                        });
+                        services.AddRouting();
+                    },
+                    configure: app =>
+                    {
+                        app.UseRouting();
+                        app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                    }
+                ).CreateClient();
+            });
+        }
+        
+        [Fact]
+        public void Options_customization_can_access_configuration_if_set()
+        {
+            // Arrange
+            var config = new FakeConfig();
+            var factory = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type == typeof(EmptyCustomizations))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    }, config);
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            );
+
+            // Act
+            var client = factory.CreateClient();
+            
+            // Assert
+            Assert.Same(config, _customizationsThatAccessTheConfigurationConfig);
         }
 
         [Fact]
@@ -127,8 +236,12 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                                 return true;
                             }
 
-                            if (type.IsNested && typeof(When_using_assembly_scanner).GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
-                                .Contains(type))
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
                             {
                                 return true;
                             }
