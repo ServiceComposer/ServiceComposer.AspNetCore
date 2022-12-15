@@ -14,7 +14,7 @@ namespace ServiceComposer.AspNetCore.Tests.API
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void Approve_API()
         {
-            var publicApi = typeof(IInterceptRoutes).Assembly.GeneratePublicApi(new ApiGeneratorOptions
+            var publicApi = typeof(ICompositionContext).Assembly.GeneratePublicApi(new ApiGeneratorOptions
             {
                 ExcludeAttributes = new[] { "System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute" }
             });
