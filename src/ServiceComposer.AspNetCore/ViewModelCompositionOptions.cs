@@ -50,12 +50,7 @@ namespace ServiceComposer.AspNetCore
 
         internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
 
-        public void EnableCompositionOverControllers()
-        {
-            EnableCompositionOverControllers(false);
-        }
-
-        public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching)
+        public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true)
         {
             CompositionOverControllersOptions.IsEnabled = true;
             CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
