@@ -1,7 +1,7 @@
-# ASP.NET Core 3.x and .NET 5
+# ASP.NET Core on .NET 6
 
-Starting ASP.NET Core 3.x ServiceComposer leverages the new Endpoints support to plugin into the request handling pipeline.
-ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET Core console applications.
+ServiceComposer leverages the Endpoints support to plugin into the request handling pipeline.
+ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET console applications.
 
 ## Note about thread safety
 

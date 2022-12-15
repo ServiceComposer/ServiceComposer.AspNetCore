@@ -25,7 +25,7 @@ Imagine an elementary e-commerce web page, where it's needed to display details 
 
 To start using ServiceComposer, follow the outlined steps:
 
-- Create, in an empty or existing solution, a .NET Core 3.x or later empty web application project named `CompositionGateway`.
+- Create, in an empty or existing solution, a .NET 6 or later empty web application project named `CompositionGateway`.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
 
 <!-- snippet: sample-startup -->
@@ -51,7 +51,7 @@ public class Startup
 
 > NOTE: To use a `Startup` class, Generic Host support is required.
 
-- Add a new .NET Core 3.x or later class library project, named `Sales.ViewModelComposition`.
+- Add a new .NET 6 or later class library project, named `Sales.ViewModelComposition`.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package.
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
@@ -114,7 +114,7 @@ In this brief sample the view model instance returned by `GetComposedResponseMod
 
 ServiceComposer is available for the following platforms:
 
-- ASP.NET Core 3.x, .NET 5, and .NET 6: [documentation is available in the docs folder](docs)
+- ASP.NET Core on .NET 6: [documentation is available in the docs folder](docs)
 
 ## Philosophy
 
