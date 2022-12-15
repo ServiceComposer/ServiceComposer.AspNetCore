@@ -100,7 +100,8 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
 
                 vm.ANumber = content?.SelectToken("ANumber")?.Value<int>();
 
-                await vm.RaiseEvent(new TestEvent() {AValue = $"ANumber: {vm.ANumber}."});
+                var context = request.GetCompositionContext();
+                await context.RaiseEvent(new TestEvent() {AValue = $"ANumber: {vm.ANumber}."});
             }
         }
 
@@ -117,8 +118,9 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
                 var vm = request.GetComposedResponseModel();
                 var model = await request.Bind<BodyRequest<ANumberModel>>();
                 vm.ANumber = model.Body.ANumber;
-
-                await vm.RaiseEvent(new TestEvent() {AValue = $"ANumber: {vm.ANumber}."});
+                
+                var context = request.GetCompositionContext();
+                await context.RaiseEvent(new TestEvent() {AValue = $"ANumber: {vm.ANumber}."});
             }
         }
 
