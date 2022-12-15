@@ -9,7 +9,7 @@ namespace ServiceComposer.AspNetCore.Gateway
 {
     public static class RouteBuilderExtentions
     {
-        [Obsolete(message:"MapComposableGet is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposableGet is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposableGet(this IRouteBuilder routeBuilder,
            string template,
            RouteValueDictionary defaults = null,
@@ -27,7 +27,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             );
         }
 
-        [Obsolete(message:"MapComposablePost is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposablePost is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposablePost(this IRouteBuilder routeBuilder,
            string template,
            RouteValueDictionary defaults = null,
@@ -45,7 +45,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             );
         }
 
-        [Obsolete(message:"MapComposablePatch is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposablePatch is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposablePatch(this IRouteBuilder routeBuilder,
            string template,
            RouteValueDictionary defaults = null,
@@ -63,7 +63,7 @@ namespace ServiceComposer.AspNetCore.Gateway
              );
         }
 
-        [Obsolete(message:"MapComposablePut is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposablePut is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposablePut(this IRouteBuilder routeBuilder,
            string template,
            RouteValueDictionary defaults = null,
@@ -81,7 +81,7 @@ namespace ServiceComposer.AspNetCore.Gateway
              );
         }
 
-        [Obsolete(message:"MapComposableDelete is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposableDelete is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposableDelete(this IRouteBuilder routeBuilder,
            string template,
            RouteValueDictionary defaults = null,
@@ -99,7 +99,7 @@ namespace ServiceComposer.AspNetCore.Gateway
             );
         }
 
-        [Obsolete(message:"MapComposableRoute is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:false)]
+        [Obsolete(message:"MapComposableRoute is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error:true)]
         public static IRouteBuilder MapComposableRoute(this IRouteBuilder routeBuilder,
            string template,
            IDictionary<string, object> constraints,

@@ -10,83 +10,8 @@ using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
-    public static class CompositionHandler
+    public static partial class CompositionHandler
     {
-        [Obsolete(message: "HandleRequest is obsoleted and will be treated as an error starting v2 and removed in v3. Use attribute routing based composition, MapCompositionHandlers, and MVC Endpoints.", error: false)]
-        public static async Task<(dynamic ViewModel, int StatusCode)> HandleRequest(string requestId,
-            HttpContext context)
-        {
-            var routeData = context.GetRouteData();
-            var request = context.Request;
-            var compositionContext = new CompositionContext(requestId, routeData, request);
-            var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-            var viewModel = new DynamicViewModel(logger, compositionContext);
-
-            try
-            {
-#pragma warning disable 618
-                var interceptors = context.RequestServices.GetServices<IInterceptRoutes>()
-#pragma warning restore 618
-                    .Where(a => a.Matches(routeData, request.Method, request))
-                    .ToArray();
-
-#pragma warning disable 618
-                foreach (var subscriber in interceptors.OfType<ISubscribeToCompositionEvents>())
-#pragma warning restore 618
-                {
-                    subscriber.Subscribe(viewModel);
-                }
-
-                var pending = new List<Task>();
-
-#pragma warning disable 618
-                foreach (var handler in interceptors.OfType<IHandleRequests>())
-#pragma warning restore 618
-                {
-                    pending.Add
-                    (
-                        handler.Handle(requestId, viewModel, routeData, request)
-                    );
-                }
-
-                if (pending.Count == 0)
-                {
-                    //we set this here to keep the implementation aligned with the .NET Core 3.x version
-                    context.Response.StatusCode = (int) HttpStatusCode.NotFound;
-                    return (null, StatusCodes.Status404NotFound);
-                }
-                else
-                {
-                    try
-                    {
-                        await Task.WhenAll(pending);
-                    }
-                    catch (Exception ex)
-                    {
-#pragma warning disable 618
-                        var errorHandlers = interceptors.OfType<IHandleRequestsErrors>();
-#pragma warning restore 618
-                        var errorHandlersEnumerable = errorHandlers as IHandleRequestsErrors[] ?? errorHandlers.ToArray();
-                        if (errorHandlersEnumerable.Any())
-                        {
-                            foreach (var handler in errorHandlersEnumerable)
-                            {
-                                await handler.OnRequestError(requestId, ex, viewModel, routeData, request);
-                            }
-                        }
-
-                        throw;
-                    }
-                }
-
-                return (viewModel, StatusCodes.Status200OK);
-            }
-            finally
-            {
-                compositionContext.CleanupSubscribers();
-            }
-        }
-
         internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
         {
             context.Request.EnableBuffering();
@@ -94,21 +19,12 @@ namespace ServiceComposer.AspNetCore
             var request = context.Request;
             var routeData = context.GetRouteData();
 
-#pragma warning disable 618
-            var requestId = request.Headers.GetComposedRequestIdHeaderOr(() =>
-#pragma warning restore 618
+            if(!request.Headers.TryGetValue(ComposedRequestIdHeader.Key, out var requestId))
             {
-                var id = Guid.NewGuid().ToString();
-#pragma warning disable 618
-                context.Request.Headers.AddComposedRequestIdHeader(id);
-#pragma warning restore 618
-                return id;
-            });
+                requestId = Guid.NewGuid().ToString();
+            }
 
-#pragma warning disable 618
-            context.Response.Headers.AddComposedRequestIdHeader(requestId);
-#pragma warning restore 618
-
+            context.Response.Headers.Add(ComposedRequestIdHeader.Key, requestId);
             var compositionContext = new CompositionContext(requestId, routeData, request);
 
             object viewModel;
@@ -121,7 +37,7 @@ namespace ServiceComposer.AspNetCore
             else
             {
                 var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-                viewModel = new DynamicViewModel(logger, compositionContext);
+                viewModel = new DynamicViewModel(logger);
             }
 
             try
