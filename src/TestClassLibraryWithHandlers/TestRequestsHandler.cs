@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using ServiceComposer.AspNetCore;
 
 namespace TestClassLibraryWithHandlers
 {
-    public class TestRequestsHandler : IHandleRequests
+    public class TestRequestsHandler : ICompositionRequestsHandler
     {
-        public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+        [HttpGet("/matching-handlers")]
+        public Task Handle(HttpRequest request)
         {
-            return Task.CompletedTask;
-        }
-
-        public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-        {
-            return (string)routeData.Values["controller"] == "matching-handlers";
+            throw new NotImplementedException();
         }
     }
 }
