@@ -7,21 +7,19 @@ using Xunit;
 using ServiceComposer.AspNetCore.Testing;
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_assembly_scanning
     {
-        class SampleNeverInvokedHandler : IHandleRequests
+        class SampleNeverInvokedHandler : ICompositionRequestsHandler
         {
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            [HttpGet("/this-doesnt-exist")]
+            public Task Handle(HttpRequest request)
             {
-                return Task.CompletedTask;
-            }
-
-            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-            {
-                return false;
+                throw new NotImplementedException();
             }
         }
 
@@ -38,7 +36,8 @@ namespace ServiceComposer.AspNetCore.Tests
                 },
                 configure: app =>
                 {
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             );
             factory.CreateClient();
@@ -101,12 +100,13 @@ namespace ServiceComposer.AspNetCore.Tests
                 configure: app =>
                 {
                     container= app.ApplicationServices;
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             );
             factory.CreateClient();
 
-            var handler = container.GetServices<IInterceptRoutes>()
+            var handler = container.GetServices<ICompositionRequestsHandler>()
                 .SingleOrDefault(svc => svc is SampleNeverInvokedHandler);
 
             Assert.NotNull(handler);
@@ -125,7 +125,8 @@ namespace ServiceComposer.AspNetCore.Tests
                 },
                 configure: app =>
                 {
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             ).CreateClient();
 
