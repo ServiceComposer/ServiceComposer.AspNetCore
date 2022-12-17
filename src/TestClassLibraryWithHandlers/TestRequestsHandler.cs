@@ -10,9 +10,10 @@ namespace TestClassLibraryWithHandlers
     public class TestRequestsHandler : ICompositionRequestsHandler
     {
         [HttpGet("/matching-handlers")]
+        [HttpGet("/matching-handlers/{id}")]
         public Task Handle(HttpRequest request)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }

@@ -29,7 +29,23 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
@@ -69,7 +85,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
         public void With_include_only_current_assembly_filter_should_return_1_assembly()
         {
             //arrange
-            var currentAssemblyName = "ServiceComposer.AspNetCore.Tests.dll";
+            var currentAssemblyName = "ServiceComposer.AspNetCore.Endpoints.Tests.dll";
             var scanner = new AssemblyScanner();
             scanner.AddAssemblyFilter(assemblyFullPath =>
             {
@@ -92,7 +108,23 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
@@ -104,7 +136,7 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             );
             factory.CreateClient();
 
-            var handler = container.GetServices<ICompositionRequestsHandler>()
+            var handler = container.GetServices<SampleNeverInvokedHandler>()
                 .SingleOrDefault(svc => svc is SampleNeverInvokedHandler);
 
             Assert.NotNull(handler);
@@ -118,7 +150,23 @@ namespace ServiceComposer.AspNetCore.Endpoints.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
