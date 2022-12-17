@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
@@ -13,6 +14,19 @@ public class UpgradeGuide
         {
             app.UseRouting();
             app.UseEndpoints(builder => builder.MapCompositionHandlers());
+        }
+        // end-snippet
+    }
+    
+    public class CompositionOverControllers
+    {
+        // begin-snippet: composition-over-controllers-case-sensitive
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddViewModelComposition(config =>
+            {
+                config.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: false);
+            });
         }
         // end-snippet
     }
