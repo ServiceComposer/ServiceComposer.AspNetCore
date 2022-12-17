@@ -6,7 +6,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClassLibraryWithHandlers", "TestClassLibraryWithHandlers\TestClassLibraryWithHandlers.csproj", "{138F9349-BE91-43F9-BADE-1FE88B7FCC84}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.Endpoints.Tests", "ServiceComposer.AspNetCore.Endpoints.Tests\ServiceComposer.AspNetCore.Endpoints.Tests.csproj", "{C4DB74A3-854B-46D1-B4B7-176BEB304E92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.Tests", "ServiceComposer.AspNetCore.Tests\ServiceComposer.AspNetCore.Tests.csproj", "{C4DB74A3-854B-46D1-B4B7-176BEB304E92}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snippets", "Snippets\Snippets.csproj", "{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}"
 EndProject
