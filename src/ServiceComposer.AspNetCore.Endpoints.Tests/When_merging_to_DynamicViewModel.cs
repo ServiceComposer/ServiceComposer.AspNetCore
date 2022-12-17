@@ -1,11 +1,9 @@
-﻿using FakeItEasy;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using System.Dynamic;
+﻿using System.Dynamic;
+using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_merging_to_DynamicViewModel
     {

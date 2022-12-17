@@ -1,16 +1,14 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using ServiceComposer.AspNetCore.Gateway;
-using System.Threading.Tasks;
-using Xunit;
-using ServiceComposer.AspNetCore.Testing;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using ServiceComposer.AspNetCore.Testing;
+using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_assembly_scanning
     {

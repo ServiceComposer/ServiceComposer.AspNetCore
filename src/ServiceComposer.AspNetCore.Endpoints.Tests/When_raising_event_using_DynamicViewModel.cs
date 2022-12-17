@@ -1,12 +1,9 @@
 ﻿using System;
-using FakeItEasy;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests
+namespace ServiceComposer.AspNetCore.Endpoints.Tests
 {
     public class When_raising_event_using_DynamicViewModel
     {
@@ -37,11 +34,14 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             // Arrange
             var logger = new Logger();
-            dynamic sut = new DynamicViewModel(logger, new CompositionContext("empty", A.Fake<RouteData>(), A.Fake<HttpRequest>()));
+            dynamic sut = new DynamicViewModel(logger);
 
-            await sut.RaiseEvent(new object());
-            
-            Assert.Equal(LogLevel.Warning, logger.Level);
+            await Assert.ThrowsAsync<NotSupportedException>(async () =>
+            {
+                await sut.RaiseEvent(new object());
+            });
+
+            Assert.Equal(LogLevel.Error, logger.Level);
             Assert.Equal("dynamic.RaiseEvent is obsolete. It'll be treated as an error starting v2 and removed in v3. Use HttpRequest.GetCompositionContext() to raise events.", logger.Message);
         }
     }
