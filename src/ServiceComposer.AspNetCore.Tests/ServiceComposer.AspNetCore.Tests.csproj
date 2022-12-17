@@ -28,7 +28,7 @@
   <ItemGroup>
     <PackageReference Include="ApprovalTests" Version="5.8.0" />
     <PackageReference Include="FakeItEasy" Version="7.3.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
     <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.0.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
