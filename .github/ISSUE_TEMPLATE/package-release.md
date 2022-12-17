@@ -8,7 +8,8 @@ assignees: ''
 ---
 
 - Prepare the release
-  - [ ] tag the repo (packages will be pushed to [MyGet](https://www.myget.org/feed/Packages/service-composer)) 
+  - [ ] tag the repo (packages will be pushed to [MyGet](https://www.myget.org/feed/Packages/service-composer))
+  - Update dependabot configuration to consider any newly created `release-X.Y` branch 
 - Release notes:
   - [ ] edit release notes as necessary, e.g. to mention contributors
   - [ ] associate draft with the created tag
