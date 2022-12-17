@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using ApprovalTests.Namers;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.API
+namespace ServiceComposer.AspNetCore.Endpoints.Tests.API
 {
     public class APIApprovals
     {
