@@ -1,12 +1,21 @@
 version: 2
 updates:
 - package-ecosystem: nuget
-  directory: "/src/ServiceComposer.AspNetCore.Tests"
+  directory: "/"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  target-branch: master
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  target-branch: master
+# release-1.13
 - package-ecosystem: nuget
-  directory: "/src/ServiceComposer.AspNetCore"
+  directory: "/"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  target-branch: release-1.13
