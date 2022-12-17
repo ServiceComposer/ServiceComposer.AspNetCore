@@ -33,7 +33,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="MELT" Version="0.7.0" />
+    <PackageReference Include="MELT" Version="0.8.0" />
     <PackageReference Include="ApprovalTests" Version="5.2.5" />
     <PackageReference Include="FakeItEasy" Version="6.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
