@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,33 +8,35 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_setting_custom_http_status_code
+    public class When_using_custom_services_registration_handlers
     {
-        public class CustomStatusCodeHandler : ICompositionRequestsHandler
+        public class TestNoOpHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
             {
-                var response = request.HttpContext.Response;
-                response.StatusCode = (int)HttpStatusCode.Forbidden;
-
                 return Task.CompletedTask;
             }
         }
 
         [Fact]
-        public async Task Default_status_code_should_be_overwritten()
+        public async Task Handlers_should_be_registered_as_expected()
         {
             // Arrange
-            var expectedStatusCode = HttpStatusCode.Forbidden;
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_setting_custom_http_status_code>
+            bool invokedCustomhandler = false;
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_custom_services_registration_handlers>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<CustomStatusCodeHandler>();
+                        options.AddServicesConfigurationHandler(typeof(TestNoOpHandler), (type, serviceCollection) =>
+                        {
+                            invokedCustomhandler = true;
+                            serviceCollection.AddTransient(type);
+                        });
+                        options.RegisterCompositionHandler<TestNoOpHandler>();
                     });
                     services.AddControllers();
                     services.AddRouting();
@@ -56,7 +56,8 @@ namespace ServiceComposer.AspNetCore.Tests
             var composedResponse = await client.GetAsync("/sample/1");
 
             // Assert
-            Assert.Equal(expectedStatusCode, composedResponse.StatusCode);
+            Assert.True(composedResponse.IsSuccessStatusCode);
+            Assert.True(invokedCustomhandler);
         }
     }
 }

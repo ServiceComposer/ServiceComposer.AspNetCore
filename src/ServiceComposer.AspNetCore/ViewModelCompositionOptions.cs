@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace ServiceComposer.AspNetCore
 {
-    public class ViewModelCompositionOptions
+    public partial class ViewModelCompositionOptions
     {
         readonly IConfiguration _configuration;
         readonly CompositionMetadataRegistry _compositionMetadataRegistry = new CompositionMetadataRegistry();
@@ -95,24 +95,6 @@ namespace ServiceComposer.AspNetCore
 
             if (AssemblyScanner.IsEnabled)
             {
-                AddTypesRegistrationHandler(
-                    typesFilter: type =>
-                    {
-                        var typeInfo = type.GetTypeInfo();
-                        return !typeInfo.IsInterface
-                            && !typeInfo.IsAbstract
-#pragma warning disable 618
-                            && typeof(IInterceptRoutes).IsAssignableFrom(type);
-#pragma warning restore 618
-                    },
-                    registrationHandler: types =>
-                    {
-                        foreach (var type in types)
-                        {
-                            RegisterRouteInterceptor(type);
-                        }
-                    });
-
                 AddTypesRegistrationHandler(
                     typesFilter: type =>
                     {
@@ -222,20 +204,6 @@ namespace ServiceComposer.AspNetCore
 
         public ResponseSerializationOptions ResponseSerialization { get; }
 
-#pragma warning disable 618
-        public void RegisterRequestsHandler<T>() where T: IHandleRequests
-#pragma warning restore 618
-        {
-            RegisterRouteInterceptor(typeof(T));
-        }
-
-#pragma warning disable 618
-        public void RegisterCompositionEventsSubscriber<T>() where T : ISubscribeToCompositionEvents
-#pragma warning restore 618
-        {
-            RegisterRouteInterceptor(typeof(T));
-        }
-
         public void RegisterCompositionHandler<T>()
         {
             RegisterCompositionComponents(typeof(T));
@@ -316,20 +284,6 @@ namespace ServiceComposer.AspNetCore
             else
             {
                 Services.AddTransient(typeof(IViewModelFactory), viewModelFactoryType);
-            }
-        }
-
-        void RegisterRouteInterceptor(Type type)
-        {
-            if (configurationHandlers.TryGetValue(type, out var handler))
-            {
-                handler(type, Services);
-            }
-            else
-            {
-#pragma warning disable 618
-                Services.AddTransient(typeof(IInterceptRoutes), type);
-#pragma warning restore 618
             }
         }
     }

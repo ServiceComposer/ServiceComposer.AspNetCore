@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_handling_request
+    public class When_validating_container_configuration
     {
         class EmptyResponseHandler : ICompositionRequestsHandler
         {
@@ -25,10 +26,10 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Request_header_should_be_not_null_if_not_explicitly_set()
+        public async Task Startup_should_not_fail()
         {
             // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_matching_handler>
+            using var webApp = new SelfContainedWebApplicationFactoryWithHost<Dummy>
             (
                 configureServices: services =>
                 {
@@ -44,7 +45,19 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
-            ).CreateClient();
+            )
+            {
+                HostBuilderCustomization = builder =>
+                {
+                    builder.UseDefaultServiceProvider(options =>
+                    {
+                        options.ValidateScopes = true;
+                        options.ValidateOnBuild = true;
+                    });
+                }
+            };
+
+            var client = webApp.CreateClient();
 
             // Act
             var response = await client.GetAsync("/empty-response/1");
@@ -55,41 +68,6 @@ namespace ServiceComposer.AspNetCore.Tests
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic body = JObject.Parse(contentString);
             Assert.NotNull(body.requestId);
-        }
-
-        [Fact]
-        public async Task Request_header_should_be_set_as_expected()
-        {
-            // Arrange
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_matching_handler>
-            (
-                configureServices: services =>
-                {
-                    services.AddViewModelComposition(options =>
-                    {
-                        options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<EmptyResponseHandler>();
-                    });
-                    services.AddRouting();
-                },
-                configure: app =>
-                {
-                    app.UseRouting();
-                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
-                }
-            ).CreateClient();
-
-            var expectedRequestId = "my-request";
-            client.DefaultRequestHeaders.Add(ComposedRequestIdHeader.Key, expectedRequestId);
-            // Act
-            var response = await client.GetAsync("/empty-response/1");
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-
-            var contentString = await response.Content.ReadAsStringAsync();
-            dynamic body = JObject.Parse(contentString);
-            Assert.Equal(expectedRequestId, (string)body.requestId);
         }
     }
 }

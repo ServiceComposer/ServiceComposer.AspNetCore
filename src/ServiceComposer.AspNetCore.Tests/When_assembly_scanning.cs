@@ -1,27 +1,23 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using ServiceComposer.AspNetCore.Gateway;
-using System.Threading.Tasks;
-using Xunit;
-using ServiceComposer.AspNetCore.Testing;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using ServiceComposer.AspNetCore.Testing;
+using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_assembly_scanning
     {
-        class SampleNeverInvokedHandler : IHandleRequests
+        class SampleNeverInvokedHandler : ICompositionRequestsHandler
         {
-            public Task Handle(string requestId, dynamic vm, RouteData routeData, HttpRequest request)
+            [HttpGet("/this-doesnt-exist")]
+            public Task Handle(HttpRequest request)
             {
-                return Task.CompletedTask;
-            }
-
-            public bool Matches(RouteData routeData, string httpVerb, HttpRequest request)
-            {
-                return false;
+                throw new NotImplementedException();
             }
         }
 
@@ -33,12 +29,29 @@ namespace ServiceComposer.AspNetCore.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
                 {
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             );
             factory.CreateClient();
@@ -95,18 +108,35 @@ namespace ServiceComposer.AspNetCore.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
                 {
                     container= app.ApplicationServices;
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             );
             factory.CreateClient();
 
-            var handler = container.GetServices<IInterceptRoutes>()
+            var handler = container.GetServices<SampleNeverInvokedHandler>()
                 .SingleOrDefault(svc => svc is SampleNeverInvokedHandler);
 
             Assert.NotNull(handler);
@@ -120,12 +150,29 @@ namespace ServiceComposer.AspNetCore.Tests
             (
                 configureServices: services =>
                 {
-                    services.AddViewModelComposition();
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type.IsNestedTypeOf<When_assembly_scanning>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
                     services.AddRouting();
                 },
                 configure: app =>
                 {
-                    app.RunCompositionGatewayWithDefaultRoutes();
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
                 }
             ).CreateClient();
 

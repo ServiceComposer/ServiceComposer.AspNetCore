@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -10,53 +9,55 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_setting_custom_http_status_code
+    public class When_adding_endpoint_builder_customizations
     {
-        public class CustomStatusCodeHandler : ICompositionRequestsHandler
+        class TestGetIntegerHandler : ICompositionRequestsHandler
         {
             [HttpGet("/sample/{id}")]
             public Task Handle(HttpRequest request)
             {
-                var response = request.HttpContext.Response;
-                response.StatusCode = (int)HttpStatusCode.Forbidden;
-
                 return Task.CompletedTask;
             }
         }
 
         [Fact]
-        public async Task Default_status_code_should_be_overwritten()
+        public async Task Convention_is_invoked_as_expected()
         {
+            var invoked = false;
+            Action<EndpointBuilder> convention = builder => invoked = true;
+
             // Arrange
-            var expectedStatusCode = HttpStatusCode.Forbidden;
-            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_setting_custom_http_status_code>
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
                 configureServices: services =>
                 {
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterCompositionHandler<CustomStatusCodeHandler>();
+                        options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.ResponseSerialization.UseOutputFormatters = true;
                     });
-                    services.AddControllers();
                     services.AddRouting();
+                    services.AddControllers()
+                        .AddNewtonsoftJson();
                 },
                 configure: app =>
                 {
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapCompositionHandlers();
-                        builder.MapControllers();
+                        var conventionBuilder = builder.MapCompositionHandlers();
+                        conventionBuilder.Add(convention);
                     });
                 }
             ).CreateClient();
 
             // Act
-            var composedResponse = await client.GetAsync("/sample/1");
+            var response = await client.GetAsync("/sample/1");
 
             // Assert
-            Assert.Equal(expectedStatusCode, composedResponse.StatusCode);
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(invoked);
         }
     }
 }

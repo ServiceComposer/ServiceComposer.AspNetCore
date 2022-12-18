@@ -8,15 +8,10 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ServiceComposer.AspNetCore
 {
-#pragma warning disable 618
-    class CompositionContext : ICompositionContext, IPublishCompositionEvents, ICompositionEventsPublisher
-#pragma warning restore 618
+    class CompositionContext : ICompositionContext, ICompositionEventsPublisher
     {
         readonly RouteData _routeData;
         readonly HttpRequest _httpRequest;
-#pragma warning disable 618
-        readonly ConcurrentDictionary<Type, List<EventHandler<object>>> _subscriptions = new();
-#pragma warning restore 618
         readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new();
 
         public CompositionContext(string requestId, RouteData routeData, HttpRequest httpRequest)
@@ -25,21 +20,9 @@ namespace ServiceComposer.AspNetCore
             _httpRequest = httpRequest;
             RequestId = requestId;
         }
-
-        //TODO: Remove once old style is dropped
-        internal dynamic CurrentViewModel { get; set; }
-
         public string RequestId { get; }
         public Task RaiseEvent(object @event)
         {
-            if (_subscriptions.TryGetValue(@event.GetType(), out var handlers))
-            {
-                //TODO: Remove once old style is dropped
-                var tasks = handlers.Select(handler => (Task)handler.Invoke(RequestId, CurrentViewModel, @event, _routeData, _httpRequest)).ToList();
-
-                return Task.WhenAll(tasks);
-            }
-
             if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
             {
                 var tasks = compositionHandlers.Select(handler => handler.Invoke(@event, _httpRequest)).ToList();
@@ -49,19 +32,6 @@ namespace ServiceComposer.AspNetCore
 
             return Task.CompletedTask;
         }
-
-#pragma warning disable 618
-        public void Subscribe<TEvent>(EventHandler<TEvent> handler)
-        {
-            if (!_subscriptions.TryGetValue(typeof(TEvent), out var handlers))
-            {
-                handlers = new List<EventHandler<object>>();
-                _subscriptions.TryAdd(typeof(TEvent), handlers);
-            }
-
-            handlers.Add((requestId, pageViewModel, @event, routeData, query) => handler(requestId, pageViewModel, (TEvent) @event, routeData, query));
-        }
-#pragma warning restore 618
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
         {
@@ -76,7 +46,6 @@ namespace ServiceComposer.AspNetCore
 
         public void CleanupSubscribers()
         {
-            _subscriptions.Clear();
             _compositionEventsSubscriptions.Clear();
         }
     }
