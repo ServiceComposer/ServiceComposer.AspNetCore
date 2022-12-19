@@ -1,4 +1,8 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
@@ -30,4 +34,15 @@ public class UpgradeGuide
         }
         // end-snippet
     }
+    
+    // begin-snippet: composition-handler-api
+    public class SampleHandler : ICompositionRequestsHandler
+    {
+        [HttpGet("/sample/{id}")]
+        public Task Handle(HttpRequest request)
+        {
+            return Task.CompletedTask;
+        }
+    }
+    // end-snippet
 }
