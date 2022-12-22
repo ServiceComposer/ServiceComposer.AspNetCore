@@ -3,7 +3,7 @@
 ServiceComposer leverages the Endpoints support to plugin into the request handling pipeline.
 ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET console applications.
 
-## Supported .NET version
+## Supported .NET versions
 
 ServiceComposer targets .NET 6 and .NET 7.
 
