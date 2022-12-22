@@ -51,20 +51,19 @@ public class UpgradeGuide
         class AnEvent{}
         
         [HttpGet("/sample/{id}")]
-        public Task Handle(HttpRequest request)
+        public async Task Handle(HttpRequest request)
         {
             // begin-snippet: composition-context-api-get-context
             var context = request.GetCompositionContext();
             // end-snippet
 
             // begin-snippet: composition-context-api-raise-event
-            context.RaiseEvent(new AnEvent());
+            await context.RaiseEvent(new AnEvent());
             // end-snippet
             
             // begin-snippet: composition-context-api-get-request-id
             var requestId = context.RequestId;
             // end-snippet
-            return Task.CompletedTask;
         }
     }
 }
