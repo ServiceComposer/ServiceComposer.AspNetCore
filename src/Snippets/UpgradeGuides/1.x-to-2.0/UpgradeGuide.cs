@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -53,6 +54,16 @@ public class UpgradeGuide
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
         {
             // subscribe here
+        }
+    }
+    // end-snippet
+    
+    // begin-snippet: composition-errors-handler-api
+    public class SampleErrorHandler : ICompositionErrorsHandler
+    {
+        public Task OnRequestError(HttpRequest request, Exception ex)
+        {
+            return Task.CompletedTask;
         }
     }
     // end-snippet
