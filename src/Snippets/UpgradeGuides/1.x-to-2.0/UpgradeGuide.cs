@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
@@ -47,13 +46,20 @@ public class UpgradeGuide
     }
     // end-snippet
     
-    // begin-snippet: composition-event-publisher-api
-    public class SamplePublisher : ICompositionEventsPublisher
+    class SampleEvent{}
+    
+    // begin-snippet: composition-event-subscriber-api
+    public class SamplePublisher : ICompositionEventsSubscriber
     {
         [HttpGet("/sample/{id}")]
-        public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
+        public void Subscribe(ICompositionEventsPublisher publisher)
         {
-            // subscribe here
+            // Use the publisher to subscriber to published events
+            publisher.Subscribe<SampleEvent>((evt, httpRequest)=>
+            {
+                // Handle the event
+                return Task.CompletedTask;
+            });
         }
     }
     // end-snippet
