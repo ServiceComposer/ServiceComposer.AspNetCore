@@ -46,6 +46,17 @@ public class UpgradeGuide
     }
     // end-snippet
     
+    // begin-snippet: composition-event-publisher-api
+    public class SamplePublisher : ICompositionEventsPublisher
+    {
+        [HttpGet("/sample/{id}")]
+        public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
+        {
+            // subscribe here
+        }
+    }
+    // end-snippet
+    
     public class CompositionContextApi : ICompositionRequestsHandler
     {
         class AnEvent{}
