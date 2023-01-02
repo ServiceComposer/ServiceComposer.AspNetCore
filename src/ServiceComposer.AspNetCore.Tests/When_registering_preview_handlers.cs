@@ -23,9 +23,9 @@ namespace ServiceComposer.AspNetCore.Tests
 
         class TestPreviewHandler : IViewModelPreviewHandler
         {
-            public bool Invoked { get; set; }
-
-            public Task Preview(dynamic viewModel)
+            public bool Invoked { get; private set; }
+            
+            public Task Preview(HttpRequest request)
             {
                 Invoked = true;
                 return Task.CompletedTask;

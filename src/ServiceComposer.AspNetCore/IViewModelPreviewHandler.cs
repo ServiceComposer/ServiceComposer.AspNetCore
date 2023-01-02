@@ -6,19 +6,18 @@ namespace ServiceComposer.AspNetCore
 {
     public interface IViewModelPreviewHandler
     {
-        [Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and removed in v3.")]
-        Task Preview(dynamic viewModel);
+        [Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and removed in v3.", error: true)]
+        Task Preview(dynamic viewModel)
+        {
+            throw new NotSupportedException();
+        }
 
-        [Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and removed in v3.")]
+        [Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and removed in v3.", error: true)]
         Task Preview(HttpRequest request, dynamic viewModel)
         {
-            return Preview(viewModel);
+            throw new NotSupportedException();
         }
 
-        Task Preview(HttpRequest request)
-        {
-            var viewModel = request.GetComposedResponseModel();
-            return Preview(viewModel);
-        }
+        Task Preview(HttpRequest request);
     }
 }

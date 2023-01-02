@@ -142,10 +142,10 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
         [System.Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and rem" +
-            "oved in v3.")]
+            "oved in v3.", true)]
         System.Threading.Tasks.Task Preview([System.Runtime.CompilerServices.Dynamic] object viewModel);
         [System.Obsolete("Use Preview(HttpRequest request). Will be treated as an error starting v2 and rem" +
-            "oved in v3.")]
+            "oved in v3.", true)]
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request, [System.Runtime.CompilerServices.Dynamic] object viewModel);
     }
     public enum ResponseCasing
