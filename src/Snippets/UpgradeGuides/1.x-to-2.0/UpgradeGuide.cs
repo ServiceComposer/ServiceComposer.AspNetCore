@@ -74,6 +74,16 @@ public class UpgradeGuide
     }
     // end-snippet
     
+    // begin-snippet: viewmodel-preview-handler-api
+    public class ViewModelPreviewHandler: IViewModelPreviewHandler
+    {
+        public Task Preview(HttpRequest httpRequest)
+        {
+            return Task.CompletedTask;
+        }
+    }
+    // end-snippet
+    
     public class CompositionContextApi : ICompositionRequestsHandler
     {
         class AnEvent{}
