@@ -1,11 +1,19 @@
-# ASP.NET Core on .NET 6
+# ASP.NET Core on .NET
 
 ServiceComposer leverages the Endpoints support to plugin into the request handling pipeline.
 ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET console applications.
 
+## Supported .NET versions
+
+ServiceComposer targets .NET 6 and .NET 7.
+
 ## Note about thread safety
 
 If resources are shared across more than one handler they must be [thread-safe](thread-safety.md).
+
+## Upgrade guides
+
+[Upgrade guides](upgrade-guides) are available to easy the migration from one version to another when needed.
 
 ## ASP.Net Model Binding
 
