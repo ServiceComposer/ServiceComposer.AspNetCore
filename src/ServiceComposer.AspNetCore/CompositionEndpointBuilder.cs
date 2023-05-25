@@ -117,6 +117,7 @@ namespace ServiceComposer.AspNetCore
 
         public override Endpoint Build()
         {
+            Debug.Assert(RequestDelegate != null, nameof(RequestDelegate) + " != null");
             var routeEndpoint = new RouteEndpoint(
                 RequestDelegate,
                 routePattern,
