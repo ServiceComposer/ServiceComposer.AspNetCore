@@ -28,7 +28,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 var content = JObject.Parse(body);
 
                 var vm = request.GetComposedResponseModel();
-                vm.ANumber = content?.SelectToken("ANumber")?.Value<int>();
+                vm.ANumber = content.SelectToken("ANumber")?.Value<int>();
             }
         }
 
@@ -43,7 +43,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 var content = JObject.Parse(body);
 
                 var vm = request.GetComposedResponseModel();
-                vm.AString = content?.SelectToken("AString")?.Value<string>();
+                vm.AString = content.SelectToken("AString")?.Value<string>();
             }
         }
 
@@ -93,8 +93,8 @@ namespace ServiceComposer.AspNetCore.Tests
             var responseString = await response.Content.ReadAsStringAsync();
             var responseObj = JObject.Parse(responseString);
 
-            Assert.Equal(expectedString, responseObj?.SelectToken("AString")?.Value<string>());
-            Assert.Equal(expectedNumber, responseObj?.SelectToken("ANumber")?.Value<int>());
+            Assert.Equal(expectedString, responseObj.SelectToken("AString")?.Value<string>());
+            Assert.Equal(expectedNumber, responseObj.SelectToken("ANumber")?.Value<int>());
         }
 
         [Fact]
@@ -143,8 +143,8 @@ namespace ServiceComposer.AspNetCore.Tests
             var responseString = await response.Content.ReadAsStringAsync();
             var responseObj = JObject.Parse(responseString);
 
-            Assert.Equal(expectedString, responseObj?.SelectToken("AString")?.Value<string>());
-            Assert.Equal(expectedNumber, responseObj?.SelectToken("ANumber")?.Value<int>());
+            Assert.Equal(expectedString, responseObj.SelectToken("AString")?.Value<string>());
+            Assert.Equal(expectedNumber, responseObj.SelectToken("ANumber")?.Value<int>());
         }
     }
 }
