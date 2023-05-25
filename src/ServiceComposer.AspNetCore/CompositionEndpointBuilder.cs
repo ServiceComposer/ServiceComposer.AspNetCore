@@ -40,7 +40,7 @@ namespace ServiceComposer.AspNetCore
                     switch (useOutputFormatters)
                     {
                         case false when containsActionResult:
-                            throw new NotSupportedException($"Setting an action results requires output formatters supports. " +
+                            throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
                                                             $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
                                                             $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
                         case true when containsActionResult:
