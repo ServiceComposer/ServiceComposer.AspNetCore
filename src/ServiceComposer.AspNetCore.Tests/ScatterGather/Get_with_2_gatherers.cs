@@ -16,34 +16,6 @@ namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
 
 public class Get_with_2_gatherers
 {
-    // class AGatherer : IGatherRequestsHandler
-    // {
-    //     [HttpGet("/values")]
-    //     public Task Handle(HttpRequest request)
-    //     {
-    //         var vm = request.GetScatterGatherResponseModel();
-    //         dynamic item = new ExpandoObject();
-    //         item.Id = 1;
-    //         vm.Add(item);
-    //         
-    //         return Task.CompletedTask;
-    //     }
-    // }
-    //
-    // class AnotherGatherer : IGatherRequestsHandler
-    // {
-    //     [HttpGet("/values")]
-    //     public Task Handle(HttpRequest request)
-    //     {
-    //         var vm = request.GetScatterGatherResponseModel();
-    //         dynamic item = new ExpandoObject();
-    //         item.Id = 2;
-    //         vm.Add(item);
-    //         
-    //         return Task.CompletedTask;
-    //     }
-    // }
-
     [Fact]
     public async Task Returns_expected_response()
     {
