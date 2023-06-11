@@ -15,16 +15,8 @@ public class Startup
         {
             Gatherers = new List<Gatherer>
             {
-                new()
-                {
-                    Key = "ASamplesSource",
-                    Destination = "https://a.web.server/api/samples/ASamplesSource"
-                },
-                new()
-                {
-                    Key = "AnotherSamplesSource",
-                    Destination = "https://another.web.server/api/samples/AnotherSamplesSource"
-                }
+                new(key: "ASamplesSource", destination: "https://a.web.server/api/samples/ASamplesSource"),
+                new(key: "AnotherSamplesSource", destination: "https://another.web.server/api/samples/AnotherSamplesSource")
             }
         }));
     }
