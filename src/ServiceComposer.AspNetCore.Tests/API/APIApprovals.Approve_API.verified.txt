@@ -68,6 +68,7 @@ namespace ServiceComposer.AspNetCore
         public string Destination { get; init; }
         public string Key { get; init; }
         public virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }
+        protected virtual string MapDestinationUrl(Microsoft.AspNetCore.Http.HttpRequest request) { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
     public static class HttpRequestExtensions

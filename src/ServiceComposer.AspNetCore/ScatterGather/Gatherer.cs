@@ -12,9 +12,7 @@ public class Gatherer
 {
     public Gatherer()
     {
-        DefaultDestinationUrlMapper= request => request.Query.Count == 0
-            ? Destination
-            : $"{Destination}{request.QueryString}";
+        DefaultDestinationUrlMapper = MapDestinationUrl;
         
         DestinationUrlMapper = request => DefaultDestinationUrlMapper(request);
     }
@@ -26,6 +24,13 @@ public class Gatherer
     
     public Func<HttpRequest, string> DestinationUrlMapper { get; init; }
 
+    protected virtual string MapDestinationUrl(HttpRequest request)
+    {
+        return request.Query.Count == 0
+            ? Destination
+            : $"{Destination}{request.QueryString}";
+    }
+    
     protected virtual async Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
     {
         var nodes = new List<JsonNode>();
