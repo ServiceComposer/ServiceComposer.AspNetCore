@@ -21,15 +21,6 @@ public static class ScatterGatherEndpointBuilderExtensions
             {
                 var client = factory.CreateClient(gatherer.Key);
                 
-                // TODO: template matching?
-                // e.g., what if Destination is defined as
-                // /samples/{culture}/ASamplesSource
-                // and the source template is /samples/{culture}
-                // or this responsibility could be moved into the gatherer
-                // and users could pass in a Func to transform the incoming request path
-                // into the outgoing request path
-                // e.g. /samples/ASamplesSource -> /samples/ASamplesSource?filter=foo
-                // or they could define a IDownstreamInvoker that does the entire downstream request
                 var destination = gatherer.DestinationUrlMapper(context.Request);
                 var task = client.GetAsync(destination)
                     .ContinueWith(t =>
