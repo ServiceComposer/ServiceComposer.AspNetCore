@@ -1,11 +1,11 @@
-using System.Net.Http;
+using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
 
 public interface IAggregator
 {
-    void Add(HttpResponseMessage response);
-    Task<string> Aggregate();
+    void Add(IEnumerable<JsonNode> nodes);
+    Task<JsonArray> Aggregate();
 }
