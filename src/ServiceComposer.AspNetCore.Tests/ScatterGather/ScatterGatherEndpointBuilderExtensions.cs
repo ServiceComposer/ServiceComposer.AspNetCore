@@ -15,7 +15,7 @@ public static class ScatterGatherEndpointBuilderExtensions
         builder.MapGet(template, async context =>
         {
             var aggregator = options.GetAggregator(context);
-            var factory = ServiceProviderServiceExtensions.GetRequiredService<IHttpClientFactory>(context.RequestServices);
+            var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
             var tasks = new List<Task>();
             foreach (var gatherer in options.Gatherers)
             {
