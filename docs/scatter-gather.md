@@ -14,13 +14,13 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
         Gatherers = new List<Gatherer>
         {
-            new(key: "ASamplesSource", destination: "https://a.web.server/api/samples/ASamplesSource"),
-            new(key: "AnotherSamplesSource", destination: "https://another.web.server/api/samples/AnotherSamplesSource")
+            new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
+            new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
         }
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L10-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L11-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The above configuration snippet configures ServiceComposer to handle HTTP requests matching the template. Each time a matching request is dealt with, ServiceComposer invokes each configured gatherer and merges responses from each one into a response returned to the original issuer.
@@ -40,7 +40,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
         Gatherers = new List<Gatherer>
         {
-            new Gatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+            new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
             {
                 DestinationUrlMapper = (request, destination) => destination.Replace(
                     "{this-is-contextual}", 
@@ -66,9 +66,9 @@ If there is a need to transform downstream data to respect the expected format, 
 <!-- snippet: scatter-gather-transform-response -->
 <a id='snippet-scatter-gather-transform-response'></a>
 ```cs
-public class CustomGatherer : Gatherer
+public class CustomHttpGatherer : HttpGatherer
 {
-    public CustomGatherer(string key, string destination) : base(key, destination) { }
+    public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
     
     protected override Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
     {
@@ -78,7 +78,7 @@ public class CustomGatherer : Gatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L11-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
@@ -88,9 +88,9 @@ If transforming returned data is not enough, it's possible to take full control 
 <!-- snippet: scatter-gather-gather-override -->
 <a id='snippet-scatter-gather-gather-override'></a>
 ```cs
-public class CustomGatherer : Gatherer
+public class CustomHttpGatherer : HttpGatherer
 {
-    public CustomGatherer(string key, string destination) : base(key, destination) { }
+    public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
 
     public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
