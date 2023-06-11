@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
+namespace ServiceComposer.AspNetCore;
 
 public class Gatherer
 {

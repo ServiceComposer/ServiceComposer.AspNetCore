@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
+namespace ServiceComposer.AspNetCore;
 
 public static class ScatterGatherEndpointBuilderExtensions
 {
