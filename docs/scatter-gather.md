@@ -4,7 +4,24 @@ ServiceCompose natively supports scatter/gather scenarios. Scatter/gather is sup
 
 The following configuration configures a scatter/gather endpoint:
 
-snippet: scatter-gather-basic-usage
+<!-- snippet: scatter-gather-basic-usage -->
+<a id='snippet-scatter-gather-basic-usage'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseRouting();
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<Gatherer>
+        {
+            new(key: "ASamplesSource", destination: "https://a.web.server/api/samples/ASamplesSource"),
+            new(key: "AnotherSamplesSource", destination: "https://another.web.server/api/samples/AnotherSamplesSource")
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L10-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 The above configuration snippet configures ServiceComposer to handle HTTP requests matching the template. Each time a matching request is dealt with, ServiceComposer invokes each configured gatherer and merges responses from each one into a response returned to the original issuer.
 
@@ -14,7 +31,27 @@ The `Key` and `Destination` properties are mandatory. The key uniquely identifie
 
 If the incoming request contains a query string, the query string and its values are automatically appended to downstream URLs as is. It is possible to override that behavior by setting the `DownstreamUrlMapper` delegate as presented in the following snippet:
 
-snippet: scatter-gather-customizing-downstream-urls
+<!-- snippet: scatter-gather-customizing-downstream-urls -->
+<a id='snippet-scatter-gather-customizing-downstream-urls'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<Gatherer>
+        {
+            new Gatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+            {
+                DestinationUrlMapper = (request, destination) => destination.Replace(
+                    "{this-is-contextual}", 
+                    request.HttpContext.Request.Query["this-is-contextual"])
+            }
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L10-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 The same approach can be used to customize the downstream URL before invocation.
 
