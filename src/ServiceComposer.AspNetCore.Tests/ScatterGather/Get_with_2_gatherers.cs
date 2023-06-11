@@ -86,16 +86,8 @@ public class Get_with_2_gatherers
                     {
                         Gatherers = new List<Gatherer>
                         {
-                            new()
-                            {
-                                Key = "ASamplesSource",
-                                Destination = "/samples/ASamplesSource"
-                            },
-                            new()
-                            {
-                                Key = "AnotherSamplesSource",
-                                Destination = "/samples/AnotherSamplesSource"
-                            }
+                            new(key: "ASamplesSource", destination: "/samples/ASamplesSource"),
+                            new(key: "AnotherSamplesSource", destination: "/samples/AnotherSamplesSource")
                         }
                     });
                 });

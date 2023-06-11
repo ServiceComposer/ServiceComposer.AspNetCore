@@ -10,25 +10,27 @@ namespace ServiceComposer.AspNetCore;
 
 public class Gatherer
 {
-    public Gatherer()
+    public Gatherer(string key, string destination)
     {
-        DefaultDestinationUrlMapper = MapDestinationUrl;
+        Key = key;
+        Destination = destination;
         
-        DestinationUrlMapper = request => DefaultDestinationUrlMapper(request);
+        DefaultDestinationUrlMapper = MapDestinationUrl;
+        DestinationUrlMapper = (request, dest) => DefaultDestinationUrlMapper(request, dest);
     }
-    
-    public string Key { get; init; }
-    public string Destination { get; init; }
-    
-    public Func<HttpRequest, string> DefaultDestinationUrlMapper { get; }
-    
-    public Func<HttpRequest, string> DestinationUrlMapper { get; init; }
 
-    protected virtual string MapDestinationUrl(HttpRequest request)
+    public string Key { get; }
+    public string Destination { get; }
+    
+    public Func<HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
+    
+    public Func<HttpRequest, string, string> DestinationUrlMapper { get; init; }
+
+    protected virtual string MapDestinationUrl(HttpRequest request, string destination)
     {
         return request.Query.Count == 0
-            ? Destination
-            : $"{Destination}{request.QueryString}";
+            ? destination
+            : $"{destination}{request.QueryString}";
     }
     
     protected virtual async Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
@@ -57,7 +59,7 @@ public class Gatherer
     {
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);
-        var destination = DestinationUrlMapper(context.Request);
+        var destination = DestinationUrlMapper(context.Request, Destination);
         var response = await client.GetAsync(destination);
         return await TransformResponse(response);
     }

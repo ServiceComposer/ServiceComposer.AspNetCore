@@ -62,13 +62,13 @@ namespace ServiceComposer.AspNetCore
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public class Gatherer
     {
-        public Gatherer() { }
-        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string> DefaultDestinationUrlMapper { get; }
-        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string> DestinationUrlMapper { get; init; }
-        public string Destination { get; init; }
-        public string Key { get; init; }
+        public Gatherer(string key, string destination) { }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
+        public string Destination { get; }
+        public string Key { get; }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DestinationUrlMapper { get; init; }
         public virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }
-        protected virtual string MapDestinationUrl(Microsoft.AspNetCore.Http.HttpRequest request) { }
+        protected virtual string MapDestinationUrl(Microsoft.AspNetCore.Http.HttpRequest request, string destination) { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
     public static class HttpRequestExtensions
