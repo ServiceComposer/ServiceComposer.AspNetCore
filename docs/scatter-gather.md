@@ -63,10 +63,42 @@ ServiceComposer scatter/gather support works only with JSON data. Gatherers must
 
 If there is a need to transform downstream data to respect the expected format, it's possible to create a custom gatherer and override the `TransformResponse` method:
 
-snippet: scatter-gather-transform-response
+<!-- snippet: scatter-gather-transform-response -->
+<a id='snippet-scatter-gather-transform-response'></a>
+```cs
+public class CustomGatherer : Gatherer
+{
+    public CustomGatherer(string key, string destination) : base(key, destination) { }
+    
+    protected override Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
+    {
+        // retrieve the response as a string from the HttpResponseMessage
+        // and parse it as a JsonNode enumerable.
+        return base.TransformResponse(responseMessage);
+    }
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L11-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
 
 If transforming returned data is not enough, it's possible to take full control over the downstream service invocation process by overriding the `Gather` method:
 
-snippet: scatter-gather-gather-override
+<!-- snippet: scatter-gather-gather-override -->
+<a id='snippet-scatter-gather-gather-override'></a>
+```cs
+public class CustomGatherer : Gatherer
+{
+    public CustomGatherer(string key, string destination) : base(key, destination) { }
+
+    public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
+    {
+        // by overriding this method we can implement custom logic
+        // to gather the responses from the downstream service.
+        return base.Gather(context);
+    }
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
