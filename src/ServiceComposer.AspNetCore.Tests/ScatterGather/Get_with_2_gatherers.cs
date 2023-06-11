@@ -65,8 +65,8 @@ public class Get_with_2_gatherers
                 HttpClient ClientProvider(string name) =>
                     name switch
                     {
-                        var val when val == "ASamplesSource" => aSampleSourceClient,
-                        var val when val == "AnotherSamplesSource" => anotherSampleSourceClient,
+                        "ASamplesSource" => aSampleSourceClient,
+                        "AnotherSamplesSource" => anotherSampleSourceClient,
                         _ => throw new NotSupportedException($"Missing HTTP client for {name}")
                     };
                 
