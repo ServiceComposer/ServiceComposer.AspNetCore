@@ -10,9 +10,9 @@ namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
 
 public static class ScatterGatherEndpointBuilderExtensions
 {
-    public static void MapScatterGather(this IEndpointRouteBuilder builder, string template, ScatterGatherOptions options)
+    public static IEndpointConventionBuilder MapScatterGather(this IEndpointRouteBuilder builder, string template, ScatterGatherOptions options)
     {
-        builder.MapGet(template, async context =>
+        return builder.MapGet(template, async context =>
         {
             var aggregator = options.GetAggregator(context);
             var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
