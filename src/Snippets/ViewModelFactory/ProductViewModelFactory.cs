@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using ServiceComposer.AspNetCore;
 
-namespace Snipptes.ViewModelFactory
+namespace Snippets.ViewModelFactory
 {
     // begin-snippet: view-model-factory-product-view-model-factory
     class ProductViewModelFactory : IEndpointScopedViewModelFactory
