@@ -10,9 +10,9 @@ namespace Snippets.ScatterGather;
 public class GatherMethodOverride
 {
     // begin-snippet: scatter-gather-gather-override
-    public class CustomGatherer : Gatherer
+    public class CustomHttpGatherer : HttpGatherer
     {
-        public CustomGatherer(string key, string destination) : base(key, destination) { }
+        public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
 
         public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
         {

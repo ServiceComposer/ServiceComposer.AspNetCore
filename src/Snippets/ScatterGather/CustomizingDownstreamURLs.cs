@@ -14,7 +14,7 @@ public class CustomizingDownstreamURLs
         {
             Gatherers = new List<Gatherer>
             {
-                new Gatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+                new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
                 {
                     DestinationUrlMapper = (request, destination) => destination.Replace(
                         "{this-is-contextual}", 

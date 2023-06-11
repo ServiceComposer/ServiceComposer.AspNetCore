@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
@@ -15,8 +16,8 @@ public class Startup
         {
             Gatherers = new List<Gatherer>
             {
-                new(key: "ASamplesSource", destination: "https://a.web.server/api/samples/ASamplesSource"),
-                new(key: "AnotherSamplesSource", destination: "https://another.web.server/api/samples/AnotherSamplesSource")
+                new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
+                new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
             }
         }));
     }

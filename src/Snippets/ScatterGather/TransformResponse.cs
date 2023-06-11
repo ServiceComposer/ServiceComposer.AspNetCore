@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json.Nodes;
@@ -9,9 +10,9 @@ namespace Snippets.ScatterGather;
 public class TransformResponseMethodOverride
 {
     // begin-snippet: scatter-gather-transform-response
-    public class CustomGatherer : Gatherer
+    public class CustomHttpGatherer : HttpGatherer
     {
-        public CustomGatherer(string key, string destination) : base(key, destination) { }
+        public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
         
         protected override Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
         {

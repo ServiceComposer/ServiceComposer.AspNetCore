@@ -86,8 +86,8 @@ public class When_using_query_string
                     {
                         Gatherers = new List<Gatherer>
                         {
-                            new(key: "ASamplesSource", destination: "/samples/ASamplesSource"),
-                            new(key: "AnotherSamplesSource", destination: "/samples/AnotherSamplesSource")
+                            new HttpGatherer(key: "ASamplesSource", destinationUrl: "/samples/ASamplesSource"),
+                            new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "/samples/AnotherSamplesSource")
                         }
                     });
                 });

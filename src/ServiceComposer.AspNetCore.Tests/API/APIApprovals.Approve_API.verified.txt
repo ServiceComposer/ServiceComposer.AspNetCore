@@ -60,14 +60,19 @@ namespace ServiceComposer.AspNetCore
         " removed in v3. Use attribute routing based composition, and CompositionEventHan" +
         "dler<TEvent>.", true)]
     public delegate System.Threading.Tasks.Task EventHandler<TEvent>(string requestId, [System.Runtime.CompilerServices.Dynamic] object viewModel, TEvent @event, Microsoft.AspNetCore.Routing.RouteData routeData, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
-    public class Gatherer
+    public abstract class Gatherer
     {
-        public Gatherer(string key, string destination) { }
-        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
-        public string Destination { get; }
+        protected Gatherer(string key) { }
         public string Key { get; }
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context);
+    }
+    public class HttpGatherer : ServiceComposer.AspNetCore.Gatherer
+    {
+        public HttpGatherer(string key, string destinationUrl) { }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
+        public string DestinationUrl { get; }
         public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DestinationUrlMapper { get; init; }
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }
+        public override System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }
         protected virtual string MapDestinationUrl(Microsoft.AspNetCore.Http.HttpRequest request, string destination) { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
