@@ -61,8 +61,12 @@ ServiceComposer scatter/gather support works only with JSON data. Gatherers must
 
 ### Transforming returned data
 
-TODO
+If there is a need to transform downstream data to respect the expected format, it's possible to create a custom gatherer and override the `TransformResponse` method:
+
+snippet: scatter-gather-transform-response
 
 ### Taking control of the downstream invocation process
 
-TODO
+If transforming returned data is not enough, it's possible to take full control over the downstream service invocation process by overriding the `Gather` method:
+
+snippet: scatter-gather-gather-override
