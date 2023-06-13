@@ -12,7 +12,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     app.UseRouting();
     app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     {
-        Gatherers = new List<Gatherer>
+        Gatherers = new List<IGatherer>
         {
             new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
             new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
@@ -38,7 +38,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
 {
     app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     {
-        Gatherers = new List<Gatherer>
+        Gatherers = new List<IGatherer>
         {
             new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
             {
@@ -92,7 +92,7 @@ public class CustomHttpGatherer : HttpGatherer
 {
     public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
 
-    public override Task<IEnumerable<object>> Gather(HttpContext context)
+    public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
 
         return base.Gather(context);
