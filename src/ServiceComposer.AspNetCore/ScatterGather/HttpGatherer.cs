@@ -55,7 +55,7 @@ public class HttpGatherer : Gatherer
         return nodes;
     }
 
-    public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
+    public override async Task<IEnumerable<object>> Gather(HttpContext context)
     {
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);

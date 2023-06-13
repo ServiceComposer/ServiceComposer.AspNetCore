@@ -14,6 +14,5 @@ public abstract class Gatherer
 
     public string Key { get; }
 
-    // TODO: how to use generics to remove the dependency on JSON?
-    public abstract Task<IEnumerable<JsonNode>> Gather(HttpContext context);
+    public abstract Task<IEnumerable<object>> Gather(HttpContext context);
 }

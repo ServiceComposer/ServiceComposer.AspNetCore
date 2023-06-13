@@ -6,6 +6,6 @@ namespace ServiceComposer.AspNetCore;
 
 public interface IAggregator
 {
-    void Add(IEnumerable<JsonNode> nodes);
-    Task<JsonArray> Aggregate();
+    void Add(IEnumerable<object> nodes);
+    Task<object> Aggregate();
 }

@@ -73,6 +73,7 @@ public class Get_with_2_gatherers
                 // TODO: does this need to register a default HTTP client?
                 // services.AddScatterGather();
                 services.AddRouting();
+                services.AddControllers();
                 services.Replace(
                     new ServiceDescriptor(typeof(IHttpClientFactory), 
                     new DelegateHttpClientFactory(ClientProvider)));

@@ -14,6 +14,7 @@ public class ScatterGatherOptions
         {
             return (IAggregator)httpContext.RequestServices.GetRequiredService(CustomAggregator);
         }
+        
         return new DefaultAggregator();
     }
 
