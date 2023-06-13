@@ -18,5 +18,5 @@ public class ScatterGatherOptions
         return new DefaultAggregator();
     }
 
-    public IList<Gatherer> Gatherers { get; set; }
+    public IList<IGatherer> Gatherers { get; set; }
 }

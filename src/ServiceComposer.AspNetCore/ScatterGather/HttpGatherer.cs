@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore;
 
-public class HttpGatherer : Gatherer
+public class HttpGatherer : Gatherer<JsonNode>
 {
     public HttpGatherer(string key, string destinationUrl)
         : base(key)
@@ -55,7 +55,7 @@ public class HttpGatherer : Gatherer
         return nodes;
     }
 
-    public override async Task<IEnumerable<object>> Gather(HttpContext context)
+    public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);

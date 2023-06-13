@@ -12,7 +12,7 @@ public class CustomizingDownstreamURLs
     {
         app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
-            Gatherers = new List<Gatherer>
+            Gatherers = new List<IGatherer>
             {
                 new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
                 {

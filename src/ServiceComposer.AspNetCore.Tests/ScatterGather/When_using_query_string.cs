@@ -84,7 +84,7 @@ public class When_using_query_string
                 {
                     builder.MapScatterGather(template: "/samples", new ScatterGatherOptions
                     {
-                        Gatherers = new List<Gatherer>
+                        Gatherers = new List<IGatherer>
                         {
                             new HttpGatherer(key: "ASamplesSource", destinationUrl: "/samples/ASamplesSource"),
                             new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "/samples/AnotherSamplesSource")

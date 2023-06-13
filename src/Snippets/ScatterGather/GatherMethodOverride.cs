@@ -14,7 +14,7 @@ public class GatherMethodOverride
     {
         public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
 
-        public override Task<IEnumerable<object>> Gather(HttpContext context)
+        public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
         {
 
             return base.Gather(context);

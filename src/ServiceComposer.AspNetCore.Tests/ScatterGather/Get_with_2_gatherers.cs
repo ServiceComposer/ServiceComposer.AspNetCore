@@ -85,7 +85,7 @@ public class Get_with_2_gatherers
                 {
                     builder.MapScatterGather(template: "/samples", new ScatterGatherOptions
                     {
-                        Gatherers = new List<Gatherer>
+                        Gatherers = new List<IGatherer>
                         {
                             new HttpGatherer(key: "ASamplesSource", destinationUrl: "/samples/ASamplesSource"),
                             new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "/samples/AnotherSamplesSource")
