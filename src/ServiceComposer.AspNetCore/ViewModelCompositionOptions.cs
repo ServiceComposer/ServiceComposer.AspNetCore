@@ -156,7 +156,7 @@ namespace ServiceComposer.AspNetCore
                     {
                         foreach (var type in types)
                         {
-                            Services.AddTransient(typeof(IEndpointScopedViewModelFactory), type);
+                            RegisterEndpointScopedViewModelFactory(type);
                         }
                     });
 
@@ -236,6 +236,11 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
+        void RegisterEndpointScopedViewModelFactory(Type viewModelFactoryType)
+        {
+            RegisterCompositionComponents(viewModelFactoryType);
+        }
+        
         public void RegisterEndpointScopedViewModelFactory<T>() where T: IEndpointScopedViewModelFactory
         {
             RegisterCompositionComponents(typeof(T));
