@@ -277,9 +277,9 @@ namespace ServiceComposer.AspNetCore.Tests
         [Fact]
         public void Endpoint_scoped_factories_are_registered_automatically()
         {
-            IEnumerable<IEndpointScopedViewModelFactory> expectedEndpointScopedViewModelFactories = null;
-
             // Arrange
+            TestEndpointScopedViewModelFactory expectedInstance = null;
+            
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
             (
                 configureServices: services =>
@@ -313,13 +313,12 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder => builder.MapCompositionHandlers());
 
-                    expectedEndpointScopedViewModelFactories = app.ApplicationServices.GetServices<IEndpointScopedViewModelFactory>();
+                    expectedInstance = app.ApplicationServices.GetService<TestEndpointScopedViewModelFactory>();
                 }
             ).CreateClient();
 
             // Assert
-            Assert.NotNull(expectedEndpointScopedViewModelFactories);
-            Assert.True(expectedEndpointScopedViewModelFactories.Single().GetType() == typeof(TestEndpointScopedViewModelFactory));
+            Assert.NotNull(expectedInstance);
         }
         
         [Fact]
@@ -333,6 +332,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 {
                     services.AddViewModelComposition(options =>
                     {
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
                         options.TypesFilter = type =>
                         {
                             if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
@@ -366,7 +366,7 @@ namespace ServiceComposer.AspNetCore.Tests
             var response = await client.GetAsync($"/use-endpoint-scoped-factory/{expectedValue}");
 
             var responseString = await response.Content.ReadAsStringAsync();
-            var responseObj = System.Text.Json.JsonSerializer.Deserialize<TestModel>(responseString);
+            var responseObj = JsonSerializer.Deserialize<TestModel>(responseString);
             
             // Assert
             Assert.True(response.IsSuccessStatusCode);
