@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Castle.Core.Configuration;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore.Testing;
 using TestClassLibraryWithHandlers;
@@ -263,6 +265,114 @@ namespace ServiceComposer.AspNetCore.Tests
             // Assert
             Assert.NotNull(expectedPreviewHandlers);
             Assert.True(expectedPreviewHandlers.Single().GetType() == typeof(TestPreviewHandler));
+        }
+
+        class TestEndpointScopedViewModelFactory : IEndpointScopedViewModelFactory
+        {
+            [HttpGet("/use-endpoint-scoped-factory/{id}")]
+            public object CreateViewModel(HttpContext httpContext, ICompositionContext compositionContext)
+            {
+                return new TestModel();
+            }
+        }
+        
+        [Fact]
+        public void Endpoint_scoped_factories_are_registered_automatically()
+        {
+            IEnumerable<IEndpointScopedViewModelFactory> expectedEndpointScopedViewModelFactories = null;
+
+            // Arrange
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+
+                    expectedEndpointScopedViewModelFactories = app.ApplicationServices.GetServices<IEndpointScopedViewModelFactory>();
+                }
+            ).CreateClient();
+
+            // Assert
+            Assert.NotNull(expectedEndpointScopedViewModelFactories);
+            Assert.True(expectedEndpointScopedViewModelFactories.Single().GetType() == typeof(TestEndpointScopedViewModelFactory));
+        }
+        
+        [Fact]
+        public async Task Endpoint_scoped_factories_is_used()
+        {
+            // Arrange
+            var expectedValue = 1;
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
+                    services.AddRouting();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync($"/use-endpoint-scoped-factory/{expectedValue}");
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = System.Text.Json.JsonSerializer.Deserialize<TestModel>(responseString);
+            
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(expectedValue, responseObj.Value);
         }
     }
 }
