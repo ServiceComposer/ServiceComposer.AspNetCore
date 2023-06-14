@@ -20,7 +20,7 @@ public class ProductViewModel
 <sup><a href='/src/Snippets/ViewModelFactory/ProductViewModel.cs#L3-L11' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-View models have no requirements other than being serializable. They are POC objects.
+View models have no requirements other than being serializable. They are POCO objects.
 
 ## Endpoint scoped view model factories
 
@@ -45,7 +45,7 @@ class ProductViewModelFactory : IEndpointScopedViewModelFactory
 <sup><a href='/src/Snippets/ViewModelFactory/ProductViewModelFactory.cs#L8-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-view-model-factory-product-view-model-factory' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-View model factories are scoped to endpoints, they need to be identified when handling routes and thus they need to be decorated with a routing attribute and a route template. Each rout that needs a strongly typed view model needs a different factory.
+View model factories are scoped to endpoints, they need to be identified when handling routes and thus they need to be decorated with a routing attribute and a route template. Each route that needs a strongly typed view model needs a different factory.
 
 Once the factory is defined it's automatically registered in the DI container at startup and will be used by ServiceComposer when handling the specified route.
 
