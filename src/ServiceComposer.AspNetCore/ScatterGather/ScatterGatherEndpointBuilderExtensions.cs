@@ -33,7 +33,7 @@ public static class ScatterGatherEndpointBuilderExtensions
 
             // TODO: support output formatters by using the WriteModelAsync extension method.
             // It must be under a setting flag, because it requires a dependency on MVC.
-            await context.Response.WriteAsync(responses.ToJsonString());
+            await context.Response.WriteAsync( System.Text.Json.JsonSerializer.Serialize(responses));
         });
     }
 }
