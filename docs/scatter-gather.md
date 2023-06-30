@@ -78,7 +78,7 @@ public class CustomHttpGatherer : HttpGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L13-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
