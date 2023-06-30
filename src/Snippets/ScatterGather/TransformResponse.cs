@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.ScatterGather;

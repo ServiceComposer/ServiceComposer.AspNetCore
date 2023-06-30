@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore;
 
-public class HttpGatherer : Gatherer
+public class HttpGatherer : Gatherer<JsonNode>
 {
     public HttpGatherer(string key, string destinationUrl)
         : base(key)

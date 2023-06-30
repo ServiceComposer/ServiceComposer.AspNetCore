@@ -9,17 +9,17 @@ class DefaultAggregator : IAggregator
 {
     readonly ConcurrentBag<JsonNode> allNodes = new();
 
-    public void Add(IEnumerable<JsonNode> nodes)
+    public void Add(IEnumerable<object> nodes)
     {
         foreach (var node in nodes)
         {
-            allNodes.Add(node);
+            allNodes.Add((JsonNode)node);
         }
     }
 
-    public Task<JsonArray> Aggregate()
+    public Task<object> Aggregate()
     {
         var responsesArray = new JsonArray(allNodes.ToArray());
-        return Task.FromResult(responsesArray);
+        return Task.FromResult((object)responsesArray);
     }
 }

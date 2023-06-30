@@ -14,7 +14,7 @@ public class Startup
         app.UseRouting();
         app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
-            Gatherers = new List<Gatherer>
+            Gatherers = new List<IGatherer>
             {
                 new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
                 new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")

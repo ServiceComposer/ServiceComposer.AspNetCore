@@ -73,6 +73,7 @@ public class Get_with_2_gatherers
                 // TODO: does this need to register a default HTTP client?
                 // services.AddScatterGather();
                 services.AddRouting();
+                services.AddControllers();
                 services.Replace(
                     new ServiceDescriptor(typeof(IHttpClientFactory), 
                     new DelegateHttpClientFactory(ClientProvider)));
@@ -84,7 +85,7 @@ public class Get_with_2_gatherers
                 {
                     builder.MapScatterGather(template: "/samples", new ScatterGatherOptions
                     {
-                        Gatherers = new List<Gatherer>
+                        Gatherers = new List<IGatherer>
                         {
                             new HttpGatherer(key: "ASamplesSource", destinationUrl: "/samples/ASamplesSource"),
                             new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "/samples/AnotherSamplesSource")

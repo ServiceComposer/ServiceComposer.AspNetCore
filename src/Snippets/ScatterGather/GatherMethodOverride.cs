@@ -16,8 +16,7 @@ public class GatherMethodOverride
 
         public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
         {
-            // by overriding this method we can implement custom logic
-            // to gather the responses from the downstream service.
+
             return base.Gather(context);
         }
     }

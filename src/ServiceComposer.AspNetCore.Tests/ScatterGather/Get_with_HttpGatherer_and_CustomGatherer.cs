@@ -9,15 +9,26 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ServiceComposer.AspNetCore.Tests.Utils;
 
 namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
 
-public class When_using_query_string
+public class Get_with_HttpGatherer_and_CustomGatherer
 {
+    class CustomGatherer : IGatherer
+    {
+        public string Key { get; } = "CustomGatherer";
+        public Task<IEnumerable<object>> Gather(HttpContext context)
+        {
+            var data = (IEnumerable<object>)(new []{ new { Value = "ACustomSample" } });
+            return Task.FromResult(data);
+        }
+    }
+
     [Fact]
-    public async Task Values_are_propagated_to_downstream_destinations()
+    public async Task Returns_expected_response()
     {
         // Arrange
         var aSampleSourceClient = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
@@ -31,28 +42,9 @@ public class When_using_query_string
                 app.UseRouting();
                 app.UseEndpoints(builder =>
                 {
-                    builder.MapGet("/samples/ASamplesSource", (string culture) =>
+                    builder.MapGet("/samples/ASamplesSource", () =>
                     {
-                        return new []{ new { Value = "ASample", Culture = culture } };
-                    });
-                });
-            }
-        ).CreateClient();
-        
-        var anotherSampleSourceClient = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
-        (
-            configureServices: services =>
-            {
-                services.AddRouting();
-            },
-            configure: app =>
-            {
-                app.UseRouting();
-                app.UseEndpoints(builder =>
-                {
-                    builder.MapGet("/samples/AnotherSamplesSource", (string culture) =>
-                    {
-                        return new []{ new { Value = "AnotherSample", Culture = culture } };
+                        return new []{ new { Value = "ASample" } };
                     });
                 });
             }
@@ -66,13 +58,13 @@ public class When_using_query_string
                     name switch
                     {
                         "ASamplesSource" => aSampleSourceClient,
-                        "AnotherSamplesSource" => anotherSampleSourceClient,
                         _ => throw new NotSupportedException($"Missing HTTP client for {name}")
                     };
                 
                 // TODO: does this need to register a default HTTP client?
                 // services.AddScatterGather();
                 services.AddRouting();
+                services.AddControllers();
                 services.Replace(
                     new ServiceDescriptor(typeof(IHttpClientFactory), 
                     new DelegateHttpClientFactory(ClientProvider)));
@@ -87,7 +79,7 @@ public class When_using_query_string
                         Gatherers = new List<IGatherer>
                         {
                             new HttpGatherer(key: "ASamplesSource", destinationUrl: "/samples/ASamplesSource"),
-                            new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "/samples/AnotherSamplesSource")
+                            new CustomGatherer()
                         }
                     });
                 });
@@ -95,8 +87,7 @@ public class When_using_query_string
         ).CreateClient();
         
         // Act
-        var culture = "it-IT";
-        var response = await client.GetAsync($"/samples?culture={culture}");
+        var response = await client.GetAsync("/samples");
 
         // Assert
         Assert.True(response.IsSuccessStatusCode);
@@ -107,8 +98,8 @@ public class When_using_query_string
 
         var expectedArray = JsonNode.Parse(JsonSerializer.Serialize( new[]
         {
-            new {Value = "ASample", Culture = culture},
-            new {Value = "AnotherSample", Culture = culture}
+            new {Value = "ASample"},
+            new {Value = "ACustomSample"}
         }, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase

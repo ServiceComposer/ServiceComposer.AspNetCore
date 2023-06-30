@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace ServiceComposer.AspNetCore;
 
-public abstract class Gatherer
+public abstract class Gatherer<T> : IGatherer where T : class
 {
     protected Gatherer(string key)
     {
@@ -14,6 +13,10 @@ public abstract class Gatherer
 
     public string Key { get; }
 
-    // TODO: how to use generics to remove the dependency on JSON?
-    public abstract Task<IEnumerable<JsonNode>> Gather(HttpContext context);
+    Task<IEnumerable<object>> IGatherer.Gather(HttpContext context)
+    {
+        return Gather(context).ContinueWith(t => (IEnumerable<object>)t.Result);
+    }
+
+    public abstract Task<IEnumerable<T>> Gather(HttpContext context);
 }

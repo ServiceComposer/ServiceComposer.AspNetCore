@@ -12,7 +12,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     app.UseRouting();
     app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     {
-        Gatherers = new List<Gatherer>
+        Gatherers = new List<IGatherer>
         {
             new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
             new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
@@ -38,7 +38,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
 {
     app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     {
-        Gatherers = new List<Gatherer>
+        Gatherers = new List<IGatherer>
         {
             new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
             {
@@ -78,7 +78,7 @@ public class CustomHttpGatherer : HttpGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L13-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
@@ -94,11 +94,10 @@ public class CustomHttpGatherer : HttpGatherer
 
     public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
-        // by overriding this method we can implement custom logic
-        // to gather the responses from the downstream service.
+
         return base.Gather(context);
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L12-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
