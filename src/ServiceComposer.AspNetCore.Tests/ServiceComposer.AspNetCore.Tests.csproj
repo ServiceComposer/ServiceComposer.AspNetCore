@@ -40,7 +40,7 @@
     <PackageReference Include="PublicApiGenerator" Version="11.0.0" />
     <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.0.0" />
     <PackageReference Include="xunit" Version="2.5.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
