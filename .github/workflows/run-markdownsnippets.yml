@@ -10,7 +10,7 @@ jobs:
     name: Process documentation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.0
+    - uses: actions/checkout@v4.1.1
     - name: Run MarkdownSnippets
       run: |
         dotnet tool install --global MarkdownSnippets.Tool
