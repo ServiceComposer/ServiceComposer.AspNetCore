@@ -96,7 +96,7 @@ namespace ServiceComposer.AspNetCore.Tests
         [Fact]
         public async Task Throws_if_output_formatters_are_not_enabled()
         {
-            await Assert.ThrowsAsync<NotSupportedException>(async () => 
+            async Task Function()
             {
                 // Arrange
                 var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
@@ -123,7 +123,8 @@ namespace ServiceComposer.AspNetCore.Tests
 
                 // Act
                 var response = await client.GetAsync("/sample/1");
-            });
+            }
+            await Assert.ThrowsAsync<NotSupportedException>(Function);
         }
     }
 }
