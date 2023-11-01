@@ -36,10 +36,8 @@ namespace ServiceComposer.AspNetCore.Tests
             var logger = new Logger();
             dynamic sut = new DynamicViewModel(logger);
 
-            await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            {
-                await sut.RaiseEvent(new object());
-            });
+            Task Function() => sut.RaiseEvent(new object());
+            await Assert.ThrowsAsync<NotSupportedException>(Function);
 
             Assert.Equal(LogLevel.Error, logger.Level);
             Assert.Equal("dynamic.RaiseEvent is obsolete. It'll be treated as an error starting v2 and removed in v3. Use HttpRequest.GetCompositionContext() to raise events.", logger.Message);

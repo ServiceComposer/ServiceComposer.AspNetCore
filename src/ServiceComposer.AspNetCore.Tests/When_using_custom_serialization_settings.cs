@@ -75,35 +75,29 @@ namespace ServiceComposer.AspNetCore.Tests
         [Fact]
         public async Task Should_throw_if_camel_case_request_and_no_valid_contract_resolver()
         {
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            async Task Function()
             {
                 // Arrange
-                var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_matching_handler>
-                (
-                    configureServices: services =>
+                var client = new SelfContainedWebApplicationFactoryWithWebHost<Get_with_matching_handler>(configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
                     {
-                        services.AddViewModelComposition(options =>
-                        {
-                            options.AssemblyScanner.Disable();
-                            options.RegisterCompositionHandler<ResponseHandler>();
-                            options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.CamelCase;
-                            options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
-                            {
-                                return new JsonSerializerSettings();
-                            });
-                        });
-                        services.AddRouting();
-                    },
-                    configure: app =>
-                    {
-                        app.UseRouting();
-                        app.UseEndpoints(builder => builder.MapCompositionHandlers());
-                    }
-                ).CreateClient();
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<ResponseHandler>();
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.CamelCase;
+                        options.ResponseSerialization.UseCustomJsonSerializerSettings(request => new JsonSerializerSettings());
+                    });
+                    services.AddRouting();
+                }, configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }).CreateClient();
 
                 // Act
                 await client.GetAsync("/empty-response/1");
-            });
+            }
+            await Assert.ThrowsAsync<ArgumentException>(Function);
         }
 
         [Fact]
