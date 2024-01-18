@@ -6,7 +6,6 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests.API
 {
-    [UsesVerify]
     public class APIApprovals
     {
         [Fact]
