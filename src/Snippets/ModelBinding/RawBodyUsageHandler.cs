@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.ModelBinding
+namespace Snippets.ModelBinding
 {
     class RawBodyUsageHandler : ICompositionRequestsHandler
     {

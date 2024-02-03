@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.SampleHandler
+namespace Snippets.SampleHandler
 {
     // begin-snippet: sample-handler-with-authorization
     public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
