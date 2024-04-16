@@ -53,7 +53,7 @@ namespace ServiceComposer.AspNetCore
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         [System.Obsolete("To enable write support use the EnableWriteSupport() method on the ViewModelCompo" +
-            "sitionOptions. This method will be treated as an error in v2 and removed in v3.")]
+            "sitionOptions. This method will be treated as an error in v2 and removed in v3.", true)]
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, bool enableWriteSupport) { }
     }
     [System.Obsolete("EventHandler<TEvent> is obsoleted and will be treated as an error starting v2 and" +
@@ -172,7 +172,11 @@ namespace ServiceComposer.AspNetCore
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
+        public void DisableWriteSupport() { }
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true) { }
+        [System.Obsolete("EnableWriteSupport is obsolete. Starting v2.1.0, write support is enabled by defa" +
+            "ult. Use DisableWriteSupport to disable it. It\'ll be considered an error in v3.0" +
+            ".0 and removed in v4.0.0", false)]
         public void EnableWriteSupport() { }
         [System.Obsolete("RegisterCompositionEventsSubscriber is obsolete, see upgrade guide on how to use " +
             "the new composition interfaces.", true)]

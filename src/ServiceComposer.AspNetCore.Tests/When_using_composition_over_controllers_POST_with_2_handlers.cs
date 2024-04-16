@@ -92,7 +92,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
                         options.EnableCompositionOverControllers();
-                        options.EnableWriteSupport();
                     });
                     services.AddRouting();
                     services.AddControllers()

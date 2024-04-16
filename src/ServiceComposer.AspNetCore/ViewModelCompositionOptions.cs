@@ -56,11 +56,11 @@ namespace ServiceComposer.AspNetCore
             CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
         }
 
-        internal bool IsWriteSupportEnabled { get; private set; }
+        internal bool IsWriteSupportEnabled { get; private set; } = true;
 
-        public void EnableWriteSupport()
+        public void DisableWriteSupport()
         {
-            IsWriteSupportEnabled = true;
+            IsWriteSupportEnabled = false;
         }
 
         internal void InitializeServiceCollection()
