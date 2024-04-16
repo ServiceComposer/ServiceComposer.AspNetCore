@@ -17,15 +17,15 @@ Designing a UI when the back-end system consists of dozens (or more) of (micro)s
 
 ## Technical introduction
 
-For a technical introduction and an overview of the problem space, refer to the following presentation available on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0).
+For a technical introduction and an overview of the problem space, refer to the following presentation on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0).
 
 ## Getting Started
 
-Imagine an elementary e-commerce web page, where it's needed to display details about a selected product. These details are stored in two different services. The Sales service owns the product price, and the Marketing service owns the product name and description. ServiceComposer solves the problem of composing information coming from different services into one composed view model that can be later displayed or consumed by downstream clients.
+Imagine an elementary e-commerce web page where it's needed to display details about a selected product. These details are stored in two different services. The Sales service owns the product price, and the Marketing service owns the product name and description. ServiceComposer solves the problem of composing information from different services into one composed view model that downstream clients can later display or consume.
 
 To start using ServiceComposer, follow the outlined steps:
 
-- Create, in an empty or existing solution, a .NET 6 or later empty web application project named `CompositionGateway`.
+- Create a .NET 6 or later empty web application project named `CompositionGateway` in an empty or existing solution.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
 
 <!-- snippet: sample-startup -->
@@ -49,9 +49,7 @@ public class Startup
 <sup><a href='/src/Snippets/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-> NOTE: To use a `Startup` class, Generic Host support is required.
-
-- Add a new .NET 6 or later class library project, named `Sales.ViewModelComposition`.
+- Add a new .NET 6 or later class library project named `Sales.ViewModelComposition`.
 - Add a package reference to the `ServiceComposer.AspNetCore` NuGet package.
 - Add a new class to create a composition request handler.
 - Define the class similar to the following:
@@ -100,7 +98,7 @@ public class MarketingProductInfo: ICompositionRequestsHandler
 <sup><a href='/src/Snippets/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-- Make so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
+- Make it so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
 - Build and run the web application project
 - Using a browser or a tool like Postman, issue an HTTP Get request to `<url-of-the-web-application>/product/1`
 
@@ -108,7 +106,7 @@ The HTTP response should be a JSON result containing the properties and values d
 
 > NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
 
-In this brief sample the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow requests handlers to be fully independent from each other, they share nothing. ServiceComposer supports using strongly typed view models in case they are preferred. They come with the advantage of strong typing and compilers checks, and the disadvantage of a little coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
+In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantage of a little coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
 
 ## Documentation and supported platforms
 
@@ -118,21 +116,21 @@ ServiceComposer is available for the following platforms:
 
 ## Philosophy
 
-### Service boundaries
+### Service Boundaries
 
-When building systems based on SOA principles, service boundaries are key, if not THE key aspect. If we get service boundaries wrong, the end result has the risk to be, in the best case, a distributed monolith, and in the worst one, a complete failure.
+When building systems based on SOA principles, service boundaries are key, if not THE key aspect. If we get service boundaries wrong, the end result risks being a distributed monolith in the best case and a complete failure in the worst case.
 
-> Service boundaries identification is a challenge on its own; it requires a lot of business domain knowledge and a lot of confidence with high-level design techniques. Other than that, technical challenges might drive the solution design in the wrong direction due to the lack of technical solutions to problems foreseen while defining service boundaries.
+> Service boundary identification is a challenge on its own; it requires extensive business domain knowledge and confidence in high-level design techniques. Technical challenges, such as the lack of technical solutions to problems foreseen while defining service boundaries, might drive the solution design in the wrong direction.
 
 The transition from the user mental model, described by domain experts, to the service boundaries architectural model in the SOA space raises many different concerns. If domain entities, as defined by domain experts, are split among several services:
 
 - how can we then display to users what they need to visualize?
 - when systems need to make decisions, how can they “query” data required to make that decision, stored in many different services?
 
-This type of question leads systems to be designed using rich events, and not thin ones, to share data between services and at the same to share data with cache-like things, such as Elastic Search, to satisfy UI query/visualization needs.
+This type of question leads systems to be designed using rich events, not thin ones, to share data between services and with cache-like things, such as Elastic Search, to satisfy UI query/visualization needs.
 
-This is the beginning of a road that can only lead to a distributed monolith, where data ownership is a lost concept and every change impacts and breaks the whole system. In such a scenario, it’s very easy to blame SOA and the toolset.
+This is the beginning of a road that can only lead to a distributed monolith, where data ownership is a lost concept and every change impacts and breaks the whole system. In such a scenario, it’s easy to blame SOA and the toolset.
 
-ViewModel Composition techniques are designed to address all these concerns. ViewModel Composition brings the separation of concerns, designed at the back-end, to the front-end.
+ViewModel Composition techniques are designed to address all these concerns. They bring the separation of concerns, designed at the back end, to the front end.
 
 For more details and the philosophy behind a Composition Gateway, refer to the [ViewModel Composition series](https://milestone.topics.it/categories/view-model-composition) of article available on [milestone.topics.it](https://milestone.topics.it/).
