@@ -169,7 +169,6 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.EnableWriteSupport();
 
                         variant.CompositionOptions?.Invoke(options);
                     });

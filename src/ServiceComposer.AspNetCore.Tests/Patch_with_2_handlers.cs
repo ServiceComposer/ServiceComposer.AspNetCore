@@ -63,7 +63,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
-                        options.EnableWriteSupport();
                     });
                     services.AddRouting();
                 },
@@ -113,7 +112,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
-                        options.EnableWriteSupport();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();
