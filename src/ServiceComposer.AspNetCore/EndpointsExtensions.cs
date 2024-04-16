@@ -13,21 +13,12 @@ using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
-    public static class EndpointsExtensions
+    public static partial class EndpointsExtensions
     {
         static readonly Dictionary<string, Type[]> compositionOverControllerGetComponents = new();
         static readonly Dictionary<string, Type[]> compositionOverControllerPostComponents = new();
 
         public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
-        {
-#pragma warning disable 618
-            return MapCompositionHandlers(endpoints, false);
-#pragma warning restore 618
-        }
-
-        [Obsolete(
-            "To enable write support use the EnableWriteSupport() method on the ViewModelCompositionOptions. This method will be treated as an error in v2 and removed in v3.")]
-        public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints, bool enableWriteSupport)
         {
             if (endpoints == null)
             {
@@ -55,7 +46,7 @@ namespace ServiceComposer.AspNetCore
                 options.CompositionOverControllersOptions,
                 options.ResponseSerialization.DefaultResponseCasing,
                 options.ResponseSerialization.UseOutputFormatters);
-            if (enableWriteSupport || options.IsWriteSupportEnabled)
+            if (options.IsWriteSupportEnabled)
             {
                 MapPostComponents(
                     compositionMetadataRegistry,
@@ -87,7 +78,7 @@ namespace ServiceComposer.AspNetCore
             return dataSource;
         }
 
-        private static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+        static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -113,7 +104,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+        static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -139,7 +130,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+        static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -156,7 +147,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+        static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -173,7 +164,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry,
+        static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -190,7 +181,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        private static void AppendToDataSource(ICollection<EndpointDataSource> dataSources,
+        static void AppendToDataSource(ICollection<EndpointDataSource> dataSources,
             CompositionEndpointBuilder builder)
         {
             var dataSource = dataSources.OfType<CompositionEndpointDataSource>().FirstOrDefault();
@@ -231,7 +222,7 @@ namespace ServiceComposer.AspNetCore
             return false;
         }
 
-        private static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
+        static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
             HttpMethodMetadata methodMetadata,
             ResponseCasing defaultCasing,
