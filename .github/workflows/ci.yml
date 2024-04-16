@@ -60,7 +60,7 @@ jobs:
         with:
           name: nuget-packages
           path: nugets/
-      - name: Push package to Myget
-        run: dotnet nuget push ./nugets/*.nupkg --source https://www.myget.org/F/service-composer/api/v2/package --api-key ${{ secrets.MYGET_API_KEY }}
-      - name: Push symbols to MyGet
-        run: dotnet nuget push ./nugets/*.snupkg --source https://www.myget.org/F/service-composer/api/v3/index.json --api-key ${{ secrets.MYGET_API_KEY }}
+      - name: Push package to Feedz.io
+        run: dotnet nuget push ./nugets/*.nupkg --source https://f.feedz.io/mauroservienti/pre-releases/nuget --api-key ${{ secrets.FEEDZ_API_KEY }}
+      - name: Push symbols to Feedz.io
+        run: dotnet nuget push ./nugets/*.snupkg --source https://f.feedz.io/mauroservienti/pre-releases/symbols --api-key ${{ secrets.FEEDZ_API_KEY }}
