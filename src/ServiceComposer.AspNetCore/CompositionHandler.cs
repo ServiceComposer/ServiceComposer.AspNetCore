@@ -24,7 +24,11 @@ namespace ServiceComposer.AspNetCore
                 requestId = Guid.NewGuid().ToString();
             }
 
+#if NET8_0
+            context.Response.Headers.Append(ComposedRequestIdHeader.Key, requestId);
+#else
             context.Response.Headers.Add(ComposedRequestIdHeader.Key, requestId);
+#endif
             var compositionContext = new CompositionContext(requestId, routeData, request);
 
             object viewModel;
