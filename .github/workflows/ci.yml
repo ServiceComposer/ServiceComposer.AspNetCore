@@ -48,7 +48,7 @@ jobs:
           retention-days: 2
   release:
     needs: build
-    name: Release to MyGet
+    name: Release to Feedz.io
     if: startsWith(github.ref, 'refs/tags')
     runs-on: ubuntu-20.04
     steps:
