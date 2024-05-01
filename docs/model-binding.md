@@ -115,7 +115,7 @@ public async Task Handle(HttpRequest request)
     //use values as needed
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L25-L37' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L25-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 For more information and options when using model binding refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
@@ -126,6 +126,17 @@ _Available starting with v2.2.0_
 
 The `TryBind` model binding option allows binding the incoming request and at the same time access additional information about the binding process:
 
-snippet: model-binding-try-bind
+<!-- snippet: model-binding-try-bind -->
+<a id='snippet-model-binding-try-bind'></a>
+```cs
+[HttpPost("/sample/{id}")]
+public async Task Handle(HttpRequest request)
+{
+    var (model, isModelSet, modelState) = await request.TryBind<RequestModel>();
+    //use values as needed
+}
+```
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L41-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null`</c>` value), and the `ModelStateDictionary` to access binding errors.

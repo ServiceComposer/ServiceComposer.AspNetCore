@@ -13,7 +13,7 @@ Designing a UI when the back-end system consists of dozens (or more) of (micro)s
   * [Getting Started](#getting-started)
   * [Documentation and supported platforms](#documentation-and-supported-platforms)
   * [Philosophy](#philosophy)
-    * [Service boundaries](#service-boundaries)<!-- endToc -->
+    * [Service Boundaries](#service-boundaries)<!-- endToc -->
 
 ## Technical introduction
 
