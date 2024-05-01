@@ -139,4 +139,4 @@ public async Task Handle(HttpRequest request)
 <sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L41-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null`</c>` value), and the `ModelStateDictionary` to access binding errors.
+The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
