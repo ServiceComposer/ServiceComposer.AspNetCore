@@ -119,3 +119,13 @@ public async Task Handle(HttpRequest request)
 <!-- endSnippet -->
 
 For more information and options when using model binding refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
+
+### Try bind to access the model state dictionary
+
+_Available starting with v2.2.0_
+
+The `TryBind` model binding option allows binding the incoming request and at the same time access additional information about the binding process:
+
+snippet: model-binding-try-bind
+
+The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null`</c>` value), and the `ModelStateDictionary` to access binding errors.
