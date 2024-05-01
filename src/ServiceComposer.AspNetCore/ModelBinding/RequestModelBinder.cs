@@ -21,8 +21,8 @@ namespace ServiceComposer.AspNetCore
             this.modelMetadataProvider = modelMetadataProvider;
             this.mvcOptions = mvcOptions;
         }
-
-        public async Task<T> Bind<T>(HttpRequest request) where T : new()
+        
+        public async Task<(T Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind<T>(HttpRequest request) where T : new ()
         {
             //always rewind the stream; otherwise,
             //if multiple handlers concurrently bind
@@ -66,7 +66,9 @@ namespace ServiceComposer.AspNetCore
                 .CreateBinder(factoryContext)
                 .BindModelAsync(modelBindingContext);
 
-            return (T) modelBindingContext.Result.Model;
+            return ((T)modelBindingContext.Result.Model, 
+                modelBindingContext.Result.IsModelSet,
+                modelBindingContext.ModelState);
         }
     }
 }
