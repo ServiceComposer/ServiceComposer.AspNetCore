@@ -73,6 +73,12 @@ namespace ServiceComposer.AspNetCore
     {
         public static System.Threading.Tasks.Task<T> Bind<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
             where T : new() { }
+        [return: System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Model",
+                "IsModelSet",
+                "ModelState"})]
+        public static System.Threading.Tasks.Task<System.ValueTuple<T, bool, Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary>> TryBind<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
+            where T : new() { }
     }
     public interface ICompositionContext
     {

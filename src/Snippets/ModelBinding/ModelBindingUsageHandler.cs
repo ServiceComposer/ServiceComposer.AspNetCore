@@ -33,7 +33,18 @@ namespace Snippets.NetCore3x.ModelBinding
 
             //use values as needed
         }
-
+        // end-snippet
+    }
+    
+    class ModelBindingTryBindUsageHandler : ICompositionRequestsHandler
+    {
+        // begin-snippet: model-binding-try-bind
+        [HttpPost("/sample/{id}")]
+        public async Task Handle(HttpRequest request)
+        {
+            var (model, isModelSet, modelState) = await request.TryBind<RequestModel>();
+            //use values as needed
+        }
         // end-snippet
     }
 }
