@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.Serialization
+namespace Snippets.Serialization
 {
     public class Startup
     {
