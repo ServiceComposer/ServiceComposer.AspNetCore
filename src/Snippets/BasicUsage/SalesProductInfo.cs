@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.BasicUsage
+namespace Snippets.BasicUsage
 {
     // begin-snippet: basic-usage-sales-handler
     public class SalesProductInfo : ICompositionRequestsHandler
