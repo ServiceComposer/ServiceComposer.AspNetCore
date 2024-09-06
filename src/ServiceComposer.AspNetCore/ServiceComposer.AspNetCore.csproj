@@ -21,6 +21,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
