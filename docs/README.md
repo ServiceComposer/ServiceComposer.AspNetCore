@@ -5,7 +5,7 @@ ServiceComposer can be added to existing or new ASP.NET Core projects, or it can
 
 ## Supported .NET versions
 
-ServiceComposer targets .NET 6 and .NET 7.
+ServiceComposer targets .NET 8.
 
 ## Note about thread safety
 
