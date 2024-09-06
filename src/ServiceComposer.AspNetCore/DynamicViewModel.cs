@@ -30,13 +30,6 @@ namespace ServiceComposer.AspNetCore
 
             switch (binder.Name)
             {
-                case "RaiseEvent":
-
-                    const string message = "dynamic.RaiseEvent is obsolete. " +
-                                           "It'll be treated as an error starting v2 and removed in v3. " +
-                                           "Use HttpRequest.GetCompositionContext() to raise events.";
-                    _logger.LogError(message);
-                    throw new NotSupportedException(message);
                 case "Merge":
                     result = MergeImpl((IDictionary<string, object>) args[0]);
                     return true;
@@ -52,8 +45,6 @@ namespace ServiceComposer.AspNetCore
                 yield return item;
             }
 
-            //TODO: remove "RaiseEvent" in V3
-            yield return "RaiseEvent";
             yield return "Merge";
         }
 
