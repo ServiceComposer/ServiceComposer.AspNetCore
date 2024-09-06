@@ -8,7 +8,6 @@ namespace ServiceComposer.AspNetCore.Tests
 {
     class TestAuthenticationHandler : AuthenticationHandler<DelegateAuthenticationSchemeOptions>
     {
-#if NET8_0
         public TestAuthenticationHandler(
             IOptionsMonitor<DelegateAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
@@ -17,17 +16,6 @@ namespace ServiceComposer.AspNetCore.Tests
         {
 
         }
-#else
-        public TestAuthenticationHandler(
-            IOptionsMonitor<DelegateAuthenticationSchemeOptions> options,
-            ILoggerFactory logger,
-            UrlEncoder encoder,
-            ISystemClock clock)
-            : base(options, logger, encoder, clock)
-        {
-
-        }
-#endif
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
