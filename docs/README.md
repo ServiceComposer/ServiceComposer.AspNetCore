@@ -13,7 +13,7 @@ If resources are shared across more than one handler they must be [thread-safe](
 
 ## Upgrade guides
 
-[Upgrade guides](upgrade-guides) are available to easy the migration from one version to another when needed.
+[Upgrade guides](upgrade-guides) are available to ease the migration from one version to another.
 
 ## ASP.Net Model Binding
 
