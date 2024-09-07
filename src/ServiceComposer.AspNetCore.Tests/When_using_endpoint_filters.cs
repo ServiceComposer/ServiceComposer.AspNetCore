@@ -26,14 +26,31 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
         
-        public class SampleEndpointFilter : IEndpointFilter
+        class SampleEndpointFilter : IEndpointFilter
         {
             public bool Invoked { get; set; }
+            public object CapturedResponse { get; set; }
             
-            public ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+            public async ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
             {
                 Invoked = true;
-                return next(context);
+                CapturedResponse = await next(context);
+
+                return CapturedResponse;
+            }
+        }
+        
+        class AnotherSampleEndpointFilter : IEndpointFilter
+        {
+            public bool Invoked { get; set; }
+            public object CapturedResponse { get; set; }
+            
+            public async ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+            {
+                Invoked = true;
+                CapturedResponse = await next(context);
+
+                return CapturedResponse;
             }
         }
 
@@ -41,7 +58,8 @@ namespace ServiceComposer.AspNetCore.Tests
         public async Task Should_invoke_the_filter()
         {
             var expectedComposedRequestId = Guid.NewGuid().ToString();
-            var filter = new SampleEndpointFilter();
+            var sampleEndpointFilter = new SampleEndpointFilter();
+            var anotherSampleEndpointFilter = new AnotherSampleEndpointFilter();
 
             // Arrange
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_endpoint_filters>
@@ -51,6 +69,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
                         options.RegisterCompositionHandler<ResponseHandler>();
                     });
                     services.AddRouting();
@@ -60,7 +79,9 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapCompositionHandlers().AddEndpointFilter(filter);
+                        builder.MapCompositionHandlers()
+                            .AddEndpointFilter(sampleEndpointFilter)
+                            .AddEndpointFilter(anotherSampleEndpointFilter);
                     });
                 }
             ).CreateClient();
@@ -71,7 +92,12 @@ namespace ServiceComposer.AspNetCore.Tests
             var response = await client.GetAsync("/empty-response/1");
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(filter.Invoked);
+            
+            Assert.True(sampleEndpointFilter.Invoked);
+            Assert.Equal(expectedComposedRequestId, ((dynamic)sampleEndpointFilter.CapturedResponse).RequestId);
+
+            Assert.True(anotherSampleEndpointFilter.Invoked);
+            Assert.Equal(expectedComposedRequestId, ((dynamic)anotherSampleEndpointFilter.CapturedResponse).RequestId);
 
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic body = JObject.Parse(contentString);
