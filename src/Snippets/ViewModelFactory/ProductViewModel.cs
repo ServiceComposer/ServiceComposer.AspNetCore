@@ -1,4 +1,4 @@
-﻿namespace Snipptes.ViewModelFactory
+﻿namespace Snippets.ViewModelFactory
 {
     // begin-snippet: view-model-factory-product-view-model
     public class ProductViewModel

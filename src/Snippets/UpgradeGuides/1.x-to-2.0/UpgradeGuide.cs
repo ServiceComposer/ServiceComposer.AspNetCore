@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.UpgradeGuides._1.x_to_2._0;
+namespace Snippets.UpgradeGuides._1.x_to_2._0;
 
 public class UpgradeGuide
 {

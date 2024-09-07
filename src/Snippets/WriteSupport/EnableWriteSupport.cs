@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.WriteSupport;
+namespace Snippets.WriteSupport;
 
 public class EnableWriteSupport
 {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceComposer.AspNetCore;
 
-namespace Snipptes.ViewModelFactory
+namespace Snippets.ViewModelFactory
 {
     // begin-snippet: view-model-factory-sales-handler
     public class SalesProductInfo : ICompositionRequestsHandler

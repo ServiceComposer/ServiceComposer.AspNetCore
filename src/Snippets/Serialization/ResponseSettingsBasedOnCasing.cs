@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Snippets.NetCore3x.Serialization
+namespace Snippets.Serialization
 {
     public class ResponseSettingsBasedOnCasing
     {

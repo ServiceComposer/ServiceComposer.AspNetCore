@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.ModelBinding
+namespace Snippets.ModelBinding
 {
     // begin-snippet: model-binding-model
     class BodyModel
