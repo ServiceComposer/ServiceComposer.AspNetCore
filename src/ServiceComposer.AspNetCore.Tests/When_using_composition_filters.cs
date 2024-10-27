@@ -12,7 +12,7 @@ namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_using_composition_filters
     {
-        [SampleCompositionRequestFilter, AnotherSampleCompositionRequestFilter]
+        //[SampleCompositionRequestFilter, AnotherSampleCompositionRequestFilter]
         class ResponseHandler : ICompositionRequestsHandler
         {
             [HttpGet("/empty-response/{id}"), SampleCompositionRequestFilter]
@@ -25,62 +25,56 @@ namespace ServiceComposer.AspNetCore.Tests
                 return Task.CompletedTask;
             }
         }
-
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-        abstract class CompositionRequestFilterAttribute : Attribute
-        {
-            
-        }
-
-        class CompositionRequestContext
-        {
-            public HttpRequest Request { get; }
-        }
-
-        interface ICompositionRequestFilter<T>
-        {
-            ValueTask<object> InvokeAsync(CompositionRequestContext context, CompositionDelegate next);
-        }
         
         class SampleCompositionRequestFilterAttribute : CompositionRequestFilterAttribute
         {
-            public bool Invoked { get; set; }
-            public object CapturedResponse { get; set; }
-            
-            public async ValueTask<object> InvokeAsync(CompositionRequestContext context, CompositionDelegate next)
+            public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
             {
-                Invoked = true;
-                CapturedResponse = await next(context);
+                await next(context);
 
-                return CapturedResponse;
+                var vm = context.HttpContext.Request.GetComposedResponseModel();
+                vm.InvokedSampleCompositionRequestFilterAttribute = true;
+
+                return vm;
             }
         }
         
-        class AnotherSampleCompositionRequestFilterAttribute : CompositionRequestFilterAttribute
+        class SampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
         {
-            public bool Invoked { get; set; }
-            public object CapturedResponse { get; set; }
-            
-            public async ValueTask<object> InvokeAsync(CompositionRequestContext context, CompositionDelegate next)
+            public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
             {
-                Invoked = true;
-                CapturedResponse = await next(context);
+                await next(context);
 
-                return CapturedResponse;
+                var vm = context.HttpContext.Request.GetComposedResponseModel();
+                vm.InvokedSampleCompositionRequestFilterOnClassAttribute = true;
+
+                return vm;
             }
         }
         
-        class SampleCompositionRequestFilter : ICompositionRequestFilter<ResponseHandler>
+        class AnotherSampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
         {
-            public bool Invoked { get; set; }
-            public object CapturedResponse { get; set; }
-            
-            public async ValueTask<object> InvokeAsync(ICompositionContext context, CompositionDelegate next)
+            public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
             {
-                Invoked = true;
-                CapturedResponse = await next(context);
+                await next(context);
 
-                return CapturedResponse;
+                var vm = context.HttpContext.Request.GetComposedResponseModel();
+                vm.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute = true;
+                
+                return vm;
+            }
+        }
+        
+        class InvokedSampleCompositionRequestFilterInterface : ICompositionRequestFilter<ResponseHandler>
+        {
+            public async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+            {
+                await next(context);
+
+                var vm = context.HttpContext.Request.GetComposedResponseModel();
+                vm.InvokedSampleCompositionRequestFilterInterface = true;
+                
+                return vm;
             }
         }
 
@@ -116,12 +110,16 @@ namespace ServiceComposer.AspNetCore.Tests
 
             // Act
             var response = await client.GetAsync("/empty-response/1");
-
+            
             Assert.True(response.IsSuccessStatusCode);
 
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic body = JObject.Parse(contentString);
             Assert.Equal(expectedComposedRequestId, (string)body.RequestId);
+            Assert.True((bool)body.InvokedSampleCompositionRequestFilterAttribute);
+            //Assert.True(body.InvokedSampleCompositionRequestFilterInterface);
+            //Assert.True(body.InvokedSampleCompositionRequestFilterOnClassAttribute);
+            //Assert.True(body.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute);
         }
     }
 }
