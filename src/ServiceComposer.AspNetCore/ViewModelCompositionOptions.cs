@@ -159,6 +159,23 @@ namespace ServiceComposer.AspNetCore
                             RegisterEndpointScopedViewModelFactory(type);
                         }
                     });
+                
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && !typeof(Attribute).IsAssignableFrom(type) //We don't want to register attributes in DI 
+                               && typeof(ICompositionRequestFilter).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterCompositionRequestsFilter(type);
+                        }
+                    });
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
@@ -181,6 +198,17 @@ namespace ServiceComposer.AspNetCore
                     registrationHandler(filteredTypes);
                 }
             }
+        }
+
+        internal void RegisterCompositionRequestsFilter(Type type)
+        {
+            type.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionRequestFilter<>))
+                .ToList()
+                .ForEach(compositionFilterGenericInterfaceType =>
+                {
+                    Services.AddTransient(compositionFilterGenericInterfaceType, type); 
+                });
         }
 
         public AssemblyScanner AssemblyScanner { get; }

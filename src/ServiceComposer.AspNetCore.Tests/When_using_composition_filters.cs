@@ -93,6 +93,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
                         options.RegisterCompositionHandler<ResponseHandler>();
+                        options.RegisterCompositionRequestsFilter(typeof(InvokedSampleCompositionRequestFilterInterface));
                     });
                     services.AddRouting();
                 },
@@ -117,7 +118,7 @@ namespace ServiceComposer.AspNetCore.Tests
             dynamic body = JObject.Parse(contentString);
             Assert.Equal(expectedComposedRequestId, (string)body.RequestId);
             Assert.True((bool)body.InvokedSampleCompositionRequestFilterAttribute);
-            //Assert.True(body.InvokedSampleCompositionRequestFilterInterface);
+            Assert.True((bool)body.InvokedSampleCompositionRequestFilterInterface);
             //Assert.True(body.InvokedSampleCompositionRequestFilterOnClassAttribute);
             //Assert.True(body.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute);
         }
