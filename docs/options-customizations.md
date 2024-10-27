@@ -4,4 +4,4 @@ Assemblies containing types participating in the composition process can customi
 
 > Note: Types implementing `IViewModelCompositionOptionsCustomization` are not managed by IoC container. Dependency injection is not available.
 
-`ViewModelCompositionOptions` offers the ability to access the application `IConfiguration` insance. By default the `ViewModelCompositionOptions.Configuration` property is null. If accessed it throws an `ArgumentException`. To enable configuration support, pass the `IConfiguration` instance when configuring ServiceComposer via the  `AddViewModelComposition` extension method.
+`ViewModelCompositionOptions` offers the ability to access the application `IConfiguration` instance. By default, the `ViewModelCompositionOptions.Configuration` property is null. If accessed it throws an `ArgumentException`. To enable configuration support, pass the `IConfiguration` instance when configuring ServiceComposer via the  `AddViewModelComposition` extension method.
