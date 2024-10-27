@@ -1,4 +1,3 @@
-#if NET8_0
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -105,4 +104,3 @@ namespace ServiceComposer.AspNetCore.Tests
         }
     }
 }
-#endif
