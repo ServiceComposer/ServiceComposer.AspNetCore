@@ -20,6 +20,17 @@ namespace ServiceComposer.AspNetCore
     }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class CompositionHandler { }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public abstract class CompositionRequestFilterAttribute : System.Attribute, ServiceComposer.AspNetCore.ICompositionRequestFilter
+    {
+        protected CompositionRequestFilterAttribute() { }
+        public abstract System.Threading.Tasks.ValueTask<object> InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
+    }
+    public sealed class CompositionRequestFilterContext
+    {
+        public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; }
+    }
+    public delegate System.Threading.Tasks.ValueTask<object> CompositionRequestFilterDelegate(ServiceComposer.AspNetCore.CompositionRequestFilterContext context);
     public static class EndpointsExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
@@ -61,6 +72,11 @@ namespace ServiceComposer.AspNetCore
     {
         void Subscribe(ServiceComposer.AspNetCore.ICompositionEventsPublisher publisher);
     }
+    public interface ICompositionRequestFilter
+    {
+        System.Threading.Tasks.ValueTask<object> InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
+    }
+    public interface ICompositionRequestFilter<T> : ServiceComposer.AspNetCore.ICompositionRequestFilter { }
     public interface ICompositionRequestsHandler
     {
         System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
