@@ -36,3 +36,7 @@ Starting with version 1.9.0, regular MVC Output Formatters can be used to serial
 ## Customizing ViewModel Composition options from dependent assemblies
 
 It's possible to access and [customize ViewModel Composition options](options-customizations.md) at application start-up by defining types implementing the `IViewModelCompositionOptionsCustomization` interface.
+
+## Endpoint filters
+
+Endpoint filters allow intercepting all incoming HTTP requests before they reach the composition stage. For more information refer to the [endpoint filters documentation](endpoint-filters.md).
