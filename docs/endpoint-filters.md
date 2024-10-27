@@ -2,9 +2,11 @@
 
 _Available starting with v2.3.0_
 
+Endpoint filters allow intercepting all incoming HTTP requests prior to invoking the composition pipeline.
+
 ## Defining endpoint filters
 
-Implement `IEndpointFilter`
+Defining an endpoint filter requires defining a class that implements the `IEndpointFilter` interface, like in the following snippet:
 
 <!-- snippet: sample-endpoint-filter -->
 <a id='snippet-sample-endpoint-filter'></a>
@@ -27,6 +29,8 @@ class SampleEndpointFilter : IEndpointFilter
 <!-- endSnippet -->
 
 ## Registering endpoint filters
+
+For an endpoint filter to be included in te invocation pipeline, it must be registered at application configuration time:  
 
 <!-- snippet: sample-endpoint-filter-registration -->
 <a id='snippet-sample-endpoint-filter-registration'></a>
