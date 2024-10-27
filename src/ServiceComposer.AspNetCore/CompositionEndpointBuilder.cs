@@ -159,7 +159,7 @@ namespace ServiceComposer.AspNetCore
                         case false when containsActionResult:
                             throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
                                                             $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
-                                                            $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
+                                                            $"configuration property of the {nameof(ResponseSerializationOptions)} instance.");
                         case true when containsActionResult:
                             await context.ExecuteResultAsync(context.Items[HttpRequestExtensions.ComposedActionResultKey] as IActionResult);
                             break;
