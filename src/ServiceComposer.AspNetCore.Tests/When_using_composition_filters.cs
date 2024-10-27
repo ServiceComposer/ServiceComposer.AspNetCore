@@ -12,7 +12,7 @@ namespace ServiceComposer.AspNetCore.Tests
 {
     public class When_using_composition_filters
     {
-        //[SampleCompositionRequestFilter, AnotherSampleCompositionRequestFilter]
+        //[SampleCompositionRequestFilterOnClass, AnotherSampleCompositionRequestFilterOnClass]
         class ResponseHandler : ICompositionRequestsHandler
         {
             [HttpGet("/empty-response/{id}"), SampleCompositionRequestFilter]
@@ -39,31 +39,31 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
         
-        class SampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
-        {
-            public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
-            {
-                await next(context);
-
-                var vm = context.HttpContext.Request.GetComposedResponseModel();
-                vm.InvokedSampleCompositionRequestFilterOnClassAttribute = true;
-
-                return vm;
-            }
-        }
-        
-        class AnotherSampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
-        {
-            public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
-            {
-                await next(context);
-
-                var vm = context.HttpContext.Request.GetComposedResponseModel();
-                vm.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute = true;
-                
-                return vm;
-            }
-        }
+        // class SampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
+        // {
+        //     public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+        //     {
+        //         await next(context);
+        //
+        //         var vm = context.HttpContext.Request.GetComposedResponseModel();
+        //         vm.InvokedSampleCompositionRequestFilterOnClassAttribute = true;
+        //
+        //         return vm;
+        //     }
+        // }
+        //
+        // class AnotherSampleCompositionRequestFilterOnClassAttribute : CompositionRequestFilterAttribute
+        // {
+        //     public override async ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+        //     {
+        //         await next(context);
+        //
+        //         var vm = context.HttpContext.Request.GetComposedResponseModel();
+        //         vm.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute = true;
+        //         
+        //         return vm;
+        //     }
+        // }
         
         class InvokedSampleCompositionRequestFilterInterface : ICompositionRequestFilter<ResponseHandler>
         {
@@ -119,8 +119,8 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal(expectedComposedRequestId, (string)body.RequestId);
             Assert.True((bool)body.InvokedSampleCompositionRequestFilterAttribute);
             Assert.True((bool)body.InvokedSampleCompositionRequestFilterInterface);
-            //Assert.True(body.InvokedSampleCompositionRequestFilterOnClassAttribute);
-            //Assert.True(body.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute);
+            // Assert.True((bool)body.InvokedSampleCompositionRequestFilterOnClassAttribute);
+            // Assert.True((bool)body.InvokedAnotherSampleCompositionRequestFilterOnClassAttribute);
         }
     }
 }
