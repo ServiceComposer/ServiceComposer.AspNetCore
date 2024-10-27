@@ -47,5 +47,5 @@ public void ConfigureServices(IServiceCollection services)
 
 Each time ServiceComposer needs to serialize a response it'll invoke the supplied function.
 
-NOTE:
-When customizing the serialization settings, it's responsibility of the function to configure the correct resolver for the requested casing
+> [!NOTE]
+> When customizing the serialization settings, it's responsibility of the function to configure the correct resolver for the requested casing

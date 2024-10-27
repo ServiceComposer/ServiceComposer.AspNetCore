@@ -42,4 +42,5 @@ services.AddViewModelComposition(options =>
 <sup><a href='/src/Snippets/ActionResult/UseSetActionResultHandler.cs#L37-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-action-results-required-config' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-Note: ServiceComposer supports only one action result per request. If two or more composition handlers try to set action results, only the frst one will succeed and subsequent requests will be ignored.
+> [!NOTE]
+> ServiceComposer supports only one action result per request. If two or more composition handlers try to set action results, only the frst one will succeed and subsequent requests will be ignored.
