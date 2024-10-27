@@ -2,7 +2,7 @@
 
 _Available starting with v1.9.0_
 
-Enabling output formatters support is a metter of:
+Enabling output formatters support is a matter of:
 
 <!-- snippet: use-output-formatters -->
 <a id='snippet-use-output-formatters'></a>

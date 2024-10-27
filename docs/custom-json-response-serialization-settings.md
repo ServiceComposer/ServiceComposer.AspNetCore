@@ -2,7 +2,7 @@
 
 _Available starting with v1.8.0_
 
-By default each response is serialized using [Json.Net](https://www.newtonsoft.com/json/help/html/Introduction.htm) and serialization settings (`JsonSerializerSettings`) are determined by the [requested response casing](response-serialization-casing.source.md). If the requested casing is camel casing, the default, the folowing serialization settings are applied to the response:
+By default, each response is serialized using [Json.Net](https://www.newtonsoft.com/json/help/html/Introduction.htm) and serialization settings (`JsonSerializerSettings`) are determined by the [requested response casing](response-serialization-casing.source.md). If the requested casing is camel casing, the default, the folowing serialization settings are applied to the response:
 
 <!-- snippet: camel-serialization-settings -->
 <a id='snippet-camel-serialization-settings'></a>
@@ -47,5 +47,5 @@ public void ConfigureServices(IServiceCollection services)
 
 Each time ServiceComposer needs to serialize a response it'll invoke the supplied function.
 
-NOTE:
-When customizing the serialization settings, it's responsibility of the function to configure the correct resolver for the requested casing
+> [!NOTE]
+> When customizing the serialization settings, it's responsibility of the function to configure the correct resolver for the requested casing

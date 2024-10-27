@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.BasicUsage
+namespace Snippets.BasicUsage
 {
     // begin-snippet: basic-usage-marketing-handler
     public class MarketingProductInfo: ICompositionRequestsHandler

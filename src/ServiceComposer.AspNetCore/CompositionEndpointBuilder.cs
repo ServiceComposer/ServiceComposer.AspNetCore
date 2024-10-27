@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
@@ -18,7 +18,10 @@ namespace ServiceComposer.AspNetCore
         readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
         readonly RoutePattern routePattern;
         readonly ResponseCasing defaultResponseCasing;
-        
+        readonly Type[] componentsTypes;
+        readonly bool useOutputFormatters;
+        EndpointFilterDelegate cachedPipeline;
+
         public int Order { get; }
 
         public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing, bool useOutputFormatters)
@@ -31,38 +34,8 @@ namespace ServiceComposer.AspNetCore
             this.routePattern = routePattern;
             Order = order;
             this.defaultResponseCasing = defaultResponseCasing;
-            RequestDelegate = async context =>
-            {
-                var viewModel = await CompositionHandler.HandleComposableRequest(context, componentsTypes);
-                if (viewModel != null)
-                {
-                    var containsActionResult = context.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
-                    switch (useOutputFormatters)
-                    {
-                        case false when containsActionResult:
-                            throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
-                                                            $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
-                                                            $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
-                        case true when containsActionResult:
-                            await context.ExecuteResultAsync(context.Items[HttpRequestExtensions.ComposedActionResultKey] as IActionResult);
-                            break;
-                        case true:
-                            await context.WriteModelAsync(viewModel);
-                            break;
-                        default:
-                        {
-                            var json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
-                            context.Response.ContentType = "application/json; charset=utf-8";
-                            await context.Response.WriteAsync(json);
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    await context.Response.WriteAsync(string.Empty);
-                }
-            };
+            this.componentsTypes = componentsTypes;
+            this.useOutputFormatters = useOutputFormatters;
         }
 
         static void Validate(RoutePattern routePattern, Type[] componentsTypes)
@@ -115,9 +88,99 @@ namespace ServiceComposer.AspNetCore
             return customSettings ?? casingToSettingsMappings[casing];
         }
 
+        static object buildAndCacheEndpointFilterDelegatePipelineSyncLock = new ();
+        EndpointFilterDelegate BuildAndCacheEndpointFilterDelegatePipeline(RequestDelegate composer, IServiceProvider serviceProvider)
+        {
+            lock (buildAndCacheEndpointFilterDelegatePipelineSyncLock)
+            {
+                var factoryContext = new EndpointFilterFactoryContext
+                {
+                    MethodInfo = composer.Method,
+                    ApplicationServices = serviceProvider
+                };
+
+                EndpointFilterDelegate filteredInvocation = async context =>
+                {
+                    if (context.HttpContext.Response.StatusCode < 400)
+                    {
+                        await composer(context.HttpContext);
+                        var viewModel = context.HttpContext.Request.GetComposedResponseModel();
+
+                        var containsActionResult =
+                            context.HttpContext.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
+                        switch (useOutputFormatters)
+                        {
+                            case false when containsActionResult:
+                                throw new NotSupportedException(
+                                    $"Setting an action result requires output formatters supports. " +
+                                    $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
+                                    $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
+                            case true when containsActionResult:
+                                return context.HttpContext.Items[HttpRequestExtensions.ComposedActionResultKey] as
+                                    IActionResult;
+                        }
+
+                        return viewModel;
+                    }
+
+                    return EmptyHttpResult.Instance;
+                };
+
+                var terminatorFilterDelegate = filteredInvocation;
+                for (var i = FilterFactories.Count - 1; i >= 0; i--)
+                {
+                    var currentFilterFactory = FilterFactories[i];
+                    filteredInvocation = currentFilterFactory(factoryContext, filteredInvocation);
+                }
+
+                cachedPipeline = ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
+                    ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
+                    : filteredInvocation;
+
+                return cachedPipeline;
+            }
+        }
+
         public override Endpoint Build()
         {
-            Debug.Assert(RequestDelegate != null, nameof(RequestDelegate) + " != null");
+            RequestDelegate = async context =>
+            {
+                RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
+                var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
+                
+                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context);
+                var viewModel = await pipeline(invocationContext);
+                
+                if (viewModel != null)
+                {
+                    var containsActionResult = context.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
+                    switch (useOutputFormatters)
+                    {
+                        case false when containsActionResult:
+                            throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
+                                                            $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
+                                                            $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
+                        case true when containsActionResult:
+                            await context.ExecuteResultAsync(context.Items[HttpRequestExtensions.ComposedActionResultKey] as IActionResult);
+                            break;
+                        case true:
+                            await context.WriteModelAsync(viewModel);
+                            break;
+                        default:
+                        {
+                            var json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                            context.Response.ContentType = "application/json; charset=utf-8";
+                            await context.Response.WriteAsync(json);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    await context.Response.WriteAsync(string.Empty);
+                }
+            };
+            
             var routeEndpoint = new RouteEndpoint(
                 RequestDelegate,
                 routePattern,

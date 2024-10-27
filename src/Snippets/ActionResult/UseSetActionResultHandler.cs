@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.NetCore3x.ActionResult
+namespace Snippets.ActionResult
 {
     // begin-snippet: action-results
     public class UseSetActionResultHandler : ICompositionRequestsHandler

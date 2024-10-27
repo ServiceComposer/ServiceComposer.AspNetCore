@@ -140,8 +140,8 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal("sample", responseObj?.SelectToken("AString")?.Value<string>());
             Assert.Equal(1, responseObj?.SelectToken("ANumber")?.Value<int>());
 
-            var apiResponsObj = await apiResponse.Content.ReadAsStringAsync();
-            Assert.Equal(32, int.Parse(apiResponsObj));
+            var apiResponseObj = await apiResponse.Content.ReadAsStringAsync();
+            Assert.Equal(32, int.Parse(apiResponseObj));
         }
     }
 }

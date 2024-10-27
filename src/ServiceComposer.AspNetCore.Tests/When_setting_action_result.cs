@@ -122,7 +122,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 ).CreateClient();
 
                 // Act
-                var response = await client.GetAsync("/sample/1");
+                _ = await client.GetAsync("/sample/1");
             }
             await Assert.ThrowsAsync<NotSupportedException>(Function);
         }

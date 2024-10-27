@@ -1,6 +1,6 @@
 # Response serialization casing
 
-ServiceComposer serializes responses using a JSON serializer. By default responses are serialized using camel casing, a C# `SampleProperty` property is serialized as `sampleProperty`. Consumers can influence the response casing of a specific request by adding to the request an `Accept-Casing` custom HTTP header. Accepted values are `casing/camel` (default) and `casing/pascal`.
+ServiceComposer serializes responses using a JSON serializer. By default, responses are serialized using camel casing, a C# `SampleProperty` property is serialized as `sampleProperty`. Consumers can influence the response casing of a specific request by adding to the request an `Accept-Casing` custom HTTP header. Accepted values are `casing/camel` (default) and `casing/pascal`.
 
 ## Default response serialization casing
 

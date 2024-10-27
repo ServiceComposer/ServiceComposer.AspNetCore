@@ -133,7 +133,7 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+                _ = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
                 (
                     configureServices: services =>
                     {
