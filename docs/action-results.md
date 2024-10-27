@@ -43,4 +43,4 @@ services.AddViewModelComposition(options =>
 <!-- endSnippet -->
 
 > [!NOTE]
-> ServiceComposer supports only one action result per request. If two or more composition handlers try to set action results, only the frst one will succeed and subsequent requests will be ignored.
+> ServiceComposer supports only one action result per request. If two or more composition handlers try to set action results, only the first one will succeed and subsequent requests will be ignored.
