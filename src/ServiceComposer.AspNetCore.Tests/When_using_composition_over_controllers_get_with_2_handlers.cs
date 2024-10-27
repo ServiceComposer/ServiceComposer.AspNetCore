@@ -181,7 +181,7 @@ namespace ServiceComposer.AspNetCore.Tests
             try
             {
                 // Act
-                var response = await client.GetAsync("/api/CompositionOverController/1");
+                _ = await client.GetAsync("/api/CompositionOverController/1");
             }
             catch (Exception e)
             {

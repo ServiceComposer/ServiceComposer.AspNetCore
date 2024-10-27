@@ -77,7 +77,7 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Throws<NotSupportedException>(() =>
             {
                 // Arrange
-                var client = new SelfContainedWebApplicationFactoryWithWebHost<When_registering_view_model_factory>
+                _ = new SelfContainedWebApplicationFactoryWithWebHost<When_registering_view_model_factory>
                 (
                     configureServices: services =>
                     {
