@@ -40,16 +40,17 @@ partial class CompositionEndpointBuilder
 
         var factoryContext = new CompositionRequestFilterFactoryContext();
         
-        var terminatorFilterDelegate = filteredInvocation;
+        //var terminatorFilterDelegate = filteredInvocation;
         for (var i = compositionRequestFilterFactories.Count - 1; i >= 0; i--)
         {
             var currentFilterFactory = compositionRequestFilterFactories[i];
             filteredInvocation = currentFilterFactory(factoryContext, filteredInvocation);
         }
         
-        return ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
-            ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
-            : filteredInvocation;
+        // return ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
+        //     ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
+        //     : filteredInvocation;
+        return filteredInvocation;
     }
 
 }

@@ -46,16 +46,17 @@ partial class CompositionEndpointBuilder
                 return EmptyHttpResult.Instance;
             };
 
-            var terminatorFilterDelegate = filteredInvocation;
+            //var terminatorFilterDelegate = filteredInvocation;
             for (var i = FilterFactories.Count - 1; i >= 0; i--)
             {
                 var currentFilterFactory = FilterFactories[i];
                 filteredInvocation = currentFilterFactory(factoryContext, filteredInvocation);
             }
 
-            cachedPipeline = ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
-                ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
-                : filteredInvocation;
+            // cachedPipeline = ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
+            //     ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
+            //     : filteredInvocation;
+            cachedPipeline = filteredInvocation;
 
             return cachedPipeline;
         }
