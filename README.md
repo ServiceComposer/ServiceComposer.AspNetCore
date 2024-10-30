@@ -4,7 +4,7 @@
 
 ServiceComposer is a ViewModel Composition Gateway.
 
-Designing a UI when the back-end system consists of dozens (or more) of (micro)services is challenging. We have separation and autonomy on the back end, but this all needs to come back together on the front-end. ViewModel Composition stops it from turning into a mess of spaghetti code and prevents simple actions from causing an inefficient torrent of web requests.
+Designing a UI when the back-end system consists of dozens (or more) of (micro)services is challenging. We have separation and autonomy on the back end, but this all needs to come back together on the front-end. ViewModel Composition prevents the back-end system from turning into a mess of spaghetti code and prevents simple actions from causing an inefficient torrent of web requests.
 
 <!-- toc -->
 ## Contents
@@ -104,9 +104,10 @@ public class MarketingProductInfo: ICompositionRequestsHandler
 
 The HTTP response should be a JSON result containing the properties and values defined in the composition handler classes.
 
-> NOTE: ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
+> [!NOTE]
+> ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
 
-In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantage of a little coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
+In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantages of a bit of coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
 
 ## Documentation and supported platforms
 
@@ -118,9 +119,9 @@ ServiceComposer is available for the following platforms:
 
 ### Service Boundaries
 
-When building systems based on SOA principles, service boundaries are key, if not THE key aspect. If we get service boundaries wrong, the end result risks being a distributed monolith in the best case and a complete failure in the worst case.
+Service boundaries are essential, if not THE critical aspect, when building systems based on SOA principles. If we get service boundaries wrong, the end result risks being a distributed monolith in the best case and a complete failure in the worst case.
 
-> Service boundary identification is a challenge on its own; it requires extensive business domain knowledge and confidence in high-level design techniques. Technical challenges, such as the lack of technical solutions to problems foreseen while defining service boundaries, might drive the solution design in the wrong direction.
+> Service boundary identification is challenging; it requires extensive business domain knowledge and confidence in high-level design techniques. Technical challenges, such as the lack of technical solutions to problems foreseen while defining service boundaries, might drive the solution design in the wrong direction.
 
 The transition from the user mental model, described by domain experts, to the service boundaries architectural model in the SOA space raises many different concerns. If domain entities, as defined by domain experts, are split among several services:
 
