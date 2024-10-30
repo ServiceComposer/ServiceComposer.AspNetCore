@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
@@ -13,7 +12,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace ServiceComposer.AspNetCore
 {
-    class CompositionEndpointBuilder : EndpointBuilder
+    partial class CompositionEndpointBuilder : EndpointBuilder
     {
         readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
         readonly RoutePattern routePattern;
@@ -88,59 +87,6 @@ namespace ServiceComposer.AspNetCore
             return customSettings ?? casingToSettingsMappings[casing];
         }
 
-        static object buildAndCacheEndpointFilterDelegatePipelineSyncLock = new ();
-        EndpointFilterDelegate BuildAndCacheEndpointFilterDelegatePipeline(RequestDelegate composer, IServiceProvider serviceProvider)
-        {
-            lock (buildAndCacheEndpointFilterDelegatePipelineSyncLock)
-            {
-                var factoryContext = new EndpointFilterFactoryContext
-                {
-                    MethodInfo = composer.Method,
-                    ApplicationServices = serviceProvider
-                };
-
-                EndpointFilterDelegate filteredInvocation = async context =>
-                {
-                    if (context.HttpContext.Response.StatusCode < 400)
-                    {
-                        await composer(context.HttpContext);
-                        var viewModel = context.HttpContext.Request.GetComposedResponseModel();
-
-                        var containsActionResult =
-                            context.HttpContext.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
-                        switch (useOutputFormatters)
-                        {
-                            case false when containsActionResult:
-                                throw new NotSupportedException(
-                                    $"Setting an action result requires output formatters supports. " +
-                                    $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
-                                    $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
-                            case true when containsActionResult:
-                                return context.HttpContext.Items[HttpRequestExtensions.ComposedActionResultKey] as
-                                    IActionResult;
-                        }
-
-                        return viewModel;
-                    }
-
-                    return EmptyHttpResult.Instance;
-                };
-
-                var terminatorFilterDelegate = filteredInvocation;
-                for (var i = FilterFactories.Count - 1; i >= 0; i--)
-                {
-                    var currentFilterFactory = FilterFactories[i];
-                    filteredInvocation = currentFilterFactory(factoryContext, filteredInvocation);
-                }
-
-                cachedPipeline = ReferenceEquals(terminatorFilterDelegate, filteredInvocation)
-                    ? terminatorFilterDelegate // The filter factories have run without modifications, skip running the pipeline.
-                    : filteredInvocation;
-
-                return cachedPipeline;
-            }
-        }
-
         public override Endpoint Build()
         {
             RequestDelegate = async context =>
@@ -159,7 +105,7 @@ namespace ServiceComposer.AspNetCore
                         case false when containsActionResult:
                             throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
                                                             $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
-                                                            $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
+                                                            $"configuration property of the {nameof(ResponseSerializationOptions)} instance.");
                         case true when containsActionResult:
                             await context.ExecuteResultAsync(context.Items[HttpRequestExtensions.ComposedActionResultKey] as IActionResult);
                             break;

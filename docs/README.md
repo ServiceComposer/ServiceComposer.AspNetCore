@@ -40,3 +40,7 @@ It's possible to access and [customize ViewModel Composition options](options-cu
 ## Endpoint filters
 
 Endpoint filters allow intercepting all incoming HTTP requests before they reach the composition stage. For more information refer to the [endpoint filters documentation](endpoint-filters.md).
+
+## Composition requests filters
+
+Composition requests filters allow intercepting compostion requests before they are dispatched to composition handlers. For more information refer to the [Composition requests filters documentation](composition-filters.md).

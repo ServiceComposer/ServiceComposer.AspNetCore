@@ -11,8 +11,8 @@ namespace ServiceComposer.AspNetCore
 {
     class CompositionEndpointDataSource : EndpointDataSource, IEndpointConventionBuilder
     {
-        readonly List<Action<EndpointBuilder>> conventions = new();
-        readonly List<CompositionEndpointBuilder> _endpointBuilders = new List<CompositionEndpointBuilder>();
+        readonly List<Action<EndpointBuilder>> conventions = [];
+        readonly List<CompositionEndpointBuilder> _endpointBuilders = [];
 
         public void AddEndpointBuilder(CompositionEndpointBuilder endpointBuilder)
         {
