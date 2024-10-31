@@ -64,6 +64,10 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task OnRequestError(Microsoft.AspNetCore.Http.HttpRequest request, System.Exception ex);
     }
+    public interface ICompositionEventsHandler<in TEvent>
+    {
+        System.Threading.Tasks.Task Handle(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest request);
+    }
     public interface ICompositionEventsPublisher
     {
         void Subscribe<TEvent>(ServiceComposer.AspNetCore.CompositionEventHandler<TEvent> handler);
