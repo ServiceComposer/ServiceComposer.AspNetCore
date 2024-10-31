@@ -17,7 +17,6 @@ namespace ServiceComposer.AspNetCore
             context.Request.EnableBuffering();
 
             var request = context.Request;
-            var routeData = context.GetRouteData();
 
             if(!request.Headers.TryGetValue(ComposedRequestIdHeader.Key, out var requestId))
             {
@@ -25,7 +24,12 @@ namespace ServiceComposer.AspNetCore
             }
 
             context.Response.Headers.Append(ComposedRequestIdHeader.Key, requestId);
-            var compositionContext = new CompositionContext(requestId, routeData, request);
+            var compositionContext = new CompositionContext
+            (
+                requestId,
+                request,
+                context.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
+            );
 
             object viewModel;
             var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
