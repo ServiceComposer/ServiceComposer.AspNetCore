@@ -176,6 +176,22 @@ namespace ServiceComposer.AspNetCore
                             RegisterCompositionRequestsFilter(type);
                         }
                     });
+                
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && typeof(ICompositionEventsHandler<>).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterCompositionEventsHandler(type);
+                        }
+                    });
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
@@ -208,6 +224,19 @@ namespace ServiceComposer.AspNetCore
                 .ForEach(compositionFilterGenericInterfaceType =>
                 {
                     Services.AddTransient(compositionFilterGenericInterfaceType, type); 
+                });
+        }
+
+        internal void RegisterCompositionEventsHandler(Type type)
+        {
+            type.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>))
+                .ToList()
+                .ForEach(compositionEventsHandlerGenericInterfaceType =>
+                {
+                    var eventType = compositionEventsHandlerGenericInterfaceType.GetGenericArguments()[0];
+                    Services.AddTransient(type);
+                    _compositionMetadataRegistry.AddEventHandler(eventType, type);
                 });
         }
 
