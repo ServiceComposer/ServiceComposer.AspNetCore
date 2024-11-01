@@ -15,31 +15,29 @@ namespace ServiceComposer.AspNetCore
 
         public string RequestId { get; } = requestId;
 
-        public Task RaiseEvent(object @event)
+        public Task RaiseEvent<TEvent>(TEvent @event)
         {
-            var handlers = new List<CompositionEventHandler<object>>();
-            if (metadataRegistry.EventHandlers.TryGetValue(@event.GetType(), out var handlerTypes))
+            var handlers = new List<CompositionEventHandler<TEvent>>();
+            if (metadataRegistry.EventHandlers.TryGetValue(typeof(TEvent), out var handlerTypes))
             {
                 handlerTypes.ForEach(handlerType =>
                 {
-                    Task EventHandler(object evt, HttpRequest req)
+                    Task EventHandler(TEvent evt, HttpRequest req)
                     {
-                        var handler = httpRequest.HttpContext.RequestServices.GetRequiredService(handlerType);
-                        var mi = handlerType.GetMethod(nameof(ICompositionEventsHandler<object>.Handle));
-                        var ret = mi.Invoke(handler, new[] { @event, req });
-                        return ret as Task;
+                        var handler = (ICompositionEventsHandler<TEvent>)httpRequest.HttpContext.RequestServices.GetRequiredService(handlerType);
+                        return handler.Handle(@event, req);
                     }
 
                     handlers.Add(EventHandler);
                 });
             }
 
-            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
+            if (_compositionEventsSubscriptions.TryGetValue(typeof(TEvent), out var compositionHandlers))
             {
-                handlers.AddRange(compositionHandlers);
+                handlers.AddRange(compositionHandlers.Cast<CompositionEventHandler<TEvent>>());
             }
             
-            var tasks = handlers.Select(handler => handler.Invoke(@event, httpRequest)).ToList();
+            var tasks = handlers.Select(handler => handler(@event, httpRequest)).ToList();
             return Task.WhenAll(tasks);
         }
 
