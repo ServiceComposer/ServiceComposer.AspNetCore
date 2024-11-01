@@ -58,11 +58,15 @@ namespace ServiceComposer.AspNetCore
     public interface ICompositionContext
     {
         string RequestId { get; }
-        System.Threading.Tasks.Task RaiseEvent(object @event);
+        System.Threading.Tasks.Task RaiseEvent<TEvent>(TEvent @event);
     }
     public interface ICompositionErrorsHandler
     {
         System.Threading.Tasks.Task OnRequestError(Microsoft.AspNetCore.Http.HttpRequest request, System.Exception ex);
+    }
+    public interface ICompositionEventsHandler<in TEvent>
+    {
+        System.Threading.Tasks.Task Handle(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest request);
     }
     public interface ICompositionEventsPublisher
     {
