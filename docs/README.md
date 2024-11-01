@@ -1,15 +1,16 @@
-# ASP.NET Core on .NET
+# Documentation
 
-ServiceComposer leverages the Endpoints support to plugin into the request handling pipeline.
-ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted in .NET console applications.
+## Hosting
+
+ServiceComposer leverages the ASP.NET Core Endpoints support to plugin into the request handling pipeline. ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted standalone in .NET console applications.
 
 ## Supported .NET versions
 
 Starting with version 5.0, ServiceComposer targets .NET 10 only.
 
-## Note about thread safety
-
-If resources are shared across more than one handler they must be [thread-safe](thread-safety.md).
+> [!NOTE]
+> About thread safety
+> If resources are shared across more than one handler they must be [thread-safe](thread-safety.md).
 
 ## Upgrade guides
 
