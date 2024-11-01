@@ -1,8 +1,10 @@
 # Documentation
 
-## Hosting
+The [getting started](getting-started.md) documentation provides an overview of the basic building blocks:
 
-ServiceComposer leverages the ASP.NET Core Endpoints support to plugin into the request handling pipeline. ServiceComposer can be added to existing or new ASP.NET Core projects, or it can be hosted standalone in .NET console applications.
+- [Hosting](getting-started.md)
+- [Composition requests handlers](getting-started.md#composition-requests-handlers)
+- [Composition events handlers](getting-started.md#composition-events-handlers)
 
 ## Supported .NET versions
 
