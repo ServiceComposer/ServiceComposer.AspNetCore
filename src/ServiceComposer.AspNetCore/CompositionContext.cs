@@ -32,7 +32,9 @@ namespace ServiceComposer.AspNetCore
                 });
             }
 
-            if (_compositionEventsSubscriptions.TryGetValue(typeof(TEvent), out var compositionHandlers))
+            // not using typeof(TEvent) to prevent introducing a breaking change
+            // due to the introduction of the generic TEvent parameter
+            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
             {
                 handlers.AddRange(compositionHandlers.Cast<CompositionEventHandler<TEvent>>());
             }
