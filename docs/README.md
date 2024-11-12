@@ -15,6 +15,10 @@ If resources are shared across more than one handler they must be [thread-safe](
 
 [Upgrade guides](upgrade-guides) are available to ease the migration from one version to another.
 
+## Subscribing to events
+
+When handling composition requests there are scenarios in which requests handlers need to offload to other handlers some of the composition concerns. That can be done by [publishing events](events-subscribers.md).
+
 ## ASP.Net Model Binding
 
 When handling composition requests it possible to leverage the power of ASP.Net Model Binding to bind incoming forms, bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding refer to the [Model Binding](model-binding.md) section.

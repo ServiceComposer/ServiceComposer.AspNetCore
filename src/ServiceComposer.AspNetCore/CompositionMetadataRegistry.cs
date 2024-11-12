@@ -6,7 +6,7 @@ namespace ServiceComposer.AspNetCore
     class CompositionMetadataRegistry
     {
         internal HashSet<Type> Components { get; } = [];
-        internal Dictionary<Type, List<Type>> EventHandlers = new();
+        internal Dictionary<Type, List<Type>> EventHandlers { get; } = new();
 
         public void AddComponent(Type type)
         {
