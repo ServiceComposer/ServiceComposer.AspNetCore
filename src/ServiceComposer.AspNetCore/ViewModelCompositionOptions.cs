@@ -227,7 +227,7 @@ namespace ServiceComposer.AspNetCore
                 });
         }
 
-        internal void RegisterCompositionEventsHandler(Type type)
+        void RegisterCompositionEventsHandler(Type type)
         {
             type.GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>))
@@ -268,28 +268,37 @@ namespace ServiceComposer.AspNetCore
 
         void RegisterCompositionComponents(Type type)
         {
-            if (
-                !(
-                    typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
-                    || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
-                    || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
-                )
-            )
+            var didSomething = false;
+            if(type.GetInterfaces()
+               .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>)))
             {
-                var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
-                              $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+                RegisterCompositionEventsHandler(type);
+                didSomething = true;
+            }
+
+            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
+                || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
+                || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type))
+            {
+
+                _compositionMetadataRegistry.AddComponent(type);
+                if (configurationHandlers.TryGetValue(type, out var handler))
+                {
+                    handler(type, Services);
+                }
+                else
+                {
+                    Services.AddTransient(type);
+                }
+                didSomething = true;
+            }
+
+            if (didSomething == false)
+            {
+                const string message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
+                                       $"{nameof(ICompositionEventsSubscriber)}, {nameof(ICompositionEventsHandler<SomeEvent>)}, or {nameof(IEndpointScopedViewModelFactory)}.";
 
                 throw new NotSupportedException(message);
-            }
-
-            _compositionMetadataRegistry.AddComponent(type);
-            if (configurationHandlers.TryGetValue(type, out var handler))
-            {
-                handler(type, Services);
-            }
-            else
-            {
-                Services.AddTransient(type);
             }
         }
 
@@ -349,4 +358,6 @@ namespace ServiceComposer.AspNetCore
             }
         }
     }
+
+    class SomeEvent;
 }
