@@ -176,6 +176,22 @@ namespace ServiceComposer.AspNetCore
                             RegisterCompositionRequestsFilter(type);
                         }
                     });
+                
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && typeof(ICompositionEventsHandler<>).IsAssignableFrom(type);
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterCompositionEventsHandler(type);
+                        }
+                    });
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
@@ -211,6 +227,19 @@ namespace ServiceComposer.AspNetCore
                 });
         }
 
+        void RegisterCompositionEventsHandler(Type type)
+        {
+            type.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>))
+                .ToList()
+                .ForEach(compositionEventsHandlerGenericInterfaceType =>
+                {
+                    var eventType = compositionEventsHandlerGenericInterfaceType.GetGenericArguments()[0];
+                    Services.AddTransient(type);
+                    _compositionMetadataRegistry.AddEventHandler(eventType, type);
+                });
+        }
+
         public AssemblyScanner AssemblyScanner { get; }
 
         public IServiceCollection Services { get; }
@@ -239,28 +268,37 @@ namespace ServiceComposer.AspNetCore
 
         void RegisterCompositionComponents(Type type)
         {
-            if (
-                !(
-                    typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
-                    || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
-                    || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
-                )
-            )
+            var didSomething = false;
+            if(type.GetInterfaces()
+               .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>)))
             {
-                var message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
-                              $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+                RegisterCompositionEventsHandler(type);
+                didSomething = true;
+            }
+
+            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
+                || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
+                || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type))
+            {
+
+                _compositionMetadataRegistry.AddComponent(type);
+                if (configurationHandlers.TryGetValue(type, out var handler))
+                {
+                    handler(type, Services);
+                }
+                else
+                {
+                    Services.AddTransient(type);
+                }
+                didSomething = true;
+            }
+
+            if (didSomething == false)
+            {
+                const string message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
+                                       $"{nameof(ICompositionEventsSubscriber)}, {nameof(ICompositionEventsHandler<SomeEvent>)}, or {nameof(IEndpointScopedViewModelFactory)}.";
 
                 throw new NotSupportedException(message);
-            }
-
-            _compositionMetadataRegistry.AddComponent(type);
-            if (configurationHandlers.TryGetValue(type, out var handler))
-            {
-                handler(type, Services);
-            }
-            else
-            {
-                Services.AddTransient(type);
             }
         }
 
@@ -320,4 +358,6 @@ namespace ServiceComposer.AspNetCore
             }
         }
     }
+
+    class SomeEvent;
 }
