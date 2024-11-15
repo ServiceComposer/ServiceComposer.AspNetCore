@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.EventsSubscribers;
+namespace Snippets.Events;
 
 // begin-snippet: generic-event-handler
 public class GenericEventHandler : ICompositionEventsHandler<AnEvent>
@@ -14,5 +14,3 @@ public class GenericEventHandler : ICompositionEventsHandler<AnEvent>
     }
 }
 // end-snippet
-
-public class AnEvent;
