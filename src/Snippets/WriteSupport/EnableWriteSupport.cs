@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
@@ -5,14 +6,13 @@ namespace Snippets.WriteSupport;
 
 public class EnableWriteSupport
 {
-#pragma warning disable CS0618 // Type or member is obsolete
+    [Obsolete("This snippet is used only by an upgrade guide. The Obsolete is needed to prevent the EnableWriteSupport usage here to cause the snippet compilation to fail.")]
     // begin-snippet: enable-write-support
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddViewModelComposition(options => options.EnableWriteSupport());
     } 
     // end-snippet
-#pragma warning restore CS0618 // Type or member is obsolete
 }
 
 public class DisableWriteSupport
