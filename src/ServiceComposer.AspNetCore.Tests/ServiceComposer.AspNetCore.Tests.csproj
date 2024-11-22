@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,9 +17,19 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
-    <PackageReference Include="System.Reflection.Metadata" Version="8.0.1" />
+    <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+    <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +38,6 @@
     <PackageReference Include="FakeItEasy" Version="8.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="PublicApiGenerator" Version="11.1.0" />
-    <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.1.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <!-- this is needed to allow tests to correctly load the xunit.runner.utility required by Verify.Xunit --> 
     <PackageReference Include="xunit.runner.utility" Version="2.9.2" />
