@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.ModelBinding
@@ -18,7 +18,7 @@ namespace Snippets.ModelBinding
             request.Body.Position = 0;
             using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true );
             var body = await reader.ReadToEndAsync();
-            var content = JObject.Parse(body);
+            var content = JsonNode.Parse(body);
 
             //use the content object instance as needed
         }

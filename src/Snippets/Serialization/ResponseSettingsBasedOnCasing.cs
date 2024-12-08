@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+﻿using System.Text.Json;
 
 namespace Snippets.Serialization
 {
@@ -8,9 +7,12 @@ namespace Snippets.Serialization
         void Camel()
         {
             // begin-snippet: camel-serialization-settings
-            var settings = new JsonSerializerSettings()
+            var settings = new JsonSerializerOptions()
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                // System.Text.Json requires both properties to be
+                // set to properly format serialized responses
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
             // end-snippet
         }
@@ -18,7 +20,7 @@ namespace Snippets.Serialization
         void Pascal()
         {
             // begin-snippet: pascal-serialization-settings
-            var settings = new JsonSerializerSettings();
+            var settings = new JsonSerializerOptions();
             // end-snippet
         }
     }
