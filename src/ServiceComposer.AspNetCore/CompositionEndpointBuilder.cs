@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace ServiceComposer.AspNetCore
 {
     partial class CompositionEndpointBuilder : EndpointBuilder
     {
-        readonly Dictionary<ResponseCasing, JsonSerializerSettings> casingToSettingsMappings = new();
+        readonly Dictionary<ResponseCasing, JsonSerializerOptions> casingToSettingsMappings = new();
         readonly RoutePattern routePattern;
         readonly ResponseCasing defaultResponseCasing;
         readonly Type[] componentsTypes;
@@ -27,8 +26,12 @@ namespace ServiceComposer.AspNetCore
         {
             Validate(routePattern, componentsTypes);
 
-            casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerSettings());
-            casingToSettingsMappings.Add(ResponseCasing.CamelCase, new JsonSerializerSettings() {ContractResolver = new CamelCasePropertyNamesContractResolver()});
+            casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerOptions());
+            casingToSettingsMappings.Add(ResponseCasing.CamelCase, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
 
             this.routePattern = routePattern;
             Order = order;
@@ -48,7 +51,7 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        JsonSerializerSettings GetSettings(HttpContext context)
+        JsonSerializerOptions GetSettings(HttpContext context)
         {
             var casing = defaultResponseCasing;
             if (context.Request.Headers.TryGetValue("Accept-Casing", out var requestedCasing))
@@ -68,19 +71,17 @@ namespace ServiceComposer.AspNetCore
                 }
             }
 
-            JsonSerializerSettings customSettings = null;
-            var customSettingProvider = context.RequestServices.GetService<Func<HttpRequest, JsonSerializerSettings>>();
+            JsonSerializerOptions customSettings = null;
+            var customSettingProvider = context.RequestServices.GetService<Func<HttpRequest, JsonSerializerOptions>>();
             if (customSettingProvider != null)
             {
                 customSettings = customSettingProvider(context.Request);
-                if (customSettings != null && casing == ResponseCasing.CamelCase && customSettings.ContractResolver is not CamelCasePropertyNamesContractResolver)
+                if (customSettings != null && casing == ResponseCasing.CamelCase && customSettings.PropertyNamingPolicy != JsonNamingPolicy.CamelCase)
                 {
-                    throw new ArgumentException($"Current HttpRequest is requesting camel case serialization. " +
-                                                $"The supplied custom settings are not using as ContractResolver an " +
-                                                $"instance of {nameof(CamelCasePropertyNamesContractResolver)}. Either " +
-                                                $"configure custom settings to use {nameof(CamelCasePropertyNamesContractResolver)} " +
-                                                $"as contract resolver by setting the property ContractResolver, or change the request " +
-                                                $"casing to be pascal case.");
+                    throw new ArgumentException($"Current HttpRequest is requesting camel case serialization. The supplied custom " +
+                                                $"settings are not using as PropertyNamingPolicy JsonNamingPolicy.CamelCase. Either " +
+                                                $"configure custom settings to use JsonNamingPolicy.CamelCase as PropertyNamingPolicy " +
+                                                $"or change the request casing to be pascal case.");
                 }
             }
 
@@ -114,7 +115,8 @@ namespace ServiceComposer.AspNetCore
                             break;
                         default:
                         {
-                            var json = JsonConvert.SerializeObject(viewModel, GetSettings(context));
+                            var options = GetSettings(context);
+                            var json = JsonSerializer.Serialize(viewModel, options);
                             context.Response.ContentType = "application/json; charset=utf-8";
                             await context.Response.WriteAsync(json);
                             break;

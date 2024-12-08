@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -40,8 +38,7 @@ namespace ServiceComposer.AspNetCore
             }
             else
             {
-                var logger = context.RequestServices.GetRequiredService<ILogger<DynamicViewModel>>();
-                viewModel = new DynamicViewModel(logger);
+                viewModel = new ExpandoObject();
             }
 
             try

@@ -107,7 +107,7 @@ namespace ServiceComposer.AspNetCore
     {
         public ServiceComposer.AspNetCore.ResponseCasing DefaultResponseCasing { get; set; }
         public bool UseOutputFormatters { get; set; }
-        public void UseCustomJsonSerializerSettings(System.Func<Microsoft.AspNetCore.Http.HttpRequest, Newtonsoft.Json.JsonSerializerSettings> jsonSerializerSettingsConfig) { }
+        public void UseCustomJsonSerializerSettings(System.Func<Microsoft.AspNetCore.Http.HttpRequest, System.Text.Json.JsonSerializerOptions> jsonSerializerSettingsConfig) { }
     }
     public static class ServiceCollectionExtensions
     {
