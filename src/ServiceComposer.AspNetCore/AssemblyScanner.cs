@@ -33,15 +33,23 @@ namespace ServiceComposer.AspNetCore
             IsEnabled = false;
         }
 
-        readonly List<Func<string, FilterResults>> assemblyFilters = new List<Func<string, FilterResults>>();
+        readonly List<Func<string, FilterResults>> assemblyFilters = [];
 
         internal IEnumerable<Assembly> Scan()
         {
-            var assemblies = new List<Assembly>();
+            var assemblies = new Dictionary<string, Assembly>();
 
             bool FullPathsFilter(string fullPath)
             {
                 return assemblyFilters.All(filter => filter(fullPath) == FilterResults.Include);
+            }
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (FullPathsFilter(assembly.Location))
+                {
+                    assemblies.Add(assembly.GetName().FullName, assembly);   
+                }
             }
 
             foreach (var patternToUse in assemblySearchPatternsToUse)
@@ -55,7 +63,15 @@ namespace ServiceComposer.AspNetCore
                     AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out _);
                     if (shouldLoad)
                     {
-                        assemblies.Add(Assembly.LoadFrom(assemblyFullPath));
+                        try
+                        {
+                            var assembly = Assembly.LoadFrom(assemblyFullPath);
+                            assemblies.TryAdd(assembly.GetName().FullName, assembly);
+                        }
+                        catch (FileLoadException)
+                        {
+                            // NOP — FileLoadException happens for already loaded assemblies
+                        }
                     }
                 }
             }
@@ -72,12 +88,20 @@ namespace ServiceComposer.AspNetCore
                     AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out _);
                     if (shouldLoad)
                     {
-                        assemblies.Add(Assembly.LoadFrom(platformAssemblyFullPath));
+                        try
+                        {
+                            var assembly = Assembly.LoadFrom(platformAssemblyFullPath);
+                            assemblies.TryAdd(assembly.GetName().FullName, assembly);
+                        }
+                        catch (FileLoadException)
+                        {
+                            // NOP — FileLoadException happens for already loaded assemblies
+                        }
                     }
                 }
             }
 
-            return assemblies.Distinct();
+            return assemblies.Values;
         }
 
         public void AddAssemblyFilter(Func<string, FilterResults> filter)
