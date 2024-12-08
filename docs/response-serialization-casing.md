@@ -6,7 +6,7 @@ ServiceComposer serializes responses using a JSON serializer. By default, respon
 
 _Available starting with v1.8.0_
 
-Default response serialization is camel casing. It's possible to configure a different default response serialization casing when configuring ServiceComposer:
+Default response serialization casing is camel case. It's possible to configure a different default response serialization casing when configuring ServiceComposer:
 
 <!-- snippet: default-casing -->
 <a id='snippet-default-casing'></a>
