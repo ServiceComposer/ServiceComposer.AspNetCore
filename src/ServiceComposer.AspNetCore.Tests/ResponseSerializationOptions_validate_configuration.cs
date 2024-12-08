@@ -1,8 +1,11 @@
 ﻿using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using MELT;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using VerifyXunit;
 using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
@@ -10,12 +13,8 @@ namespace ServiceComposer.AspNetCore.Tests
     public class ResponseSerializationOptions_validate_configuration
     {
         [Fact]
-        public void Logs_warning_when_using_invalid_config()
+        public async Task Logs_warning_when_using_invalid_config()
         {
-            var expectedLogMessage = $"ResponseSerialization {nameof(ResponseSerializationOptions.UseOutputFormatters)} is set to true, " +
-                                     $"and it's also configured to use either a custom response casing or custom json serializer settings. " +
-                                     $"When using output formatters, custom settings are ignored.";
-
             var loggerFactory = TestLoggerFactory.Create();
             var logger = loggerFactory.CreateLogger<ResponseSerializationOptions>();
 
@@ -24,21 +23,18 @@ namespace ServiceComposer.AspNetCore.Tests
                 UseOutputFormatters = true,
                 DefaultResponseCasing = ResponseCasing.PascalCase
             };
-            options.UseCustomJsonSerializerSettings(request => new JsonSerializerSettings());
+            options.UseCustomJsonSerializerSettings(request => new JsonSerializerOptions());
             options.ValidateConfiguration(logger);
 
             var log = Assert.Single(loggerFactory.Sink.LogEntries);
-            Assert.Equal(expectedLogMessage, log.Message);
             Assert.Equal(LogLevel.Warning, log.LogLevel);
+            
+            await Verifier.Verify(log.Message);
         }
 
         [Fact]
-        public void Logs_warning_when_using_invalid_config_with_casing_and_formatters()
+        public async Task Logs_warning_when_using_invalid_config_with_casing_and_formatters()
         {
-            var expectedLogMessage = $"ResponseSerialization {nameof(ResponseSerializationOptions.UseOutputFormatters)} is set to true, " +
-                                     $"and it's also configured to use either a custom response casing or custom json serializer settings. " +
-                                     $"When using output formatters, custom settings are ignored.";
-
             var loggerFactory = TestLoggerFactory.Create();
             var logger = loggerFactory.CreateLogger<ResponseSerializationOptions>();
 
@@ -50,17 +46,14 @@ namespace ServiceComposer.AspNetCore.Tests
             options.ValidateConfiguration(logger);
 
             var log = Assert.Single(loggerFactory.Sink.LogEntries);
-            Assert.Equal(expectedLogMessage, log.Message);
             Assert.Equal(LogLevel.Warning, log.LogLevel);
+            
+            await Verifier.Verify(log.Message);
         }
 
         [Fact]
-        public void Logs_warning_when_using_invalid_config_with_custom_settings_and_formatters()
+        public async Task Logs_warning_when_using_invalid_config_with_custom_settings_and_formatters()
         {
-            var expectedLogMessage = $"ResponseSerialization {nameof(ResponseSerializationOptions.UseOutputFormatters)} is set to true, " +
-                                     $"and it's also configured to use either a custom response casing or custom json serializer settings. " +
-                                     $"When using output formatters, custom settings are ignored.";
-
             var loggerFactory = TestLoggerFactory.Create();
             var logger = loggerFactory.CreateLogger<ResponseSerializationOptions>();
 
@@ -68,12 +61,13 @@ namespace ServiceComposer.AspNetCore.Tests
             {
                 UseOutputFormatters = true
             };
-            options.UseCustomJsonSerializerSettings(request => new JsonSerializerSettings());
+            options.UseCustomJsonSerializerSettings(request => new JsonSerializerOptions());
             options.ValidateConfiguration(logger);
 
             var log = Assert.Single(loggerFactory.Sink.LogEntries);
-            Assert.Equal(expectedLogMessage, log.Message);
             Assert.Equal(LogLevel.Warning, log.LogLevel);
+            
+            await Verifier.Verify(log.Message);
         }
 
         [Fact]
