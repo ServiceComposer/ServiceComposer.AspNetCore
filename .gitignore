@@ -32,3 +32,6 @@ x86/
 
 # JetBrains cache/options directory
 .idea/
+
+# macOS garbage
+.DS_Store
