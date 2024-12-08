@@ -7,12 +7,15 @@ By default, each response is serialized using [Json.Net](https://www.newtonsoft.
 <!-- snippet: camel-serialization-settings -->
 <a id='snippet-camel-serialization-settings'></a>
 ```cs
-var settings = new JsonSerializerSettings()
+var settings = new JsonSerializerOptions()
 {
-    ContractResolver = new CamelCasePropertyNamesContractResolver()
+    // System.Text.Json requires both properties to be
+    // set to properly format serialized responses
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
 };
 ```
-<sup><a href='/src/Snippets/Serialization/ResponseSettingsBasedOnCasing.cs#L10-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-camel-serialization-settings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/ResponseSettingsBasedOnCasing.cs#L9-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-camel-serialization-settings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 If the requested case is pascal, the following settings are applied:
@@ -20,9 +23,9 @@ If the requested case is pascal, the following settings are applied:
 <!-- snippet: pascal-serialization-settings -->
 <a id='snippet-pascal-serialization-settings'></a>
 ```cs
-var settings = new JsonSerializerSettings();
+var settings = new JsonSerializerOptions();
 ```
-<sup><a href='/src/Snippets/Serialization/ResponseSettingsBasedOnCasing.cs#L20-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-pascal-serialization-settings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/ResponseSettingsBasedOnCasing.cs#L22-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-pascal-serialization-settings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 It's possible to customize the response serialization settings on a case-by-case using the following configuration:
@@ -35,14 +38,17 @@ public void ConfigureServices(IServiceCollection services)
     services.AddRouting();
     services.AddViewModelComposition(options =>
     {
-        options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
+        options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
         {
-            return new JsonSerializerSettings();
+            return new JsonSerializerOptions()
+            {
+                // customize options as needed
+            };
         });
     });
 }
 ```
-<sup><a href='/src/Snippets/Serialization/Startup.cs#L9-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/Startup.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Each time ServiceComposer needs to serialize a response it'll invoke the supplied function.

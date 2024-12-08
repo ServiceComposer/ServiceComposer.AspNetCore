@@ -1,12 +1,11 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
@@ -46,7 +45,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
                         {
                             invokedUseCustomJsonSerializerSettings = true;
-                            return new JsonSerializerSettings();
+                            return new JsonSerializerOptions();
                         });
                     });
                     services.AddRouting();
@@ -85,7 +84,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<ResponseHandler>();
                         options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.CamelCase;
-                        options.ResponseSerialization.UseCustomJsonSerializerSettings(request => new JsonSerializerSettings());
+                        options.ResponseSerialization.UseCustomJsonSerializerSettings(request => new JsonSerializerOptions());
                     });
                     services.AddRouting();
                 }, configure: app =>
@@ -119,9 +118,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
                         {
                             invokedUseCustomJsonSerializerSettings = true;
-                            return new JsonSerializerSettings()
+                            return new JsonSerializerOptions()
                             {
-                                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
                             };
                         });
                     });

@@ -21,7 +21,7 @@ public async Task Handle(HttpRequest request)
     request.Body.Position = 0;
     using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true );
     var body = await reader.ReadToEndAsync();
-    var content = JObject.Parse(body);
+    var content = JsonNode.Parse(body);
 
     //use the content object instance as needed
 }

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.Serialization
@@ -12,9 +12,12 @@ namespace Snippets.Serialization
             services.AddRouting();
             services.AddViewModelComposition(options =>
             {
-                options.ResponseSerialization.UseCustomJsonSerializerSettings(request =>
+                options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
                 {
-                    return new JsonSerializerSettings();
+                    return new JsonSerializerOptions()
+                    {
+                        // customize options as needed
+                    };
                 });
             });
         }

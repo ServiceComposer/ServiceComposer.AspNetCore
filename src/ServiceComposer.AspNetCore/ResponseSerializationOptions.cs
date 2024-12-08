@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -18,7 +18,7 @@ namespace ServiceComposer.AspNetCore
             {
                 logger.LogWarning($"ResponseSerialization {nameof(UseOutputFormatters)} is set to true, and it's also configured to use " +
                                   "either a custom response casing or custom json serializer settings. When using output formatters, custom " +
-                                  "settings are ignored.");
+                                  "settings are ignored");
             }
         }
 
@@ -29,7 +29,7 @@ namespace ServiceComposer.AspNetCore
 
         public ResponseCasing DefaultResponseCasing { get; set; } = defaultCasing;
 
-        public void UseCustomJsonSerializerSettings(Func<HttpRequest, JsonSerializerSettings> jsonSerializerSettingsConfig)
+        public void UseCustomJsonSerializerSettings(Func<HttpRequest, JsonSerializerOptions> jsonSerializerSettingsConfig)
         {
             usingCustomJsonSerializerSettings = true;
             services.AddSingleton(jsonSerializerSettingsConfig);
