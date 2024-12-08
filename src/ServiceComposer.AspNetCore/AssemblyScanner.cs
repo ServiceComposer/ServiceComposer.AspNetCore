@@ -48,7 +48,7 @@ namespace ServiceComposer.AspNetCore
             {
                 if (FullPathsFilter(assembly.Location))
                 {
-                    assemblies.Add(assembly.GetName().FullName, assembly);   
+                    assemblies.TryAdd(assembly.GetName().FullName, assembly);
                 }
             }
 
