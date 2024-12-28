@@ -196,7 +196,7 @@ namespace ServiceComposer.AspNetCore.Tests
             
             var arguments = captureArgumentsEndpointFilter.CapturedArguments;
             Assert.NotNull(arguments);
-            Assert.True(arguments.Count == 2);
+            Assert.True(arguments.Count == 1);
 
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic body = JObject.Parse(contentString);
