@@ -70,5 +70,54 @@ namespace ServiceComposer.AspNetCore
                 modelBindingContext.Result.IsModelSet,
                 modelBindingContext.ModelState);
         }
+
+        internal async Task<(object Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind(Type modelType,
+            HttpRequest request)
+        {
+            //always rewind the stream; otherwise,
+            //if multiple handlers concurrently bind
+            //different models only the first one succeeds
+            request.Body.Position = 0;
+
+            var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
+            var actionContext = new ActionContext(
+                request.HttpContext,
+                request.HttpContext.GetRouteData(),
+                new ActionDescriptor(),
+                new ModelStateDictionary());
+            var valueProvider =
+                await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
+
+            var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
+                actionContext,
+                valueProvider,
+                modelMetadata,
+                bindingInfo: null,
+                modelName: "");
+
+            //modelBindingContext.Model = new T();
+            modelBindingContext.PropertyFilter = _ => true; // All props
+
+            var factoryContext = new ModelBinderFactoryContext()
+            {
+                Metadata = modelMetadata,
+                BindingInfo = new BindingInfo()
+                {
+                    BinderModelName = modelMetadata.BinderModelName,
+                    BinderType = modelMetadata.BinderType,
+                    BindingSource = modelMetadata.BindingSource,
+                    PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
+                },
+                CacheToken = modelMetadata,
+            };
+
+            await modelBinderFactory
+                .CreateBinder(factoryContext)
+                .BindModelAsync(modelBindingContext);
+
+            return (modelBindingContext.Result.Model,
+                modelBindingContext.Result.IsModelSet,
+                modelBindingContext.ModelState);
+        }
     }
 }
