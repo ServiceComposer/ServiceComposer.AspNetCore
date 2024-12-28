@@ -100,8 +100,10 @@ namespace ServiceComposer.AspNetCore
                 
                 RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
-                
-                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context);
+
+                var allComponentsArguments = await GetAllComponentsArguments(context);
+                var allArguments = allComponentsArguments.SelectMany(a => a.Arguments).ToArray();
+                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, allArguments);
                 var viewModel = await pipeline(invocationContext);
                 
                 if (viewModel != null)
