@@ -98,6 +98,22 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class ModelAttribute : System.Attribute
+    {
+        public ModelAttribute(System.Type type, ServiceComposer.AspNetCore.ModelBindingSource bindingSource = 0) { }
+        public ServiceComposer.AspNetCore.ModelBindingSource Source { get; }
+        public System.Type Type { get; }
+    }
+    public enum ModelBindingSource
+    {
+        ModelBinding = 0,
+        Query = 1,
+        Route = 2,
+        Body = 3,
+        Form = 4,
+        Headers = 5,
+    }
     public enum ResponseCasing
     {
         CamelCase = 0,
