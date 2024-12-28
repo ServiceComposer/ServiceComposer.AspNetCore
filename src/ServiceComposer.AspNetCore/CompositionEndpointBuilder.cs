@@ -92,6 +92,11 @@ namespace ServiceComposer.AspNetCore
         {
             RequestDelegate = async context =>
             {
+                // We need the body to be seekable otherwise if more than one
+                // composition handler tries to bind a model to the body
+                // it'll fail and only the first one succeeds
+                context.Request.EnableBuffering();
+                
                 RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
                 

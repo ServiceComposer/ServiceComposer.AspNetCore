@@ -31,6 +31,11 @@ namespace ServiceComposer.AspNetCore
 
                 if (handlerTypes.Any())
                 {
+                    // We need the body to be seekable otherwise if more than one
+                    // composition handler tries to bind a model to the body
+                    // it'll fail and only the first one succeeds
+                    context.HttpContext.Request.EnableBuffering();
+
                     var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
                     switch (context.Result)
                     {
