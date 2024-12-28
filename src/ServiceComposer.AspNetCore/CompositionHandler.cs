@@ -4,7 +4,6 @@ using System;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -12,8 +11,6 @@ namespace ServiceComposer.AspNetCore
     {
         internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
         {
-            context.Request.EnableBuffering();
-
             var request = context.Request;
 
             if(!request.Headers.TryGetValue(ComposedRequestIdHeader.Key, out var requestId))
