@@ -202,5 +202,9 @@ namespace ServiceComposer.AspNetCore.Tests
             dynamic body = JObject.Parse(contentString);
             Assert.Equal(expectedComposedRequestId, (string)body.RequestId);
         }
+        
+        // TODO: test using multiple Model attributes
+        // TODO: test using value types
+        // TODO: test using different biding sources
     }
 }
