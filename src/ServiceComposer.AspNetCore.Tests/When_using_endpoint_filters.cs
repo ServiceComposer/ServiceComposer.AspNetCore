@@ -168,6 +168,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.RegisterCompositionHandler<ResponseHandlerWithModelBinding>();
                     });
                     services.AddRouting();
+                    services.AddControllers();
                 },
                 configure: app =>
                 {
