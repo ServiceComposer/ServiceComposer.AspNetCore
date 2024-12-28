@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -29,8 +30,10 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             public bool Invoked { get; set; }
             public object CapturedResponse { get; set; }
+            public bool Invoked { get; private set; }
+            public object? CapturedResponse { get; private set; }
             
-            public async ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+            public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
             {
                 Invoked = true;
                 CapturedResponse = await next(context);
@@ -41,10 +44,10 @@ namespace ServiceComposer.AspNetCore.Tests
         
         class AnotherSampleEndpointFilter : IEndpointFilter
         {
-            public bool Invoked { get; set; }
-            public object CapturedResponse { get; set; }
-            
-            public async ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+            public bool Invoked { get; private set; }
+            public object? CapturedResponse { get; private set; }
+
+            public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
             {
                 Invoked = true;
                 CapturedResponse = await next(context);
@@ -52,7 +55,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 return CapturedResponse;
             }
         }
-
+        
         [Fact]
         public async Task Should_invoke_the_filter()
         {
@@ -93,10 +96,10 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(response.IsSuccessStatusCode);
             
             Assert.True(sampleEndpointFilter.Invoked);
-            Assert.Equal(expectedComposedRequestId, ((dynamic)sampleEndpointFilter.CapturedResponse).RequestId);
+            Assert.Equal(expectedComposedRequestId, (sampleEndpointFilter.CapturedResponse as dynamic)?.RequestId);
 
             Assert.True(anotherSampleEndpointFilter.Invoked);
-            Assert.Equal(expectedComposedRequestId, ((dynamic)anotherSampleEndpointFilter.CapturedResponse).RequestId);
+            Assert.Equal(expectedComposedRequestId, (anotherSampleEndpointFilter.CapturedResponse as dynamic)?.RequestId);
 
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic body = JObject.Parse(contentString);
