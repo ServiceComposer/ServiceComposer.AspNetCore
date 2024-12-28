@@ -21,6 +21,7 @@ namespace ServiceComposer.AspNetCore
         EndpointFilterDelegate cachedPipeline;
 
         public int Order { get; }
+        public IList<(Type ComponentType, IList<object> Metadata)> ComponentsMetadata { get; } = new List<(Type ComponentType, IList<object> Metadata)>();
 
         public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing, bool useOutputFormatters)
         {
