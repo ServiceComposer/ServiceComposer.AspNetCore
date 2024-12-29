@@ -106,6 +106,8 @@ namespace ServiceComposer.AspNetCore
                 
                 // TODO how are arguments exposed to composition handlers?
                 // TODO Can handlers access all arguments or only the ones they declare?
+                // TODO Do we need named arguments? If the route is /{tenant:int}/{id:int} when using
+                // TODO declarative model binding there would be no way to understand which one is which
                 
                 EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
                 var viewModel = await pipeline(invocationContext);
