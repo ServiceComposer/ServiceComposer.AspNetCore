@@ -14,14 +14,29 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
-    public sealed class BindModelFromBodyAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromBodyAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
     {
-        public BindModelFromBodyAttribute() { }
+        public BindFromBodyAttribute() { }
         public override string ModelName { get; }
     }
-    public sealed class BindModelFromRouteAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromFormAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
     {
-        public BindModelFromRouteAttribute(string routeValueKey) { }
+        public BindFromFormAttribute(string formFieldName) { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromHeaderAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    {
+        public BindFromHeaderAttribute(string headerName) { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromQueryAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    {
+        public BindFromQueryAttribute(string queryParameterName) { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromRouteAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    {
+        public BindFromRouteAttribute(string routeValueKey) { }
         public override string ModelName { get; }
     }
     public static class ComposedRequestIdHeader
