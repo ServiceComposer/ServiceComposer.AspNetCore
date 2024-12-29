@@ -60,7 +60,12 @@ namespace ServiceComposer.AspNetCore
 
                 //TODO: if handlers == none we could shortcut again to 404 here
                 var pending = handlers.OfType<ICompositionRequestsHandler>()
-                    .Select(handler => handler.Handle(request))
+                    .Select(handler =>
+                    {
+                        // TODO: apply composition filter here not before
+                        // invoking the whole composition process
+                        return handler.Handle(request);
+                    })
                     .ToList();
 
                 if (pending.Count == 0)
