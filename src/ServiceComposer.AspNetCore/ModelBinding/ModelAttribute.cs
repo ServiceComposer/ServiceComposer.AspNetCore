@@ -16,7 +16,7 @@ public abstract class ModelAttribute(Type type, BindingSource bindingSource) : A
 public sealed class BindModelFromBodyAttribute<T>()
     : ModelAttribute(typeof(T), BindingSource.Body)
 {
-    public override string ModelName { get; } = "model";
+    public override string ModelName { get; } = "";
 };
 
 public sealed class BindModelFromRouteAttribute<T>(string routeValueKey)
