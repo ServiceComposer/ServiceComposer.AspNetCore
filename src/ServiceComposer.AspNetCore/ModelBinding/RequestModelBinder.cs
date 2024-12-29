@@ -24,72 +24,23 @@ namespace ServiceComposer.AspNetCore
 
         public async Task<(T Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind<T>(HttpRequest request)
         {
-            //always rewind the stream; otherwise,
-            //if multiple handlers concurrently bind
-            //different models only the first one succeeds
-            request.Body.Position = 0;
-
             var modelType = typeof(T);
-            var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
-            var actionContext = new ActionContext(
-                request.HttpContext,
-                request.HttpContext.GetRouteData(),
-                new ActionDescriptor(),
-                new ModelStateDictionary());
-            var valueProvider =
-                await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
+            var bindingResult = await TryBind(modelType, request);
 
-            var bindingInfo = new BindingInfo()
-            {
-                BinderModelName = modelMetadata.BinderModelName,
-                BinderType = modelMetadata.BinderType,
-                BindingSource = modelMetadata.BindingSource,
-                PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
-            };
-            
-            var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
-                actionContext,
-                valueProvider,
-                modelMetadata,
-                bindingInfo: bindingInfo,
-                modelName: "");
-
-            // TODO remove this
-            // modelBindingContext.Model = new T();
-            modelBindingContext.PropertyFilter = _ => true; // All props
-
-            var factoryContext = new ModelBinderFactoryContext()
-            {
-                Metadata = modelMetadata,
-                BindingInfo = bindingInfo,
-                CacheToken = modelMetadata,
-            };
-
-            await modelBinderFactory
-                .CreateBinder(factoryContext)
-                .BindModelAsync(modelBindingContext);
-
-            return ((T)modelBindingContext.Result.Model,
-                modelBindingContext.Result.IsModelSet,
-                modelBindingContext.ModelState);
+            return ((T)bindingResult.Model, bindingResult.IsModelSet, bindingResult.ModelState);
         }
 
         internal async Task<(object Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind(
             Type modelType,
             HttpRequest request,
-            string modelName,
-            BindingSource bindingSource)
+            string modelName = "",
+            BindingSource bindingSource = null)
         {
             //always rewind the stream; otherwise,
             //if multiple handlers concurrently bind
             //different models only the first one succeeds
             request.Body.Position = 0;
             
-            // TODO remove this
-            // var reader = new StreamReader(request.Body);
-            // var content = await reader.ReadToEndAsync();
-            // request.Body.Position = 0;
-
             var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
             var actionContext = new ActionContext(
                 request.HttpContext,
@@ -114,8 +65,6 @@ namespace ServiceComposer.AspNetCore
                 bindingInfo: bindingInfo,
                 modelName: modelName);
 
-            // TODO remove this
-            //modelBindingContext.Model = new T();
             modelBindingContext.PropertyFilter = _ => true; // All props
             modelBindingContext.BindingSource = bindingSource;
 
