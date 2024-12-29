@@ -24,3 +24,24 @@ public sealed class BindFromRouteAttribute<T>(string routeValueKey)
 {
     public override string ModelName { get; } = routeValueKey;
 }
+
+// TODO Add tests for this binding source
+public sealed class BindFromQueryAttribute<T>(string queryParameterName)
+    : ModelAttribute(typeof(T), BindingSource.Query)
+{
+    public override string ModelName { get; } = queryParameterName;
+}
+
+// TODO Add tests for this binding source
+public sealed class BindFromFormAttribute<T>(string formFieldName)
+    : ModelAttribute(typeof(T), BindingSource.Form)
+{
+    public override string ModelName { get; } = formFieldName;
+}
+
+// TODO Add tests for this binding source
+public sealed class BindFromHeaderAttribute<T>(string headerName)
+    : ModelAttribute(typeof(T), BindingSource.Header)
+{
+    public override string ModelName { get; } = headerName;
+}
