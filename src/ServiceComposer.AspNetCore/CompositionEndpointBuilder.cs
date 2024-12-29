@@ -101,9 +101,13 @@ namespace ServiceComposer.AspNetCore
                 RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
 
-                var allComponentsArguments = await GetAllComponentsArguments(context);
-                var allArguments = allComponentsArguments.SelectMany(a => a.Arguments).ToArray();
-                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, allArguments);
+                var argumentsByComponent = await GetAllComponentsArguments(context);
+                var flatArguments = argumentsByComponent.SelectMany(a => a.Arguments).ToArray();
+                
+                // TODO how are arguments exposed to composition handlers?
+                // TODO Can handlers access all arguments or only the ones they declare?
+                
+                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
                 var viewModel = await pipeline(invocationContext);
                 
                 if (viewModel != null)
