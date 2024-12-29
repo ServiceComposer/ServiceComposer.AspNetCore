@@ -21,7 +21,11 @@ partial class CompositionEndpointBuilder
             {
                 // TODO: shall we cache the instance? We cannot access it earlier otherwise we need model binding support for every request even if it's not needed by user code
                 var binder = context.RequestServices.GetRequiredService<RequestModelBinder>();
-                var bindingResult = await binder.TryBind(modelAttribute.Type, context.Request);
+                var bindingResult = await binder.TryBind(
+                    modelAttribute.Type,
+                    context.Request,
+                    modelAttribute.ModelName ?? "",
+                    modelAttribute.BindingSource);
                 //TODO: throw if binding failed
                 arguments.Add(bindingResult.Model);
             }
