@@ -21,8 +21,8 @@ namespace ServiceComposer.AspNetCore.Tests
         class ResponseHandlerWithModelBinding : ICompositionRequestsHandler
         {
             [HttpPost("/empty-response/{id}")]
-            [BindModelFromBody<MyClass>]
-            [BindModelFromRoute<int>(routeValueKey: "id")]
+            [BindFromBody<MyClass>]
+            [BindFromRoute<int>(routeValueKey: "id")]
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();

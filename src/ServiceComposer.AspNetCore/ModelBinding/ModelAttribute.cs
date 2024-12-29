@@ -13,13 +13,13 @@ public abstract class ModelAttribute(Type type, BindingSource bindingSource) : A
     //public int Order { get; set; }
 }
 
-public sealed class BindModelFromBodyAttribute<T>()
+public sealed class BindFromBodyAttribute<T>()
     : ModelAttribute(typeof(T), BindingSource.Body)
 {
     public override string ModelName { get; } = "";
 };
 
-public sealed class BindModelFromRouteAttribute<T>(string routeValueKey)
+public sealed class BindFromRouteAttribute<T>(string routeValueKey)
     : ModelAttribute(typeof(T), BindingSource.Path)
 {
     public override string ModelName { get; } = routeValueKey;
