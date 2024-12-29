@@ -14,6 +14,16 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
+    public sealed class BindModelFromBodyAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    {
+        public BindModelFromBodyAttribute() { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindModelFromRouteAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    {
+        public BindModelFromRouteAttribute(string routeValueKey) { }
+        public override string ModelName { get; }
+    }
     public static class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
@@ -98,21 +108,13 @@ namespace ServiceComposer.AspNetCore
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
     }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
-    public class ModelAttribute : System.Attribute
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class ModelAttribute : System.Attribute
     {
-        public ModelAttribute(System.Type type, ServiceComposer.AspNetCore.ModelBindingSource bindingSource = 0) { }
-        public ServiceComposer.AspNetCore.ModelBindingSource Source { get; }
+        protected ModelAttribute(System.Type type, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
+        public abstract string ModelName { get; }
         public System.Type Type { get; }
-    }
-    public enum ModelBindingSource
-    {
-        ModelBinding = 0,
-        Query = 1,
-        Route = 2,
-        Body = 3,
-        Form = 4,
-        Headers = 5,
     }
     public enum ResponseCasing
     {
