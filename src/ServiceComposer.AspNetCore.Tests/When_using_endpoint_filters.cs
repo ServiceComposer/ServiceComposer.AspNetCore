@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
@@ -112,7 +113,7 @@ namespace ServiceComposer.AspNetCore.Tests
         class ResponseHandlerWithModelBinding : ICompositionRequestsHandler
         {
             [HttpPost("/empty-response/{id}")]
-            [Model(type: typeof(ModelValues))]
+            [BindModelFromWrapper<ModelValues>]
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
@@ -199,12 +200,11 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(arguments.Count == 1);
 
             var contentString = await response.Content.ReadAsStringAsync();
-            dynamic body = JObject.Parse(contentString);
-            Assert.Equal(expectedComposedRequestId, (string)body.RequestId);
+            dynamic responseBody = JObject.Parse(contentString);
+            Assert.Equal(expectedComposedRequestId, (string)responseBody.RequestId);
+
+            var mv = arguments.OfType<ModelValues>().Single();
+            Assert.Equal("some text", mv?.Body?.Text);
         }
-        
-        // TODO: test using multiple Model attributes
-        // TODO: test using value types
-        // TODO: test using different biding sources
     }
 }
