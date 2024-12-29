@@ -32,7 +32,7 @@ partial class CompositionEndpointBuilder
                     {
                         case false when containsActionResult:
                             throw new NotSupportedException(
-                                $"Setting an action result requires output formatters supports. " +
+                                $"Setting an action result requires output formatters support. " +
                                 $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
                                 $"configuration property in the {nameof(ResponseSerializationOptions)} options.");
                         case true when containsActionResult:
