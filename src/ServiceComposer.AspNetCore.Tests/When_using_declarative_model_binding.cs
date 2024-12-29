@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
@@ -29,7 +28,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 var vm = request.GetComposedResponseModel();
                 var ctx = request.GetCompositionContext();
                 vm.RequestId = ctx.RequestId;
-                
+
                 return Task.CompletedTask;
             }
         }
