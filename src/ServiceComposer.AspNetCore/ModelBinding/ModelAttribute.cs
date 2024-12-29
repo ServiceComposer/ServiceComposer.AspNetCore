@@ -10,7 +10,6 @@ public abstract class ModelAttribute(Type type, BindingSource bindingSource) : A
     public Type Type { get; } = type;
     public BindingSource BindingSource { get; } = bindingSource;
     public abstract string ModelName { get; }
-    //public int Order { get; set; }
 }
 
 public sealed class BindFromBodyAttribute<T>()
