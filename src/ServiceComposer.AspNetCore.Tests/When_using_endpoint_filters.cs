@@ -113,7 +113,8 @@ namespace ServiceComposer.AspNetCore.Tests
         class ResponseHandlerWithModelBinding : ICompositionRequestsHandler
         {
             [HttpPost("/empty-response/{id}")]
-            [BindModelFromWrapper<ModelValues>]
+            [BindModelFromBody<MyClass>]
+            [BindModelFromRoute<int>("id")]
             public Task Handle(HttpRequest request)
             {
                 var vm = request.GetComposedResponseModel();
@@ -122,15 +123,6 @@ namespace ServiceComposer.AspNetCore.Tests
 
                 return Task.CompletedTask;
             }
-        }
-
-        class ModelValues
-        {
-            [FromRoute(Name = "id")]
-            public int Identifier { get; set; }
-            
-            [FromBody]
-            public MyClass? Body { get; set; }
         }
 
         class MyClass
@@ -197,14 +189,13 @@ namespace ServiceComposer.AspNetCore.Tests
             
             var arguments = captureArgumentsEndpointFilter.CapturedArguments;
             Assert.NotNull(arguments);
-            Assert.True(arguments.Count == 1);
+            Assert.True(arguments.Count == 2);
+            Assert.Equal("some text", arguments.OfType<MyClass>().Single().Text);
+            Assert.Equal(1, arguments.OfType<int>().Single());
 
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic responseBody = JObject.Parse(contentString);
             Assert.Equal(expectedComposedRequestId, (string)responseBody.RequestId);
-
-            var mv = arguments.OfType<ModelValues>().Single();
-            Assert.Equal("some text", mv?.Body?.Text);
         }
     }
 }
