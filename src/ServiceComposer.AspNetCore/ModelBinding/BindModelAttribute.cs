@@ -50,6 +50,12 @@ public sealed class BindFromQueryAttribute<T>(string queryParameterName)
     public override string ModelName { get; } = queryParameterName;
 }
 
+/// <summary>
+/// Binds a model from the form fields collection
+/// </summary>
+/// <param name="formFieldName">The optional form field name;
+/// When omitted it's expected the bound type is <c>IFormCollection</c></param>
+/// <typeparam name="T"></typeparam>
 public sealed class BindFromFormAttribute<T>(string? formFieldName = null)
     : BindModelAttribute(typeof(T), BindingSource.Form)
 {
