@@ -16,7 +16,7 @@ using Xunit;
 
 namespace ServiceComposer.AspNetCore.Tests
 {
-    public class When_using_declarative_model_binding
+    public class When_using_declarative_model_binding_and_body_payload
     {
         class ResponseHandlerWithModelBinding : ICompositionRequestsHandler
         {
@@ -53,6 +53,7 @@ namespace ServiceComposer.AspNetCore.Tests
         public async Task Should_populate_arguments_as_expected()
         {
             var expectedComposedRequestId = Guid.NewGuid().ToString();
+            const string expectedText = "some text";
             var captureArgumentsEndpointFilter = new CaptureArgumentsEndpointFilter();
 
             // Arrange
@@ -82,11 +83,10 @@ namespace ServiceComposer.AspNetCore.Tests
 
             client.DefaultRequestHeaders.Add("composed-request-id", expectedComposedRequestId);
 
-            var json = JsonConvert.SerializeObject(new MyClass(){ Text = "some text" });
+            // Act
+            var json = JsonConvert.SerializeObject(new MyClass(){ Text = expectedText });
             var stringContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
             stringContent.Headers.ContentLength = json.Length;
-            
-            // Act
             var response = await client.PostAsync("/empty-response/1", stringContent);
 
             Assert.True(response.IsSuccessStatusCode);
@@ -96,11 +96,7 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(arguments.Count == 2);
             
             var myClass = arguments.OfType<MyClass>().Single();
-            Assert.Equal("some text", myClass.Text);
+            Assert.Equal(expectedText, myClass.Text);
         }
-        
-        // TODO: test using multiple Model attributes
-        // TODO: test using value types
-        // TODO: test using different biding sources
     }
 }
