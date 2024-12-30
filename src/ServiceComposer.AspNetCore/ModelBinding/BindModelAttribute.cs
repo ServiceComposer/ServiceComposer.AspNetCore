@@ -12,7 +12,6 @@ public abstract class BindModelAttribute(Type type, BindingSource bindingSource)
     public abstract string ModelName { get; }
 }
 
-// TODO Add tests for this binding source
 /// <summary>
 /// Binds a model from multiple sources. Each model property can specify the source
 /// to use using the various FromBody, FromForm, FromRoute, etc., attributes  
