@@ -62,3 +62,5 @@ public sealed class BindFromHeaderAttribute<T>(string headerName)
 {
     public override string ModelName { get; } = headerName;
 }
+
+// TODO what about FromServices?
