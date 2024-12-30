@@ -32,10 +32,10 @@ public sealed class BindFromQueryAttribute<T>(string queryParameterName)
 }
 
 // TODO Add tests for this binding source
-public sealed class BindFromFormAttribute<T>(string formFieldName)
+public sealed class BindFromFormAttribute<T>(string? formFieldName = null)
     : ModelAttribute(typeof(T), BindingSource.Form)
 {
-    public override string ModelName { get; } = formFieldName;
+    public override string ModelName { get; } = formFieldName ?? "";
 }
 
 // TODO Add tests for this binding source
