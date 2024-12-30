@@ -12,12 +12,32 @@ public abstract class BindModelAttribute(Type type, BindingSource bindingSource)
     public abstract string ModelName { get; }
 }
 
+// TODO Add tests for this binding source
+/// <summary>
+/// Binds a model from multiple sources. Each model property can specify the source
+/// to use using the various FromBody, FromForm, FromRoute, etc., attributes  
+/// </summary>
+/// <typeparam name="T">The type of the model to bind to</typeparam>
+public sealed class BindAttribute<T>()
+    : BindModelAttribute(typeof(T), BindingSource.ModelBinding)
+{
+    public override string ModelName { get; } = "";
+}
+
+/// <summary>
+/// Binds a model from the request body payload
+/// </summary>
+/// <typeparam name="T">The type of the model to bind to</typeparam>
 public sealed class BindFromBodyAttribute<T>()
     : BindModelAttribute(typeof(T), BindingSource.Body)
 {
     public override string ModelName { get; } = "";
 }
 
+/// <summary>
+/// Binds a model from the request path
+/// </summary>
+/// <typeparam name="T">The type of the model to bind to</typeparam>
 public sealed class BindFromRouteAttribute<T>(string routeValueKey)
     : BindModelAttribute(typeof(T), BindingSource.Path)
 {
