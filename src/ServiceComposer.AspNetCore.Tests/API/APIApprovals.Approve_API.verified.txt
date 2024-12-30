@@ -29,11 +29,6 @@ namespace ServiceComposer.AspNetCore
         public BindFromFormAttribute(string? formFieldName = null) { }
         public override string ModelName { get; }
     }
-    public sealed class BindFromHeaderAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
-    {
-        public BindFromHeaderAttribute(string headerName) { }
-        public override string ModelName { get; }
-    }
     public sealed class BindFromQueryAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
         public BindFromQueryAttribute(string queryParameterName) { }
