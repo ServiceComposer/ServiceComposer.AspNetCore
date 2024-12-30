@@ -14,30 +14,43 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
-    public sealed class BindFromBodyAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindAttribute() { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromBodyAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
         public BindFromBodyAttribute() { }
         public override string ModelName { get; }
     }
-    public sealed class BindFromFormAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromFormAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
-        public BindFromFormAttribute(string formFieldName) { }
+        public BindFromFormAttribute(string? formFieldName = null) { }
         public override string ModelName { get; }
     }
-    public sealed class BindFromHeaderAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromHeaderAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
         public BindFromHeaderAttribute(string headerName) { }
         public override string ModelName { get; }
     }
-    public sealed class BindFromQueryAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromQueryAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
         public BindFromQueryAttribute(string queryParameterName) { }
         public override string ModelName { get; }
     }
-    public sealed class BindFromRouteAttribute<T> : ServiceComposer.AspNetCore.ModelAttribute
+    public sealed class BindFromRouteAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
     {
         public BindFromRouteAttribute(string routeValueKey) { }
         public override string ModelName { get; }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class BindModelAttribute : System.Attribute
+    {
+        protected BindModelAttribute(System.Type type, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
+        public abstract string ModelName { get; }
+        public System.Type Type { get; }
     }
     public static class ComposedRequestIdHeader
     {
@@ -122,14 +135,6 @@ namespace ServiceComposer.AspNetCore
     public interface IViewModelPreviewHandler
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
-    }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public abstract class ModelAttribute : System.Attribute
-    {
-        protected ModelAttribute(System.Type type, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
-        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
-        public abstract string ModelName { get; }
-        public System.Type Type { get; }
     }
     public enum ResponseCasing
     {
