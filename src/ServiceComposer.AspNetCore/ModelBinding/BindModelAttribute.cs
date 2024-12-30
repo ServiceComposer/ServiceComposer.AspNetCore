@@ -62,11 +62,4 @@ public sealed class BindFromFormAttribute<T>(string? formFieldName = null)
     public override string ModelName { get; } = formFieldName ?? "";
 }
 
-// TODO Add tests for this binding source
-public sealed class BindFromHeaderAttribute<T>(string headerName)
-    : BindModelAttribute(typeof(T), BindingSource.Header)
-{
-    public override string ModelName { get; } = headerName;
-}
-
 // TODO what about FromServices?
