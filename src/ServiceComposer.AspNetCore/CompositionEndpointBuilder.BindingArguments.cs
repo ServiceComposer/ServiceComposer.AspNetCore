@@ -15,7 +15,7 @@ partial class CompositionEndpointBuilder
         var result = new List<(Type ComponentType, IList<object?> Arguments)>();
         foreach (var componentMetadata in ComponentsMetadata)
         {
-            var modelAttributes = componentMetadata.Metadata.OfType<ModelAttribute>();
+            var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
             var arguments = new List<object?>();
             foreach (var modelAttribute in modelAttributes)
             {
