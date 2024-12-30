@@ -68,6 +68,10 @@ namespace ServiceComposer.AspNetCore
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
     }
+    public static class HttpContextExtensions
+    {
+        public static string EnsureRequestIdIsSetup(this Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
     public static class HttpRequestExtensions
     {
         [return: System.Runtime.CompilerServices.Dynamic]

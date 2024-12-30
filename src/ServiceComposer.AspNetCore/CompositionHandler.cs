@@ -4,27 +4,15 @@ using System;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 
 namespace ServiceComposer.AspNetCore
 {
     public static partial class CompositionHandler
     {
-        internal static async Task<object> HandleComposableRequest(HttpContext context, Type[] componentsTypes)
+        internal static async Task<object> HandleComposableRequest(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes)
         {
             var request = context.Request;
-
-            if(!request.Headers.TryGetValue(ComposedRequestIdHeader.Key, out var requestId))
-            {
-                requestId = Guid.NewGuid().ToString();
-            }
-
-            context.Response.Headers.Append(ComposedRequestIdHeader.Key, requestId);
-            var compositionContext = new CompositionContext
-            (
-                requestId,
-                request,
-                context.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
-            );
 
             object viewModel;
             var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -35,8 +36,16 @@ namespace ServiceComposer.AspNetCore
                     // composition handler tries to bind a model to the body
                     // it'll fail and only the first one succeeds
                     context.HttpContext.Request.EnableBuffering();
+                    
+                    var requestId = context.HttpContext.EnsureRequestIdIsSetup();
+                    var compositionContext = new CompositionContext
+                    (
+                        requestId,
+                        context.HttpContext.Request,
+                        context.HttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
+                    );
 
-                    var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, handlerTypes);
+                    var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, compositionContext, handlerTypes);
                     switch (context.Result)
                     {
                         case ViewResult viewResult when viewResult.ViewData.Model == null:

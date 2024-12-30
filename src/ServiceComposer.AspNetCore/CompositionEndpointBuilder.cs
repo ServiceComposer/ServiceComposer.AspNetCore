@@ -98,11 +98,21 @@ namespace ServiceComposer.AspNetCore
                 // it'll fail and only the first one succeeds
                 context.Request.EnableBuffering();
                 
-                RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
-                var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
-
                 var argumentsByComponent = await GetAllComponentsArguments(context);
                 var flatArguments = argumentsByComponent.SelectMany(a => a.Arguments).ToArray();
+                
+                RequestDelegate composer = async composerHttpContext =>
+                {
+                    var requestId = context.EnsureRequestIdIsSetup();
+                    var compositionContext = new CompositionContext
+                    (
+                        requestId,
+                        composerHttpContext.Request,
+                        composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
+                    );
+                    await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
+                };
+                var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
                 
                 // TODO how are arguments exposed to composition handlers?
                 // TODO Can handlers access all arguments or only the ones they declare?
