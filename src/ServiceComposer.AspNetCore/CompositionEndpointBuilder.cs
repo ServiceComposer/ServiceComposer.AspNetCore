@@ -99,7 +99,10 @@ namespace ServiceComposer.AspNetCore
                 context.Request.EnableBuffering();
                 
                 var argumentsByComponent = await GetAllComponentsArguments(context);
-                var flatArguments = argumentsByComponent.SelectMany(a => a.Arguments).ToArray();
+                var flatArguments = argumentsByComponent
+                    .SelectMany(kvp => kvp.Value)
+                    .Select(arg=>arg.Value)
+                    .ToArray();
                 
                 RequestDelegate composer = async composerHttpContext =>
                 {
@@ -108,7 +111,8 @@ namespace ServiceComposer.AspNetCore
                     (
                         requestId,
                         composerHttpContext.Request,
-                        composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
+                        composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
+                        argumentsByComponent
                     );
                     await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
                 };

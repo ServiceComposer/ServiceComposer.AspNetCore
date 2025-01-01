@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -42,7 +44,10 @@ namespace ServiceComposer.AspNetCore
                     (
                         requestId,
                         context.HttpContext.Request,
-                        context.HttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>()
+                        context.HttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
+                        //arguments binding is unsupported when using composition over controllers
+                        new Dictionary<Type, IList<ModelBindingArgument>>(),
+                        usingCompositionOverControllers: true
                     );
 
                     var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, compositionContext, handlerTypes);

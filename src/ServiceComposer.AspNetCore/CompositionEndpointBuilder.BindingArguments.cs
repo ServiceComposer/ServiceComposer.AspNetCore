@@ -10,13 +10,13 @@ namespace ServiceComposer.AspNetCore;
 
 partial class CompositionEndpointBuilder
 {
-    async Task<IList<(Type ComponentType, IList<object?> Arguments)>> GetAllComponentsArguments(HttpContext context)
+    async Task<IDictionary<Type, IList<ModelBindingArgument>>> GetAllComponentsArguments(HttpContext context)
     {
-        var result = new List<(Type ComponentType, IList<object?> Arguments)>();
+        var result = new Dictionary<Type, IList<ModelBindingArgument>>();
         foreach (var componentMetadata in ComponentsMetadata)
         {
             var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
-            var arguments = new List<object?>();
+            var arguments = new List<ModelBindingArgument>();
             foreach (var modelAttribute in modelAttributes)
             {
                 // TODO: shall we cache the instance? We cannot access it earlier otherwise we need model binding support for every request even if it's not needed by user code
@@ -27,10 +27,10 @@ partial class CompositionEndpointBuilder
                     modelAttribute.ModelName ?? "",
                     modelAttribute.BindingSource);
                 //TODO: throw if binding failed
-                arguments.Add(bindingResult.Model);
+                arguments.Add(new ModelBindingArgument(modelAttribute.ModelName!, bindingResult.Model, modelAttribute.BindingSource));
             }
             
-            result.Add((componentMetadata.ComponentType, arguments));
+            result.Add(componentMetadata.ComponentType, arguments);
         }
 
         return result;
