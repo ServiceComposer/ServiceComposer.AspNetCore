@@ -14,17 +14,9 @@ namespace ServiceComposer.AspNetCore
         {
             var request = context.Request;
 
-            object viewModel;
             var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
-            var viewModelFactory = (IViewModelFactory)context.RequestServices.GetService(factoryType);
-            if (viewModelFactory != null)
-            {
-                viewModel = viewModelFactory.CreateViewModel(context, compositionContext);
-            }
-            else
-            {
-                viewModel = new ExpandoObject();
-            }
+            var viewModelFactory = (IViewModelFactory)context.RequestServices.GetService(factoryType); 
+            var viewModel = viewModelFactory != null ? viewModelFactory.CreateViewModel(context, compositionContext) : new ExpandoObject();
 
             try
             {
