@@ -102,9 +102,5 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal(expectedText, myClass.Text);
             Assert.Equal(expectedNumber, myClass.Number);
         }
-        
-        // TODO: test using multiple Model attributes
-        // TODO: test using value types
-        // TODO: test using different biding sources
     }
 }
