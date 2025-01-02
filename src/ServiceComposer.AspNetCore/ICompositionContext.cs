@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -6,5 +10,9 @@ namespace ServiceComposer.AspNetCore
     {
         string RequestId { get; }
         Task RaiseEvent<TEvent>(TEvent @event);
+        [Experimental("SC0001")]
+        IList<ModelBindingArgument>? GetArguments(Type owningComponentType);
+        [Experimental("SC0001")]
+        IList<ModelBindingArgument>? GetArguments(Type owningComponentType);
     }
 }

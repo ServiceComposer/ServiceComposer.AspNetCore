@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using ServiceComposer.AspNetCore.Testing;
@@ -27,6 +28,18 @@ namespace ServiceComposer.AspNetCore.Tests
                 var vm = request.GetComposedResponseModel();
                 var ctx = request.GetCompositionContext();
                 vm.RequestId = ctx.RequestId;
+                
+#pragma warning disable SC0001
+                var myClass = ctx.GetArguments(GetType())?.Single().Value as MyClass;
+
+                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>();
+                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>("name");
+                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>(BindingSource.ModelBinding);
+                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>("name", BindingSource.Path);
+                
+                vm.NumberFromHeader = myClass?.Number;
+                vm.SomeTextFromComplexType = myClass?.AComplexType.SomeText;
+#pragma warning restore SC0001
 
                 return Task.CompletedTask;
             }

@@ -49,6 +49,17 @@ namespace ServiceComposer.AspNetCore
             return Task.WhenAll(tasks);
         }
 
+        public IList<ModelBindingArgument>? GetArguments(Type owningComponentType)
+        {
+            if (usingCompositionOverControllers)
+            {
+                throw new NotSupportedException("Model binding arguments are unsupported when using composition over controllers.");
+            }
+            
+            componentsArguments.TryGetValue(owningComponentType, out var arguments);
+            return arguments;
+        }
+
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)
         {
             if (!_compositionEventsSubscriptions.TryGetValue(typeof(TEvent), out var handlers))
