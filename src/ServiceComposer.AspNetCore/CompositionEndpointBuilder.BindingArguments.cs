@@ -16,7 +16,16 @@ partial class CompositionEndpointBuilder
         foreach (var componentMetadata in ComponentsMetadata)
         {
             var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
-            var arguments = new List<ModelBindingArgument>();
+            
+            // A component can have more than one Http* attribute
+            // If that's the case we don't want to have more than
+            // arguments lists. Instead, we're reusing an existing one.
+            if (!result.TryGetValue(componentMetadata.ComponentType, out var arguments))
+            {
+                arguments = new List<ModelBindingArgument>();
+                result.Add(componentMetadata.ComponentType, arguments);
+            }
+            
             foreach (var modelAttribute in modelAttributes)
             {
                 // TODO: shall we cache the instance? We cannot access it earlier otherwise we need model binding support for every request even if it's not needed by user code
@@ -29,8 +38,6 @@ partial class CompositionEndpointBuilder
                 //TODO: throw if binding failed
                 arguments.Add(new ModelBindingArgument(modelAttribute.ModelName!, bindingResult.Model, modelAttribute.BindingSource));
             }
-            
-            result.Add(componentMetadata.ComponentType, arguments);
         }
 
         return result;
