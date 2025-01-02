@@ -95,6 +95,8 @@ namespace ServiceComposer.AspNetCore
     public interface ICompositionContext
     {
         string RequestId { get; }
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001")]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(System.Type owningComponentType);
         System.Threading.Tasks.Task RaiseEvent<TEvent>(TEvent @event);
     }
     public interface ICompositionErrorsHandler
@@ -134,6 +136,20 @@ namespace ServiceComposer.AspNetCore
     public interface IViewModelPreviewHandler
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
+    }
+    public class ModelBindingArgument
+    {
+        public ModelBindingArgument(string name, object? value, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
+        public string Name { get; }
+        public object? Value { get; }
+    }
+    public static class ModelBindingArgumentExtensions
+    {
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
     }
     public enum ResponseCasing
     {
