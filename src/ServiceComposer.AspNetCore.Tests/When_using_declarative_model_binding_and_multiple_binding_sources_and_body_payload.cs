@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
@@ -30,13 +30,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 vm.RequestId = ctx.RequestId;
                 
 #pragma warning disable SC0001
-                var myClass = ctx.GetArguments(GetType())?.Single().Value as MyClass;
-
                 var myClass = ctx.GetArguments(GetType()).Argument<MyClass>();
-                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>("name");
-                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>(BindingSource.ModelBinding);
-                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>("name", BindingSource.Path);
-                
                 vm.NumberFromHeader = myClass?.Number;
                 vm.SomeTextFromComplexType = myClass?.AComplexType.SomeText;
 #pragma warning restore SC0001
@@ -119,6 +113,12 @@ namespace ServiceComposer.AspNetCore.Tests
             var response = await client.PostAsync("/empty-response/1", jsonContent);
 
             Assert.True(response.IsSuccessStatusCode);
+            
+            var contentString = await response.Content.ReadAsStringAsync();
+            dynamic responseBody = JObject.Parse(contentString);
+            Assert.Equal(expectedComposedRequestId, (string)responseBody.RequestId);
+            Assert.Equal(expectedNumber, (int)responseBody.NumberFromHeader);
+            Assert.Equal(expectedComplexTypeSomeText, (string)responseBody.SomeTextFromComplexType);
             
             var arguments = captureArgumentsEndpointFilter.CapturedArguments;
             Assert.NotNull(arguments);
