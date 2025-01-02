@@ -12,7 +12,5 @@ namespace ServiceComposer.AspNetCore
         Task RaiseEvent<TEvent>(TEvent @event);
         [Experimental("SC0001")]
         IList<ModelBindingArgument>? GetArguments(Type owningComponentType);
-        [Experimental("SC0001")]
-        IList<ModelBindingArgument>? GetArguments(Type owningComponentType);
     }
 }
