@@ -118,9 +118,6 @@ namespace ServiceComposer.AspNetCore
                 };
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
                 
-                // TODO how are arguments exposed to composition handlers?
-                // TODO Can handlers access all arguments or only the ones they declare?
-                
                 // TODO use source generators
                 // When we'll have convention-based handlers this could be
                 // source-generated to use the the most appropriate filter
