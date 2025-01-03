@@ -10,7 +10,7 @@ namespace ServiceComposer.AspNetCore
     {
         string RequestId { get; }
         Task RaiseEvent<TEvent>(TEvent @event);
-        [Experimental("SC0001")]
+        [Experimental("SC0001", UrlFormat = "https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/model-binding.md#named-arguments-experimental-api?id={0}")]
         IList<ModelBindingArgument>? GetArguments(Type owningComponentType);
     }
 }
