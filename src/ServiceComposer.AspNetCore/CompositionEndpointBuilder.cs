@@ -120,10 +120,6 @@ namespace ServiceComposer.AspNetCore
                 
                 // TODO how are arguments exposed to composition handlers?
                 // TODO Can handlers access all arguments or only the ones they declare?
-
-                // TODO Do we need named arguments?
-                // If the route is /{tenant:int}/{id:int} when using declarative model
-                // binding there would be no way to understand which one is which
                 
                 // TODO use source generators
                 // When we'll have convention-based handlers this could be
