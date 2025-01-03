@@ -46,3 +46,9 @@ public void Configure(IApplicationBuilder app)
 ```
 <sup><a href='/src/Snippets/EndpointFilters/Startup.cs#L9-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-endpoint-filter-registration' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+## Accessing arguments
+
+The endpoint filters API exposes through the `EndpointFilterInvocationContext` the list of arguments that the ASP.Net model binding engire determined as needed by the later invoked controller action. When using regular composition handlers, e.g. by implemeting the `ICompositionHandler` interface, ServiceComposer cannot determine which arguments are latwer needed by the user composition code. To overcome this limitation and allow the arguments list to be populated and accessible by filters, it's required to use a [declarative model binding approach](model-binding.md#declarative-model-binding).
+
+[foo](model-binding.md#named-arguments-experimental-api)

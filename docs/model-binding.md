@@ -140,3 +140,9 @@ public async Task Handle(HttpRequest request)
 <!-- endSnippet -->
 
 The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
+
+## Declarative Model Binding
+
+### Named arguments experimental API
+
+The API to search for arguments exposed by the composition context is experimental and as such subject to change. The `GetArguments(Type)` method is decorated with the `Expreimental` attribute and will raise a `SC0001` warning. The warning can be suppressed with a regular pragma directive, e.g., `#pragma warning disable SC0001`.
