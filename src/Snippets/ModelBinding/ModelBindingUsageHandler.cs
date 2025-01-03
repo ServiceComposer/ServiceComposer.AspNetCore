@@ -5,21 +5,6 @@ using ServiceComposer.AspNetCore;
 
 namespace Snippets.ModelBinding
 {
-    // begin-snippet: model-binding-model
-    class BodyModel
-    {
-        public string AString { get; set; }
-    }
-    // end-snippet
-
-    // begin-snippet: model-binding-request
-    class RequestModel
-    {
-        [FromRoute] public int id { get; set; }
-        [FromBody] public BodyModel Body { get; set; }
-    }
-    // end-snippet
-
     class ModelBindingUsageHandler : ICompositionRequestsHandler
     {
         // begin-snippet: model-binding-bind-body-and-route-data
@@ -29,7 +14,7 @@ namespace Snippets.ModelBinding
             var requestModel = await request.Bind<RequestModel>();
             var body = requestModel.Body;
             var aString = body.AString;
-            var id = requestModel.id;
+            var id = requestModel.Id;
 
             //use values as needed
         }
