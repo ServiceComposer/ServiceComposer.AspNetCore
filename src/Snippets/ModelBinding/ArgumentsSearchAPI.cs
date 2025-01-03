@@ -21,8 +21,5 @@ public class ArgumentsSearchAPI : ICompositionRequestsHandler
 #pragma warning restore SC0001
     }
 
-    public Task Handle(HttpRequest request)
-    {
-        throw new System.NotImplementedException();
-    }
+    public Task Handle(HttpRequest request) => Task.CompletedTask;
 }

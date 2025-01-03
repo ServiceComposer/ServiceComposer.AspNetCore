@@ -15,10 +15,7 @@ namespace ServiceComposer.AspNetCore.Tests
         class SampleNeverInvokedHandler : ICompositionRequestsHandler
         {
             [HttpGet("/this-doesnt-exist")]
-            public Task Handle(HttpRequest request)
-            {
-                throw new NotImplementedException();
-            }
+            public Task Handle(HttpRequest request) => Task.CompletedTask;
         }
 
         [Fact]

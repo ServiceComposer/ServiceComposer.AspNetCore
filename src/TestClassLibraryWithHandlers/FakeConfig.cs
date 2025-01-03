@@ -8,22 +8,16 @@ public class FakeConfig : IConfiguration
 {
     public IEnumerable<IConfigurationSection> GetChildren()
     {
-        throw new System.NotImplementedException();
+        yield return null;
     }
 
-    public IChangeToken GetReloadToken()
-    {
-        throw new System.NotImplementedException();
-    }
+    public IChangeToken GetReloadToken() => null;
 
-    public IConfigurationSection GetSection(string key)
-    {
-        throw new System.NotImplementedException();
-    }
+    public IConfigurationSection GetSection(string key) => null;
 
     public string this[string key]
     {
-        get => throw new System.NotImplementedException();
-        set => throw new System.NotImplementedException();
+        get => null;
+        set { /* NOP */ }
     }
 }
