@@ -43,7 +43,11 @@ public sealed class BindFromRouteAttribute<T>(string routeValueKey)
     public override string ModelName { get; } = routeValueKey;
 }
 
-// TODO Add tests for this binding source
+/// <summary>
+/// Binds a model from the request query string.
+/// </summary>
+/// <param name="queryParameterName">The query string parameter name</param>
+/// <typeparam name="T"></typeparam>
 public sealed class BindFromQueryAttribute<T>(string queryParameterName)
     : BindModelAttribute(typeof(T), BindingSource.Query)
 {
@@ -61,5 +65,3 @@ public sealed class BindFromFormAttribute<T>(string? formFieldName = null)
 {
     public override string ModelName { get; } = formFieldName ?? "";
 }
-
-// TODO what about FromServices?
