@@ -49,6 +49,6 @@ public void Configure(IApplicationBuilder app)
 
 ## Accessing arguments
 
-The endpoint filters API exposes through the `EndpointFilterInvocationContext` the list of arguments that the ASP.Net model binding engire determined as needed by the later invoked controller action. When using regular composition handlers, e.g. by implemeting the `ICompositionHandler` interface, ServiceComposer cannot determine which arguments are latwer needed by the user composition code. To overcome this limitation and allow the arguments list to be populated and accessible by filters, it's required to use a [declarative model binding approach](model-binding.md#declarative-model-binding).
+The endpoint filters API exposes through the `EndpointFilterInvocationContext` the list of arguments that the ASP.Net model binding engire determined as needed by the later invoked controller action. When using regular composition handlers, e.g. by implemeting the `ICompositionRequestsHandler` interface, ServiceComposer cannot determine which arguments are latwer needed by the user composition code. To overcome this limitation and allow the arguments list to be populated and accessible by filters, it's required to use a [declarative model binding approach](model-binding.md#declarative-model-binding).
 
 [foo](model-binding.md#named-arguments-experimental-api)

@@ -8,20 +8,12 @@ namespace Snippets.ModelBinding
 {
     class DeclarativeModelBindingUsageHandler : ICompositionRequestsHandler
     {
-        // begin-snippet: model-binding-bind-body-and-route-data
+        // begin-snippet: declarative-model-binding
         [HttpPost("/sample/{id}")]
         [BindFromBody<BodyModel>]
         [BindFromRoute<int>(routeValueKey: "id")]
         public Task Handle(HttpRequest request)
         {
-            var ctx = request.GetCompositionContext();
-            var arguments = ctx.GetArguments(GetType());
-            
-            var body = arguments.Argument<BodyModel>();
-            var id = arguments.Argument<int>("id");
-
-            //use values as needed
-            
             return Task.CompletedTask;
         }
         // end-snippet
