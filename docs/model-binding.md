@@ -139,13 +139,13 @@ public async Task Handle(HttpRequest request)
 <sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L26-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
+The `TryBind` return value is a tuple containing the binding result (the model), a boolean detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
 
 ## Declarative Model Binding
 
 _Available starting with v4.1.0_
 
-Instead of directly using the `Bind`/`TryBind` API to exercise the model binding engine, it is possible to use a set of `Bind*` attributes to declare the models the composition handlers wants to bind. The following snippet demonstrates a compositin handler that declares the binding to two models:
+Instead of directly using the `Bind`/`TryBind` API to exercise the model binding engine, it is possible to use a set of `Bind*` attributes to declare the models the composition handlers wants to bind. The following snippet demonstrates a composition handler that declares the binding to two models:
 
 <!-- snippet: declarative-model-binding -->
 <a id='snippet-declarative-model-binding'></a>
@@ -171,20 +171,22 @@ Declarative model binding supports a number of binding sources through the follo
 - `BindFromFormAttribute<T>`: Binds the given type T to the incoming form fields collection. If the optional `formFieldName` is specified the binding operation only takes into account the specified form field as binding source; otherwise, the binding operation expects to bind to a `IFormCollection` type.
 - `BindAttribute<T>`: Binds the given type T from multiple sources. Each T type property can specify the source to use using the various `FromBody`, `FromForm`, `FromRoute`, etc., default ASP.Net binding attributes.
 
-Once model binding is declared, the biund models are accesible from the `ICompositionContext` arguments API, as demonstrated by the following snippet:
+Once model binding is declared, the bound models are accessible from the `ICompositionContext` arguments API, as demonstrated by the following snippet:
 
 <!-- snippet: arguments-search-api -->
 <a id='snippet-arguments-search-api'></a>
 ```cs
 var ctx = request.GetCompositionContext();
-var arguments = ctx.GetArguments(GetType());
+var arguments = ctx.GetArguments(this);
 var findValueByType = arguments.Argument<BodyModel>();
 var findValueByTypeAndName = arguments.Argument<int>(name: "id");
 var findValueByTypeAndSource = arguments.Argument<int>(bindingSource: BindingSource.Header);
 var findValueByTypeSourceAndName = arguments.Argument<string>(name: "user", bindingSource: BindingSource.Query);
 ```
-<sup><a href='/src/Snippets/ModelBinding/ArgumentsSearchAPI.cs#L12-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-arguments-search-api' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ArgumentsSearchAPI.cs#L13-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-arguments-search-api' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+Arguments are segregated by component, to access them the arguments owner instance must be passed to the `GetArguments(owner)` method. Owners are restricted to a limited set of types: `ICompositionRequestsHandler`, `ICompositionEventsSubscriber`, and `ICompositionEventsHandler<T>`. 
 
 ### Named arguments experimental API
 

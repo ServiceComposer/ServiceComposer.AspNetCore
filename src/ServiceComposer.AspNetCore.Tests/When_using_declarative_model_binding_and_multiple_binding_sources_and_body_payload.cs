@@ -30,7 +30,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 vm.RequestId = ctx.RequestId;
                 
 #pragma warning disable SC0001
-                var myClass = ctx.GetArguments(GetType()).Argument<MyClass>();
+                var myClass = ctx.GetArguments(this).Argument<MyClass>();
                 vm.NumberFromHeader = myClass?.Number;
                 vm.SomeTextFromComplexType = myClass?.AComplexType.SomeText;
 #pragma warning restore SC0001

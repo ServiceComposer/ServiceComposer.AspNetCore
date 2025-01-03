@@ -49,7 +49,11 @@ namespace ServiceComposer.AspNetCore
             return Task.WhenAll(tasks);
         }
 
-        public IList<ModelBindingArgument>? GetArguments(Type owningComponentType)
+        public IList<ModelBindingArgument>? GetArguments(ICompositionRequestsHandler owner) => GetArguments(owner.GetType());
+        public IList<ModelBindingArgument>? GetArguments(ICompositionEventsSubscriber owner) => GetArguments(owner.GetType());
+        public IList<ModelBindingArgument>? GetArguments<T>(ICompositionEventsHandler<T> owner) => GetArguments(owner.GetType());
+
+        IList<ModelBindingArgument>? GetArguments(Type owningComponentType)
         {
             if (usingCompositionOverControllers)
             {
