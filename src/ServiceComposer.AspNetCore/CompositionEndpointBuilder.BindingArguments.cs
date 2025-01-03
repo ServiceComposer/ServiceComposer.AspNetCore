@@ -18,7 +18,7 @@ partial class CompositionEndpointBuilder
             var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
             
             // A component can have more than one Http* attribute
-            // If that's the case we don't want to have more than
+            // If that's the case we don't want to have more than one
             // arguments lists. Instead, we're reusing an existing one.
             if (!result.TryGetValue(componentMetadata.ComponentType, out var arguments))
             {
