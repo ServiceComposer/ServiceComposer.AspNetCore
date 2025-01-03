@@ -21,15 +21,26 @@ namespace ServiceComposer.AspNetCore
             this.modelMetadataProvider = modelMetadataProvider;
             this.mvcOptions = mvcOptions;
         }
-        
-        public async Task<(T Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind<T>(HttpRequest request) where T : new ()
+
+        public async Task<(T Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind<T>(HttpRequest request)
+        {
+            var modelType = typeof(T);
+            var bindingResult = await TryBind(modelType, request);
+
+            return ((T)bindingResult.Model, bindingResult.IsModelSet, bindingResult.ModelState);
+        }
+
+        internal async Task<(object Model, bool IsModelSet, ModelStateDictionary ModelState)> TryBind(
+            Type modelType,
+            HttpRequest request,
+            string modelName = "",
+            BindingSource bindingSource = null)
         {
             //always rewind the stream; otherwise,
             //if multiple handlers concurrently bind
             //different models only the first one succeeds
             request.Body.Position = 0;
-
-            var modelType = typeof(T);
+            
             var modelMetadata = modelMetadataProvider.GetMetadataForType(modelType);
             var actionContext = new ActionContext(
                 request.HttpContext,
@@ -39,26 +50,28 @@ namespace ServiceComposer.AspNetCore
             var valueProvider =
                 await CompositeValueProvider.CreateAsync(actionContext, mvcOptions.Value.ValueProviderFactories);
 
+            var bindingInfo = new BindingInfo()
+            {
+                BinderModelName = modelMetadata.BinderModelName,
+                BinderType = modelMetadata.BinderType,
+                BindingSource = bindingSource,
+                PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
+            };
+            
             var modelBindingContext = DefaultModelBindingContext.CreateBindingContext(
                 actionContext,
                 valueProvider,
                 modelMetadata,
-                bindingInfo: null,
-                modelName: "");
+                bindingInfo: bindingInfo,
+                modelName: modelName);
 
-            modelBindingContext.Model = new T();
             modelBindingContext.PropertyFilter = _ => true; // All props
+            modelBindingContext.BindingSource = bindingSource;
 
             var factoryContext = new ModelBinderFactoryContext()
             {
                 Metadata = modelMetadata,
-                BindingInfo = new BindingInfo()
-                {
-                    BinderModelName = modelMetadata.BinderModelName,
-                    BinderType = modelMetadata.BinderType,
-                    BindingSource = modelMetadata.BindingSource,
-                    PropertyFilterProvider = modelMetadata.PropertyFilterProvider,
-                },
+                BindingInfo = bindingInfo,
                 CacheToken = modelMetadata,
             };
 
@@ -66,7 +79,7 @@ namespace ServiceComposer.AspNetCore
                 .CreateBinder(factoryContext)
                 .BindModelAsync(modelBindingContext);
 
-            return ((T)modelBindingContext.Result.Model, 
+            return (modelBindingContext.Result.Model,
                 modelBindingContext.Result.IsModelSet,
                 modelBindingContext.ModelState);
         }

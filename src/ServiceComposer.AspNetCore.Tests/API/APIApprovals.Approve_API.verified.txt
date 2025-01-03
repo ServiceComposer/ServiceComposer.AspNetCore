@@ -14,6 +14,39 @@ namespace ServiceComposer.AspNetCore
             Include = 1,
         }
     }
+    public sealed class BindAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindAttribute() { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromBodyAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindFromBodyAttribute() { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromFormAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindFromFormAttribute(string? formFieldName = null) { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromQueryAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindFromQueryAttribute(string queryParameterName) { }
+        public override string ModelName { get; }
+    }
+    public sealed class BindFromRouteAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindFromRouteAttribute(string routeValueKey) { }
+        public override string ModelName { get; }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class BindModelAttribute : System.Attribute
+    {
+        protected BindModelAttribute(System.Type type, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
+        public abstract string ModelName { get; }
+        public System.Type Type { get; }
+    }
     public static class ComposedRequestIdHeader
     {
         public const string Key = "composed-request-id";
@@ -34,6 +67,10 @@ namespace ServiceComposer.AspNetCore
     public static class EndpointsExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+    }
+    public static class HttpContextExtensions
+    {
+        public static string EnsureRequestIdIsSetup(this Microsoft.AspNetCore.Http.HttpContext context) { }
     }
     public static class HttpRequestExtensions
     {
@@ -58,6 +95,15 @@ namespace ServiceComposer.AspNetCore
     public interface ICompositionContext
     {
         string RequestId { get; }
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
+            "del-binding.md#named-arguments-experimental-api?id={0}"))]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(ServiceComposer.AspNetCore.ICompositionEventsSubscriber owner);
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
+            "del-binding.md#named-arguments-experimental-api?id={0}"))]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(ServiceComposer.AspNetCore.ICompositionRequestsHandler owner);
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
+            "del-binding.md#named-arguments-experimental-api?id={0}"))]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments<T>(ServiceComposer.AspNetCore.ICompositionEventsHandler<T> owner);
         System.Threading.Tasks.Task RaiseEvent<TEvent>(TEvent @event);
     }
     public interface ICompositionErrorsHandler
@@ -97,6 +143,20 @@ namespace ServiceComposer.AspNetCore
     public interface IViewModelPreviewHandler
     {
         System.Threading.Tasks.Task Preview(Microsoft.AspNetCore.Http.HttpRequest request);
+    }
+    public class ModelBindingArgument
+    {
+        public ModelBindingArgument(string name, object? value, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource BindingSource { get; }
+        public string Name { get; }
+        public object? Value { get; }
+    }
+    public static class ModelBindingArgumentExtensions
+    {
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name) { }
+        public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
     }
     public enum ResponseCasing
     {

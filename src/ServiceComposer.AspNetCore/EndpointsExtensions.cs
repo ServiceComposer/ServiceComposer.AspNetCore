@@ -239,17 +239,17 @@ namespace ServiceComposer.AspNetCore
             };
             builder.Metadata.Add(methodMetadata);
 
-            var methodAttributes = componentsGroup.SelectMany(component => component.Method.GetCustomAttributes(inherit: true));
-            foreach (var attribute in methodAttributes)
+            // builds a list of metadata for each component in this endpoint
+            foreach (var component in componentsGroup)
             {
-                builder.Metadata.Add(attribute);
+                builder.ComponentsMetadata.Add((component.ComponentType, component.Method.GetCustomAttributes(inherit: true)));
             }
-
-            // var classAttributes = componentsGroup.SelectMany(component => component.ComponentType.GetCustomAttributes(inherit: true));
-            // foreach (var attribute in classAttributes)
-            // {
-            //     builder.Metadata.Add(attribute);
-            // }
+            
+            // flattens the metadata
+            foreach (var metadata in builder.ComponentsMetadata.SelectMany(cm=>cm.Metadata))
+            {
+                builder.Metadata.Add(metadata);
+            }
 
             return builder;
         }

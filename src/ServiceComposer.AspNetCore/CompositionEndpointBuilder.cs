@@ -21,6 +21,7 @@ namespace ServiceComposer.AspNetCore
         EndpointFilterDelegate cachedPipeline;
 
         public int Order { get; }
+        public IList<(Type ComponentType, IList<object> Metadata)> ComponentsMetadata { get; } = new List<(Type ComponentType, IList<object> Metadata)>();
 
         public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing, bool useOutputFormatters)
         {
@@ -92,10 +93,36 @@ namespace ServiceComposer.AspNetCore
         {
             RequestDelegate = async context =>
             {
-                RequestDelegate composer = async composerHttpContext => await CompositionHandler.HandleComposableRequest(composerHttpContext, componentsTypes);
+                // We need the body to be seekable otherwise if more than one
+                // composition handler tries to bind a model to the body
+                // it'll fail and only the first one succeeds
+                context.Request.EnableBuffering();
+                
+                var argumentsByComponent = await GetAllComponentsArguments(context);
+                var flatArguments = argumentsByComponent
+                    .SelectMany(kvp => kvp.Value)
+                    .Select(arg=>arg.Value)
+                    .ToArray();
+                
+                RequestDelegate composer = async composerHttpContext =>
+                {
+                    var requestId = context.EnsureRequestIdIsSetup();
+                    var compositionContext = new CompositionContext
+                    (
+                        requestId,
+                        composerHttpContext.Request,
+                        composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
+                        argumentsByComponent
+                    );
+                    await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
+                };
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
                 
-                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context);
+                // TODO use source generators
+                // When we'll have convention-based handlers this could be
+                // source-generated to use the the most appropriate filter
+                // invocation context based on the number of arguments to bind
+                EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
                 var viewModel = await pipeline(invocationContext);
                 
                 if (viewModel != null)
@@ -104,7 +131,7 @@ namespace ServiceComposer.AspNetCore
                     switch (useOutputFormatters)
                     {
                         case false when containsActionResult:
-                            throw new NotSupportedException($"Setting an action result requires output formatters supports. " +
+                            throw new NotSupportedException($"Setting an action result requires output formatters support. " +
                                                             $"Enable output formatters by setting to true the {nameof(ResponseSerializationOptions.UseOutputFormatters)} " +
                                                             $"configuration property of the {nameof(ResponseSerializationOptions)} instance.");
                         case true when containsActionResult:

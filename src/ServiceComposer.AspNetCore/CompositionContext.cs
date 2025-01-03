@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore
 {
-    class CompositionContext(string requestId, HttpRequest httpRequest, CompositionMetadataRegistry metadataRegistry)
+    class CompositionContext(
+        string requestId,
+        HttpRequest httpRequest,
+        CompositionMetadataRegistry metadataRegistry,
+        IDictionary<Type, IList<ModelBindingArgument>> componentsArguments,
+        bool usingCompositionOverControllers = false)
         : ICompositionContext, ICompositionEventsPublisher
     {
         readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new();
@@ -34,13 +40,28 @@ namespace ServiceComposer.AspNetCore
 
             // not using typeof(TEvent) to prevent introducing a breaking change
             // due to the introduction of the generic TEvent parameter
-            if (_compositionEventsSubscriptions.TryGetValue(@event.GetType(), out var compositionHandlers))
+            if (_compositionEventsSubscriptions.TryGetValue(@event!.GetType(), out var compositionHandlers))
             {
                 handlers.AddRange(compositionHandlers.Cast<CompositionEventHandler<TEvent>>());
             }
             
             var tasks = handlers.Select(handler => handler(@event, httpRequest)).ToList();
             return Task.WhenAll(tasks);
+        }
+
+        public IList<ModelBindingArgument>? GetArguments(ICompositionRequestsHandler owner) => GetArguments(owner.GetType());
+        public IList<ModelBindingArgument>? GetArguments(ICompositionEventsSubscriber owner) => GetArguments(owner.GetType());
+        public IList<ModelBindingArgument>? GetArguments<T>(ICompositionEventsHandler<T> owner) => GetArguments(owner.GetType());
+
+        IList<ModelBindingArgument>? GetArguments(Type owningComponentType)
+        {
+            if (usingCompositionOverControllers)
+            {
+                throw new NotSupportedException("Model binding arguments are unsupported when using composition over controllers.");
+            }
+            
+            componentsArguments.TryGetValue(owningComponentType, out var arguments);
+            return arguments;
         }
 
         public void Subscribe<TEvent>(CompositionEventHandler<TEvent> handler)

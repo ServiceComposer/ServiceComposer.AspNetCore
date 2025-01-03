@@ -78,7 +78,7 @@ class BodyModel
     public string AString { get; set; }
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L8-L13' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-model' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/BodyModel.cs#L3-L8' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-model' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > The class name is irrelevant
@@ -90,11 +90,11 @@ Once we have a model for the body, a model that represent the incoming request i
 ```cs
 class RequestModel
 {
-    [FromRoute] public int id { get; set; }
+    [FromRoute(Name = "id")] public int Id { get; set; }
     [FromBody] public BodyModel Body { get; set; }
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L15-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-request' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/RequestModel.cs#L5-L11' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-request' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > The class name is irrelevant. The name of the properties marked as `[FromRoute]` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
@@ -110,12 +110,12 @@ public async Task Handle(HttpRequest request)
     var requestModel = await request.Bind<RequestModel>();
     var body = requestModel.Body;
     var aString = body.AString;
-    var id = requestModel.id;
+    var id = requestModel.Id;
 
     //use values as needed
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L25-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L10-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 For more information and options when using model binding refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
@@ -136,7 +136,58 @@ public async Task Handle(HttpRequest request)
     //use values as needed
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L41-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L26-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
+The `TryBind` return value is a tuple containing the binding result (the model), a boolean detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
+
+## Declarative Model Binding
+
+_Available starting with v4.1.0_
+
+Instead of directly using the `Bind`/`TryBind` API to exercise the model binding engine, it is possible to use a set of `Bind*` attributes to declare the models the composition handlers wants to bind. The following snippet demonstrates a composition handler that declares the binding to two models:
+
+<!-- snippet: declarative-model-binding -->
+<a id='snippet-declarative-model-binding'></a>
+```cs
+[HttpPost("/sample/{id}")]
+[BindFromBody<BodyModel>]
+[BindFromRoute<int>(routeValueKey: "id")]
+public Task Handle(HttpRequest request)
+{
+    return Task.CompletedTask;
+}
+```
+<sup><a href='/src/Snippets/ModelBinding/DeclarativeModelBinding.cs#L11-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-declarative-model-binding' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The first model, of type `BodyModel`, a user type, is bound from request body payload using the `BindFromBody<T>` attribute. The second model is an integer bound from the request route path using the "id" route value key.
+
+Declarative model binding supports a number of binding sources through the following attributes:
+
+- `BindFromBodyAttribute<T>`: Binds the given type T to the incoming request body payload.
+- `BindFromRouteAttribute<T>`: Binds the given type T to the incoming route element identified by the `routeValueKey` argument.
+- `BindFromQueryAttribute<T>`: Binds the given type T to the incoming query string parameter value identified by the `queryParameterName` argument.
+- `BindFromFormAttribute<T>`: Binds the given type T to the incoming form fields collection. If the optional `formFieldName` is specified the binding operation only takes into account the specified form field as binding source; otherwise, the binding operation expects to bind to a `IFormCollection` type.
+- `BindAttribute<T>`: Binds the given type T from multiple sources. Each T type property can specify the source to use using the various `FromBody`, `FromForm`, `FromRoute`, etc., default ASP.Net binding attributes.
+
+Once model binding is declared, the bound models are accessible from the `ICompositionContext` arguments API, as demonstrated by the following snippet:
+
+<!-- snippet: arguments-search-api -->
+<a id='snippet-arguments-search-api'></a>
+```cs
+var ctx = request.GetCompositionContext();
+var arguments = ctx.GetArguments(this);
+var findValueByType = arguments.Argument<BodyModel>();
+var findValueByTypeAndName = arguments.Argument<int>(name: "id");
+var findValueByTypeAndSource = arguments.Argument<int>(bindingSource: BindingSource.Header);
+var findValueByTypeSourceAndName = arguments.Argument<string>(name: "user", bindingSource: BindingSource.Query);
+```
+<sup><a href='/src/Snippets/ModelBinding/ArgumentsSearchAPI.cs#L13-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-arguments-search-api' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Arguments are segregated by component, to access them the arguments owner instance must be passed to the `GetArguments(owner)` method. Owners are restricted to a limited set of types: `ICompositionRequestsHandler`, `ICompositionEventsSubscriber`, and `ICompositionEventsHandler<T>`. 
+
+### Named arguments experimental API
+
+The API to search for arguments exposed by the composition context is experimental and as such subject to change. The `GetArguments(Type)` method is decorated with the `Expreimental` attribute and will raise a `SC0001` warning. The warning can be suppressed with a regular pragma directive, e.g., `#pragma warning disable SC0001`.
