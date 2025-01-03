@@ -78,7 +78,7 @@ class BodyModel
     public string AString { get; set; }
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L8-L13' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-model' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/BodyModel.cs#L3-L8' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-model' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > The class name is irrelevant
@@ -90,11 +90,11 @@ Once we have a model for the body, a model that represent the incoming request i
 ```cs
 class RequestModel
 {
-    [FromRoute] public int id { get; set; }
+    [FromRoute(Name = "id")] public int Id { get; set; }
     [FromBody] public BodyModel Body { get; set; }
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L15-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-request' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/RequestModel.cs#L5-L11' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-request' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > The class name is irrelevant. The name of the properties marked as `[FromRoute]` or `[FromQueryString]` must match the route data names or query string keys names. The name for the body, or form, property is irrelevant.
@@ -105,17 +105,36 @@ Once the models are defined they can be used as follows:
 <a id='snippet-model-binding-bind-body-and-route-data'></a>
 ```cs
 [HttpPost("/sample/{id}")]
+[BindFromBody<BodyModel>]
+[BindFromRoute<int>(routeValueKey: "id")]
+public Task Handle(HttpRequest request)
+{
+    var ctx = request.GetCompositionContext();
+    var arguments = ctx.GetArguments(GetType());
+    
+    var body = arguments.Argument<BodyModel>();
+    var id = arguments.Argument<int>("id");
+
+    //use values as needed
+    
+    return Task.CompletedTask;
+}
+```
+<sup><a href='/src/Snippets/ModelBinding/DeclarativeModelBinding.cs#L11-L27' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
+<a id='snippet-model-binding-bind-body-and-route-data-1'></a>
+```cs
+[HttpPost("/sample/{id}")]
 public async Task Handle(HttpRequest request)
 {
     var requestModel = await request.Bind<RequestModel>();
     var body = requestModel.Body;
     var aString = body.AString;
-    var id = requestModel.id;
+    var id = requestModel.Id;
 
     //use values as needed
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L25-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L10-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-bind-body-and-route-data-1' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 For more information and options when using model binding refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
@@ -136,7 +155,7 @@ public async Task Handle(HttpRequest request)
     //use values as needed
 }
 ```
-<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L41-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ModelBindingUsageHandler.cs#L26-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-try-bind' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The `TryBind` return value is a tuple containing the binding result (the model), a boolena detailing if the model was set or not (useful to distinguish between a model binder which does not find a value and the case where a model binder sets the `null` value), and the `ModelStateDictionary` to access binding errors.
