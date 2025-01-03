@@ -97,7 +97,13 @@ namespace ServiceComposer.AspNetCore
         string RequestId { get; }
         [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
             "del-binding.md#named-arguments-experimental-api?id={0}"))]
-        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(System.Type owningComponentType);
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(ServiceComposer.AspNetCore.ICompositionEventsSubscriber owner);
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
+            "del-binding.md#named-arguments-experimental-api?id={0}"))]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments(ServiceComposer.AspNetCore.ICompositionRequestsHandler owner);
+        [System.Diagnostics.CodeAnalysis.Experimental("SC0001", UrlFormat=("https://github.com/ServiceComposer/ServiceComposer.AspNetCore/blob/master/docs/mo" +
+            "del-binding.md#named-arguments-experimental-api?id={0}"))]
+        System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? GetArguments<T>(ServiceComposer.AspNetCore.ICompositionEventsHandler<T> owner);
         System.Threading.Tasks.Task RaiseEvent<TEvent>(TEvent @event);
     }
     public interface ICompositionErrorsHandler
