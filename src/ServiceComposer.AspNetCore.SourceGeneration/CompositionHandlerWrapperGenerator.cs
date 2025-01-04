@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace ServiceComposer.AspNetCore.Generators
+namespace ServiceComposer.AspNetCore.SourceGeneration
 {
     [Generator]
     public class CompositionHandlerWrapperGenerator : ISourceGenerator
