@@ -10,6 +10,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snippets", "Snippets\Snippets.csproj", "{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.Generators", "ServiceComposer.AspNetCore.Generators\ServiceComposer.AspNetCore.Generators.csproj", "{AB24BA80-141D-4E25-BAF4-C716B90E0451}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandlersSyntaxPlayground", "HandlersSyntaxPlayground\HandlersSyntaxPlayground.csproj", "{A2DCEB44-1496-402C-9E3F-A56EB13C6723}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +36,14 @@ Global
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
