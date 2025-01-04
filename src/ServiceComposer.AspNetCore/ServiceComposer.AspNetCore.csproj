@@ -20,6 +20,13 @@
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup Label="Include the source generators in the output package">
+    <None Include="..\ServiceComposer.AspNetCore.Generators\bin\$(Configuration)\netstandard2.0\ServiceComposer.AspNetCore.Generators.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
+
   <PropertyGroup>
     <MinVerMinimumMajorMinor>4.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
@@ -49,6 +56,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceComposer.AspNetCore.Generators\ServiceComposer.AspNetCore.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
