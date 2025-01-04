@@ -6,26 +6,25 @@ using Microsoft.CodeAnalysis.Text;
 namespace ServiceComposer.AspNetCore.Generators
 {
     [Generator]
-    public class ControllerWrapperGenerator : ISourceGenerator
+    public class CompositionHandlerWrapperGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
             // Register a syntax receiver that will gather the methods we need to process
-            context.RegisterForSyntaxNotifications(() => new ControllerSyntaxReceiver());
+            context.RegisterForSyntaxNotifications(() => new CompositionHandlerSyntaxReceiver());
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            if (!(context.SyntaxContextReceiver is ControllerSyntaxReceiver receiver))
+            if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
                 return;
 
-            foreach (var method in receiver.ControllerMethods)
+            foreach (var method in receiver.CompositionHandlerMethods)
             {
-                var nameSpace = GetNamespace(method);
-                var className = method.Identifier.Text + "Parameters";
-                var parameters = method.ParameterList.Parameters;
+                var className = method.Method.Identifier.Text + "Parameters";
+                var parameters = method.Method.ParameterList.Parameters;
 
-                var source = GenerateWrapperClass(nameSpace, className, parameters);
+                var source = GenerateWrapperClass(method.Namespace, className, parameters);
                 context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
             }
         }
@@ -90,7 +89,27 @@ namespace ServiceComposer.AspNetCore.Generators
 
             return builder.ToString();
         }
+    }
 
+    public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
+    {
+        public List<(MethodDeclarationSyntax Method, string Namespace)> CompositionHandlerMethods { get; } = [];
+
+        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
+        {
+            if (context.Node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclaration)
+            {
+                var hasHttpAttribute = methodDeclaration.AttributeLists
+                    .SelectMany(al => al.Attributes)
+                    .Any(a => a.Name.ToString().StartsWith("Http"));
+
+                if (hasHttpAttribute)
+                {
+                    CompositionHandlerMethods.Add((methodDeclaration, GetNamespace(methodDeclaration)));
+                }
+            }
+        }
+        
         static string GetNamespace(MethodDeclarationSyntax methodSyntax)
         {
             var potentialNamespaceParent = methodSyntax.Parent;
@@ -109,26 +128,6 @@ namespace ServiceComposer.AspNetCore.Generators
             };
 
             return nameSpace;
-        }
-    }
-
-    public class ControllerSyntaxReceiver : ISyntaxContextReceiver
-    {
-        public List<MethodDeclarationSyntax> ControllerMethods { get; } = [];
-
-        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
-        {
-            if (context.Node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclaration)
-            {
-                var hasHttpPostAttribute = methodDeclaration.AttributeLists
-                    .SelectMany(al => al.Attributes)
-                    .Any(a => a.Name.ToString() == "HttpPost");
-
-                if (hasHttpPostAttribute)
-                {
-                    ControllerMethods.Add(methodDeclaration);
-                }
-            }
         }
     }
 }
