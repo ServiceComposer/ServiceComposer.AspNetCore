@@ -1,6 +1,6 @@
 # Endpoint filters
 
-_Available starting with v2.3.0_
+_Available starting with v3.0.0_
 
 Endpoint filters allow intercepting all incoming HTTP requests prior to invoking the composition pipeline.
 
