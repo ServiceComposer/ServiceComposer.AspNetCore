@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup Label="Include the source generators in the output package">
-    <None Include="..\ServiceComposer.AspNetCore.Generators\bin\$(Configuration)\netstandard2.0\ServiceComposer.AspNetCore.Generators.dll"
+    <None Include="..\ServiceComposer.AspNetCore.SourceGeneration\bin\$(Configuration)\netstandard2.0\ServiceComposer.AspNetCore.SourceGeneration.dll"
           Pack="true"
           PackagePath="analyzers/dotnet/cs"
           Visible="false" />
