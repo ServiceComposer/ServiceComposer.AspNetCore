@@ -1,11 +1,11 @@
 # Events
 
-When handling composition requests there are scenarios in which requests handlers need to offload to other handlers some of the composition concerns.
+When handling composition requests, there are scenarios in which request handlers need to offload some of the composition concerns to other handlers.
 
 > [!NOTE]
 > Composing lists of composed elements or master-details type of outputs is one scenario where events are needed. For an introduction to composing lists and the related challenges, read the [Into the darkness of ViewModels Lists Composition](https://milestone.topics.it/2019/02/28/into-the-darkness-of-viewmodel-lists-composition.html) blog post.
 
-Events are regular .NET types, classes or records, like in the following example:
+Events are regular .NET types, classes, or records, like in the following example:
 
 <!-- snippet: an-event -->
 <a id='snippet-an-event'></a>
@@ -15,11 +15,11 @@ public record AnEvent(string SomeValue);
 <sup><a href='/src/Snippets/Events/AnEvent.cs#L3-L5' title='Snippet source file'>snippet source</a> | <a href='#snippet-an-event' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-Events are synchronous and in memory, they don't need to be serializable.
+Events are synchronous, and in memory, they don't need to be serializable.
 
 ## Publishing events
 
-Publishing an event is done through the composition context, like demonstrated by the following snippet:
+Publishing an event is done through the composition context, as demonstrated by the following snippet:
 
 <!-- snippet: publishing-events -->
 <a id='snippet-publishing-events'></a>
@@ -39,7 +39,7 @@ public class EventPublishingHandler : ICompositionRequestsHandler
 
 ## Subscribing to events
 
-ServiceComposer offer two APIs to subscribe to events.
+ServiceComposer offers two APIs to subscribe to events.
 
 ### Generic event handlers
 
@@ -60,9 +60,9 @@ public class GenericEventHandler : ICompositionEventsHandler<AnEvent>
 <sup><a href='/src/Snippets/Events/GenericEventHandler.cs#L7-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-generic-event-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-`ICompositionEventsHandler<TEvent>` instances are discovered at assembly scanning time and registered in the DI container as transient components. Hence, event handlers supports dependency injection.
+`ICompositionEventsHandler<TEvent>` instances are discovered at assembly scanning time and registered in the DI container as transient components. Hence, event handlers support dependency injection.
 
-### Route based subscribers
+### Route-based subscribers
 
 A more granular way to subscribe to events is by creating a class that implements the `ICompositionEventsSubscriber`:
 
@@ -88,8 +88,8 @@ public class RouteBasedEventHandler : ICompositionEventsSubscriber
 > [!NOTE]
 > The class must also be decorated with one or more route attributes. Otherwise, it'll never be invoked.
 
-At runtime, when an HTTP request that matches the route pattern is handled, all matching subscribers will be invoked giving them the opportunity to subscribe. The registered event handler will be invoked when a publisher publishes the subscribed event.
+At runtime, when an HTTP request that matches the route pattern is handled, all matching subscribers will be invoked, giving them the opportunity to subscribe. The registered event handler will be invoked when a publisher publishes the subscribed event.
 
 ## When using which
 
-Generic event handlers, classes implementing `ICompositionEventsHandler<TEvent>`, are invoked every time an event they subscribe to is published, regardless of the route that is currently handled. If the same even is used in multiple scenarios, e.g. when doing an HTTP GET and a POST, and different behaviors are required, it's better to implement a route based event handler that can easily, though the route attribute, differentiate to which type of request it reacts to.
+Generic event handlers, classes implementing `ICompositionEventsHandler<TEvent>`, are invoked every time an event they subscribe to is published, regardless of the currently handled route. If the same event is used in multiple scenarios, e.g., when doing an HTTP GET and a POST, and different behaviors are required, it's better to implement a route-based event handler that can easily, through the route attribute, differentiate to which type of request it reacts to.
