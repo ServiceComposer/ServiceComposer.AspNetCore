@@ -16,21 +16,66 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 
         public void Execute(GeneratorExecutionContext context)
         {
-            if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
-                return;
-
-            foreach (var method in receiver.CompositionHandlerMethods)
+            try 
             {
-                var className = method.Method.Identifier.Text + "Parameters";
-                var parameters = method.Method.ParameterList.Parameters;
+                if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "SG0002",
+                                "Error",
+                                "Invalid syntax receiver",
+                                "Generator",
+                                DiagnosticSeverity.Error,
+                                true
+                            ),
+                            Location.None
+                        )
+                    );
+                    return;
+                }
 
-                var source = GenerateWrapperClass(method.Namespace, className, parameters);
-                context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
+                
+                
+                
+                foreach (var method in receiver.CompositionHandlerMethods)
+                {
+                    var className = method.Method.Identifier.Text + "Parameters";
+                    var parameters = method.Method.ParameterList.Parameters;
+
+                    var source = GenerateWrapperClass(method.Namespace, className, parameters);
+                    context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
+                }
+                
+                
+                
+                
+            }
+            catch (Exception ex)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "SG0003",
+                            "Error",
+                            "Generator failed: {0}",
+                            "Generator",
+                            DiagnosticSeverity.Error,
+                            true
+                        ),
+                        Location.None,
+                        ex.ToString()
+                    )
+                );
             }
         }
 
         string GenerateWrapperClass(string nameSpace, string className, SeparatedSyntaxList<ParameterSyntax> parameters)
         {
+            // We need to make sure we don't end in an infinite loop.
+            // The generated classes will have the Http* attributes on them 
+            
             var builder = new StringBuilder();
 
             builder.AppendLine("using System;");
@@ -97,16 +142,20 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            if (context.Node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclaration)
+            if (context.Node is not MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclaration
+                ||
+                methodDeclaration.SyntaxTree.FilePath.EndsWith(".g.cs"))
             {
-                var hasHttpAttribute = methodDeclaration.AttributeLists
-                    .SelectMany(al => al.Attributes)
-                    .Any(a => a.Name.ToString().StartsWith("Http"));
+                return;
+            }
+            
+            var hasHttpAttribute = methodDeclaration.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(a => a.Name.ToString().StartsWith("Http"));
 
-                if (hasHttpAttribute)
-                {
-                    CompositionHandlerMethods.Add((methodDeclaration, GetNamespace(methodDeclaration)));
-                }
+            if (hasHttpAttribute)
+            {
+                CompositionHandlerMethods.Add((methodDeclaration, GetNamespace(methodDeclaration)));
             }
         }
         
