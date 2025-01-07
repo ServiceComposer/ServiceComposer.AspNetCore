@@ -8,52 +8,104 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
     [Generator]
     public class CompositionHandlerWrapperGenerator : ISourceGenerator
     {
+        const string ServiceComposerNamespace = "ServiceComposer.AspNetCore";
         public void Initialize(GeneratorInitializationContext context)
         {
             // Register a syntax receiver that will gather the methods we need to process
             context.RegisterForSyntaxNotifications(() => new CompositionHandlerSyntaxReceiver());
         }
 
+        string GetTypeFullname(SemanticModel semanticModel, TypeSyntax type)
+        {
+            var symbolInfo = semanticModel.GetSymbolInfo(type);
+            var symbol = symbolInfo.Symbol;
+
+            var fullName = symbol!.ToDisplayString();
+            return fullName;
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
-            if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
+            try
             {
-                return;
+                if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "SG0002",
+                                "Error",
+                                "Invalid syntax receiver",
+                                "Generator",
+                                DiagnosticSeverity.Error,
+                                true
+                            ),
+                            Location.None
+                        )
+                    );
+                    return;
+                }
+
+                foreach (var method in receiver.CompositionHandlerMethods)
+                {
+                    var generatedClassName = $"{method.ClassName}_{method.Method.Identifier.Text}_Parameters";
+                    var generatedClassNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
+                    var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
+                    var parameters = method.Method.ParameterList.Parameters;
+
+                    var source = GenerateWrapperClass(
+                        context,
+                        generatedClassNamespace,
+                        generatedClassName,
+                        userClassFullTypeName,
+                        method.Method.Identifier.Text,
+                        parameters);
+                    context.AddSource($"{generatedClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
+                }
             }
-
-            foreach (var method in receiver.CompositionHandlerMethods)
+            catch (Exception ex)
             {
-                var className = $"{method.ClassName}_{method.Method.Identifier.Text}_Parameters";
-                var parameters = method.Method.ParameterList.Parameters;
-
-                var source = GenerateWrapperClass(method.Namespace, className, parameters);
-                context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "SG0003",
+                            "Error",
+                            "Generator failed: {0}",
+                            "Generator",
+                            DiagnosticSeverity.Error,
+                            true
+                        ),
+                        Location.None,
+                        ex.ToString()
+                    )
+                );
             }
         }
 
-        string GenerateWrapperClass(string nameSpace, string className, SeparatedSyntaxList<ParameterSyntax> parameters)
+        string GenerateWrapperClass(GeneratorExecutionContext context, string generatedClassNamespace,
+            string generatedClassName, string userClassFullTypeName, string userMethodName,
+            SeparatedSyntaxList<ParameterSyntax> parameters)
         {
-            // We need to make sure we don't end in an infinite loop.
-            // The generated classes will have the Http* attributes on them 
-            
             var builder = new StringBuilder();
 
-            builder.AppendLine("using System;");
-            builder.AppendLine("using System.Text.Json.Serialization;");
             builder.AppendLine();
 
-            builder.AppendLine($"namespace Generated.{nameSpace}");
+            builder.AppendLine("#pragma warning disable SC0001");
+            builder.AppendLine($"namespace {generatedClassNamespace}");
             builder.AppendLine("{");
 
             // Generate the wrapper class
-            builder.AppendLine($"    public class {className}");
+            builder.AppendLine($"    public class {generatedClassName}({userClassFullTypeName} userHandler) : {ServiceComposerNamespace}.ICompositionRequestsHandler"); // TODO how do we ensure types are in sync?
             builder.AppendLine("    {");
 
+            List<string> propertyNames = [];
             // Generate properties for each parameter
             foreach (var param in parameters)
             {
-                var paramType = param.Type?.ToString() ?? "object";
-                var paramName = char.ToUpper(param.Identifier.Text[0]) + param.Identifier.Text.Substring(1);
+                var semanticModel = context.Compilation.GetSemanticModel(param.Type!.SyntaxTree);
+                var paramTypeFullName = GetTypeFullname(semanticModel, param.Type);
+                var propertyName = char.ToUpper(param.Identifier.Text[0]) + param.Identifier.Text.Substring(1);
+                propertyNames.Add(propertyName);
 
                 // Check for [FromBody] attribute
                 var isFromBody = param.AttributeLists
@@ -62,94 +114,36 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 
                 if (isFromBody)
                 {
-                    builder.AppendLine($"        [JsonPropertyName(\"{param.Identifier.Text}\")]");
+//                    builder.AppendLine($"        [JsonPropertyName(\"{param.Identifier.Text}\")]");
                 }
 
-                builder.AppendLine($"        public {paramType} {paramName} {{ get; set; }}");
+                builder.AppendLine($"        public {paramTypeFullName} {propertyName} {{ get; set; }}");
                 builder.AppendLine();
             }
 
-            // Generate a constructor
-            builder.AppendLine($"        public {className}()");
+            //TODO copy here all the attributes declared on the user method
+            //TODO we don't want to bind to a class with properties. Instead for each parameter we need to have a corresponding bind* attribute, and then use arguments. Otherwise, filters will get a list of arguments that is different from the one expressed by user code 
+            builder.AppendLine($"        [{ServiceComposerNamespace}.Bind<{generatedClassName}>]");
+            builder.AppendLine("        public System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request)");
             builder.AppendLine("        {");
+            builder.AppendLine($"            var ctx = {ServiceComposerNamespace}.HttpRequestExtensions.GetCompositionContext(request);");
+            builder.AppendLine("            var arguments = ctx.GetArguments(this);");
+            builder.AppendLine($"            var self = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<{generatedClassName}>(arguments);");
+            builder.AppendLine("            // invoke the userHandler.MethodName with the list of parameters");
+            
+            builder.AppendLine($"            return userHandler.{userMethodName}(");
+            builder.AppendLine(string.Join(",\n", propertyNames.Select(propertyName => 
+                $"                    self.{propertyName}")));
+            builder.AppendLine($"            )");
             builder.AppendLine("        }");
-
-            // Generate a constructor with parameters
-            builder.AppendLine($"        public {className}(");
-            builder.AppendLine(string.Join(",\n", parameters.Select(p =>
-                $"            {p.Type} {p.Identifier.Text}")));
-            builder.AppendLine("        )");
-            builder.AppendLine("        {");
-
-            foreach (var param in parameters)
-            {
-                var paramName = char.ToUpper(param.Identifier.Text[0]) + param.Identifier.Text.Substring(1);
-                builder.AppendLine($"            {paramName} = {param.Identifier.Text};");
-            }
-
-            builder.AppendLine("        }");
-
+            
             builder.AppendLine("    }");
             builder.AppendLine("}");
+            builder.AppendLine("#pragma warning restore SC0001");
 
             var code = builder.ToString();
-            
+
             return code;
-        }
-    }
-
-    public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
-    {
-        public List<(MethodDeclarationSyntax Method, string Namespace, string ClassName)> CompositionHandlerMethods { get; } = [];
-
-        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
-        {
-            if (context.Node is not MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclaration
-                ||
-                methodDeclaration.SyntaxTree.FilePath.EndsWith(".g.cs"))
-            {
-                return;
-            }
-            
-            var hasHttpAttribute = methodDeclaration.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(a => a.Name.ToString() == "HttpPost");
-
-            if (hasHttpAttribute)
-            {
-                CompositionHandlerMethods.Add((methodDeclaration, GetNamespace(methodDeclaration), GetClassName(methodDeclaration)));
-            }
-        }
-
-        static string GetClassName(MethodDeclarationSyntax methodSyntax)
-        {
-            var potentialClassParent = methodSyntax.Parent;
-            while (potentialClassParent != null &&
-                   !(potentialClassParent is ClassDeclarationSyntax))
-            {
-                potentialClassParent = potentialClassParent.Parent;
-            }
-            
-            return (((ClassDeclarationSyntax)potentialClassParent!)!).Identifier.Text;
-        }
-        
-        static string GetNamespace(MethodDeclarationSyntax methodSyntax)
-        {
-            var potentialNamespaceParent = methodSyntax.Parent;
-            while (potentialNamespaceParent != null &&
-                   !(potentialNamespaceParent is NamespaceDeclarationSyntax || potentialNamespaceParent is FileScopedNamespaceDeclarationSyntax))
-            {
-                potentialNamespaceParent = potentialNamespaceParent?.Parent;
-            }
-
-            var nameSpace = potentialNamespaceParent switch
-            {
-                NamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Name.ToString(),
-                FileScopedNamespaceDeclarationSyntax filerScopedNamespaceDeclaration => filerScopedNamespaceDeclaration.Name.ToString(),
-                _ => "UndefinedNamespace"
-            };
-
-            return nameSpace;
         }
     }
 }
