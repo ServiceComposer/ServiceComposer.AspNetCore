@@ -24,6 +24,33 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             return fullName;
         }
 
+        string GetRouteTemplate(AttributeSyntax attribute)
+        {
+            string? routeTemplate = null;
+            if (attribute.ArgumentList != null)
+            {
+                foreach (var argument in attribute.ArgumentList.Arguments)
+                {
+                    if (argument.NameEquals != null)
+                    {
+                        if (argument.NameEquals.Name.Identifier.Text == "template" &&
+                            argument.Expression is LiteralExpressionSyntax literal)
+                        {
+                            routeTemplate = literal.Token.ValueText;
+                            break;
+                        }
+                    }
+                    else if (argument.Expression is LiteralExpressionSyntax literal)
+                    {
+                        routeTemplate = literal.Token.ValueText;
+                        break;
+                    }
+                }
+            }
+
+            return routeTemplate ?? string.Empty;
+        }
+        
         public void Execute(GeneratorExecutionContext context)
         {
             try
@@ -51,6 +78,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
                     var generatedClassName = $"{method.ClassName}_{method.Method.Identifier.Text}_Parameters";
                     var generatedClassNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
                     var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
+                    var userMethodRouteTemplate = GetRouteTemplate(method.HttpAttribute);
                     var parameters = method.Method.ParameterList.Parameters;
 
                     var source = GenerateWrapperClass(
@@ -59,6 +87,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
                         generatedClassName,
                         userClassFullTypeName,
                         method.Method.Identifier.Text,
+                        userMethodRouteTemplate,
                         parameters);
                     context.AddSource($"{generatedClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
                 }
@@ -82,9 +111,15 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             }
         }
 
-        string GenerateWrapperClass(GeneratorExecutionContext context, string generatedClassNamespace,
-            string generatedClassName, string userClassFullTypeName, string userMethodName,
-            SeparatedSyntaxList<ParameterSyntax> parameters)
+        string GenerateWrapperClass(
+            GeneratorExecutionContext context,
+            string generatedClassNamespace,
+            string generatedClassName,
+            string userClassFullTypeName,
+            string userMethodName,
+            string userMethodRouteTemplate,
+            SeparatedSyntaxList<ParameterSyntax> parameters
+            )
         {
             var builder = new StringBuilder();
 
@@ -129,12 +164,11 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             builder.AppendLine($"            var ctx = {ServiceComposerNamespace}.HttpRequestExtensions.GetCompositionContext(request);");
             builder.AppendLine("            var arguments = ctx.GetArguments(this);");
             builder.AppendLine($"            var self = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<{generatedClassName}>(arguments);");
-            builder.AppendLine("            // invoke the userHandler.MethodName with the list of parameters");
-            
+            builder.AppendLine();            
             builder.AppendLine($"            return userHandler.{userMethodName}(");
             builder.AppendLine(string.Join(",\n", propertyNames.Select(propertyName => 
                 $"                    self.{propertyName}")));
-            builder.AppendLine($"            )");
+            builder.AppendLine($"            );");
             builder.AppendLine("        }");
             
             builder.AppendLine("    }");
