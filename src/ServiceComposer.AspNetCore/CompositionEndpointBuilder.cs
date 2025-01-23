@@ -106,7 +106,7 @@ namespace ServiceComposer.AspNetCore
                 
                 RequestDelegate composer = async composerHttpContext =>
                 {
-                    var requestId = context.EnsureRequestIdIsSetup();
+                    var requestId = composerHttpContext.EnsureRequestIdIsSetup();
                     var compositionContext = new CompositionContext
                     (
                         requestId,
