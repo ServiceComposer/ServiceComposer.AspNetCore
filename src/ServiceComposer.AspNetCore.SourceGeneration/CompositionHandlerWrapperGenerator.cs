@@ -52,6 +52,35 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             return routeTemplate ?? string.Empty;
         }
 
+        bool TryGetHttpAttribute(GeneratorExecutionContext context, MethodDeclarationSyntax method, AttributeSyntax[] attributes, out AttributeSyntax? attribute)
+        {
+            if (attributes.Length > 1)
+            {
+                var descriptor = new DiagnosticDescriptor(
+                    id: "SC001",
+                    title: "Configuration not supported",
+                    messageFormat: "The method {0} contains more than one Http* attribute. This version of ServiceComposer supports only one Http* per method.",
+                    category: "CodeGeneration",
+                    defaultSeverity: DiagnosticSeverity.Error,
+                    isEnabledByDefault: true
+                );
+
+                var diagnostic = Diagnostic.Create(
+                    descriptor, 
+                    method.GetLocation(), 
+                    method.Identifier.Text
+                );
+
+                context.ReportDiagnostic(diagnostic);
+                
+                attribute = null;
+                return false;
+            }
+            
+            attribute = attributes[0];
+            return true;
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
             try
@@ -83,11 +112,16 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
                         return $"{GetTypeFullname(semanticModel, p.Type).Replace('.', '_')}_{p.Identifier.Text}";
                     });
 
+                    if (!TryGetHttpAttribute(context, method.Method, method.HttpAttributes, out var httpAttribute))
+                    {
+                        return;
+                    }
+
                     var generatedHandlerClassName =
                         $"{method.ClassName}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}";
                     var generatedNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
                     var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
-                    var userMethodRouteTemplate = GetRouteTemplate(method.HttpAttribute);
+                    var userMethodRouteTemplate = GetRouteTemplate(httpAttribute!);
 
                     var source = GenerateWrapperClass(
                         context,
