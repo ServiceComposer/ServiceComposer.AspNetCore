@@ -34,7 +34,7 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         // TODO How are conventions shared with ServiceComposer?
         // somehow this conventions must be shared with ServiceComposer
         // that uses them to register user types in the IoC container
-        var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace.EndsWith("CompositionHandlers") : false;
+        var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace == "userClassNamespace" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
         var classNameMatchesConventions = userClassName.EndsWith("CompositionHandler");
         
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
