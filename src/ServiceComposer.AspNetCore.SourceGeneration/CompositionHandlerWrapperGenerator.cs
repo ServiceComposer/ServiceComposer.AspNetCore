@@ -144,7 +144,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 
             //TODO copy here all the attributes declared on the user method
             //TODO we don't want to bind to a class with properties. Instead for each parameter we need to have a corresponding bind* attribute, and then use arguments. Otherwise, filters will get a list of arguments that is different from the one expressed by user code 
-            var boundParameters = GenerateBindAttributes(context, builder, parameters, userMethodRouteTemplate);
+            var boundParameters = AppendBindAttributes(context, builder, parameters, userMethodRouteTemplate);
             builder.AppendLine(
                 "        public System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request)");
             builder.AppendLine("        {");
@@ -153,17 +153,16 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             builder.AppendLine("            var arguments = ctx.GetArguments(this);");
 
             List<string> generatedArgs = [];
-            for (int i = 0; i < boundParameters.Count; i++)
+            for (var i = 0; i < boundParameters.Count; i++)
             {
                 var boundParameter = boundParameters[i];
                 var arg = $"p{i}_{boundParameter.parameterName}";
                 generatedArgs.Add(arg);
-                builder.AppendLine($"            var {arg} = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<{boundParameter.parameterType}>(arguments, \"{boundParameter.parameterName}\", Microsoft.AspNetCore.Mvc.ModelBinding.{boundParameter.bindingSource});");  
+                builder.AppendLine($"            var {arg} = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<{boundParameter.parameterType}>(arguments, \"{boundParameter.parameterName}\", Microsoft.AspNetCore.Mvc.ModelBinding.{boundParameter.bindingSource});");
             }
+
             builder.AppendLine();
-            builder.AppendLine($"            return userHandler.{userMethodName}(");
-            builder.AppendLine($"                {string.Join(",\n", generatedArgs)}");
-            builder.AppendLine($"            );");
+            builder.AppendLine($"            return userHandler.{userMethodName}({string.Join(", ", generatedArgs)});");
             builder.AppendLine("        }");
 
             builder.AppendLine("    }");
@@ -175,38 +174,54 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             return code;
         }
 
-        bool TryAddParameterBindingFromRoute(GeneratorExecutionContext context, StringBuilder builder,
+        bool IsSimpleType(ITypeSymbol? typeSymbol)
+        {
+            var simpleTypes = new[]
+            {
+                "System.Boolean",
+                "System.Byte", "System.SByte",
+                "System.Int16", "System.UInt16",
+                "System.Int32", "System.UInt32",
+                "System.Int64", "System.UInt64",
+                "System.Single", "System.Double",
+                "System.Decimal",
+                "System.Char",
+                "System.String",
+                "System.DateTime",
+                "System.DateTimeOffset",
+                "System.Guid"
+            };
+
+            if (typeSymbol == null)
+            {
+                return false;
+            }
+            
+            return typeSymbol.IsValueType 
+                   || typeSymbol.TypeKind == TypeKind.Enum
+                   || simpleTypes.Contains(typeSymbol.ToDisplayString());
+        }
+        
+        bool TryAppendBindingFromBody(GeneratorExecutionContext context, StringBuilder builder,
             ParameterSyntax parameter, string userMethodRouteTemplate,
             out (string parameterName, string parameterType, string bindingSource) boundParam)
         {
             var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
+            var typeSymbol = semanticModel.GetTypeInfo(parameter.Type).Type;
+            var isSimpleType = IsSimpleType(typeSymbol!);
             var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
 
-            string[] possibleMatches =
-            [
-                "{" + parameter.Identifier.Text + "}",
-                "{" + parameter.Identifier.Text + ":"
-            ];
+            const string bindingSource = "BindingSource.Body";
+            string[] attributeNames = ["FromBody", "FromBodyAttribute"];
+            
+            // TODO can we somehow support the EmptyBodyBehavior?
+            var (attribute, _) = GetAttributeAndArgument(parameter, attributeNames, "EmptyBodyBehavior");
+            var addAttribute = attribute is not null || isSimpleType == false;
 
-            var fromRouteAttribute = parameter.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .SingleOrDefault(a => a.Name.ToString() == "FromRoute" || a.Name.ToString() == "FromRouteAttribute");
-            var namedArguments = fromRouteAttribute?.ArgumentList?.Arguments
-                .SingleOrDefault(arg => arg.NameEquals is { Name.Identifier.Text: "Name" });
-
-            if (namedArguments is not null)
+            if (addAttribute)
             {
-                var paramName = namedArguments.Expression.ToString().Trim('"');
-                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromRoute<{paramTypeFullName}>(\"{paramName}\")]");
-                boundParam = (paramName, paramTypeFullName, "BindingSource.Path");
-                return true;
-            }
-
-            if (possibleMatches.Any(userMethodRouteTemplate.Contains))
-            {
-                //the parameter is in the route template: use it as is
-                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromRoute<{paramTypeFullName}>(\"{parameter.Identifier.Text}\")]");
-                boundParam = (parameter.Identifier.Text, paramTypeFullName, "BindingSource.Path");
+                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromBody<{paramTypeFullName}>()]");
+                boundParam = (parameter.Identifier.Text, paramTypeFullName, bindingSource);
                 return true;
             }
 
@@ -214,27 +229,104 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             return false;
         }
 
-        List<(string parameterName, string parameterType, string bindingSource)> GenerateBindAttributes(GeneratorExecutionContext context, StringBuilder builder,
+        bool TryAppendBindingFromQuery(GeneratorExecutionContext context, StringBuilder builder,
+            ParameterSyntax parameter, string userMethodRouteTemplate,
+            out (string parameterName, string parameterType, string bindingSource) boundParam)
+        {
+            var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
+            var typeSymbol = semanticModel.GetTypeInfo(parameter.Type).Type;
+            var isSimpleType = IsSimpleType(typeSymbol!);
+            var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+
+            const string bindingSource = "BindingSource.Query";
+            string[] attributeNames = ["FromQuery", "FromQueryAttribute"];
+            
+            var (attribute, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
+            var addAttribute = attribute is not null || isSimpleType;
+            var paramName = nameArgument is null 
+                ? parameter.Identifier.Text
+                : nameArgument.Expression.ToString().Trim('"');
+
+            if (addAttribute)
+            {
+                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromQuery<{paramTypeFullName}>(\"{paramName}\")]");
+                boundParam = (paramName, paramTypeFullName, bindingSource);
+                return true;
+            }
+
+            boundParam = ("", "", "");
+            return false;
+        }
+
+        bool TryAppendBindingFromRoute(GeneratorExecutionContext context, StringBuilder builder,
+            ParameterSyntax parameter, string userMethodRouteTemplate,
+            out (string parameterName, string parameterType, string bindingSource) boundParam)
+        {
+            var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
+            var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+
+            const string bindingSource = "BindingSource.Path";
+            string[] possibleMatches =
+            [
+                "{" + parameter.Identifier.Text + "}",
+                "{" + parameter.Identifier.Text + ":"
+            ];
+            string[] attributeNames = ["FromRoute", "FromRouteAttribute"];
+
+            var (_, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
+            var appendAttribute = nameArgument is not null || possibleMatches.Any(userMethodRouteTemplate.Contains);
+            var paramName = nameArgument is null 
+                ? parameter.Identifier.Text
+                : nameArgument.Expression.ToString().Trim('"');
+            
+            if (appendAttribute)
+            {
+                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromRoute<{paramTypeFullName}>(\"{paramName}\")]");
+                boundParam = (paramName, paramTypeFullName, bindingSource);
+                return true;
+            }
+
+            boundParam = ("", "", "");
+            return false;
+        }
+
+        static (AttributeSyntax? attribute, AttributeArgumentSyntax? argument) GetAttributeAndArgument(ParameterSyntax parameter, string[] attributeNamesToMatch, string argumentName)
+        {
+            var attribute = parameter.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .SingleOrDefault(a => attributeNamesToMatch.Any(attributeName => a.Name.ToString() == attributeName));
+            var argument = attribute?.ArgumentList?.Arguments
+                .SingleOrDefault(arg => arg.NameEquals != null && arg.NameEquals.Name.Identifier.Text == argumentName);
+            return (attribute, argument);
+        }
+
+        List<(string parameterName, string parameterType, string bindingSource)> AppendBindAttributes(
+            GeneratorExecutionContext context, StringBuilder builder,
             SeparatedSyntaxList<ParameterSyntax> parameters, string userMethodRouteTemplate)
         {
             List<(string parameterName, string parameterType, string bindingSource)> boundParameters = [];
             foreach (var param in parameters)
             {
-                if (TryAddParameterBindingFromRoute(context, builder, param, userMethodRouteTemplate, out var boundParam))
+                if (TryAppendBindingFromRoute(context, builder, param, userMethodRouteTemplate,
+                        out var fromRouteBoundParam))
                 {
-                    boundParameters.Add(boundParam);
+                    boundParameters.Add(fromRouteBoundParam);
+                    continue;
                 }
 
-
-//                 // Check for [FromBody] attribute
-//                 var isFromBody = param.AttributeLists
-//                     .SelectMany(al => al.Attributes)
-//                     .Any(a => a.Name.ToString() == "FromBody");
-//
-//                 if (isFromBody)
-//                 {
-//              }
-
+                if (TryAppendBindingFromQuery(context, builder, param, userMethodRouteTemplate,
+                        out var fromQueryBoundParam))
+                {
+                    boundParameters.Add(fromQueryBoundParam);
+                    continue;
+                }
+                
+                if (TryAppendBindingFromBody(context, builder, param, userMethodRouteTemplate,
+                        out var fromBodyBoundParam))
+                {
+                    boundParameters.Add(fromBodyBoundParam);
+                    continue;
+                }
             }
 
             return boundParameters;
