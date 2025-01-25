@@ -10,8 +10,8 @@ public class MySampleCompositionHandler
         return Task.CompletedTask;
     }
     
-    [HttpPost("/sample/{id}")]
-    public Task Post(int id, [FromQuery]int c)
+    [HttpPost("/sample/{v}")]
+    public Task Post([FromRoute(Name = "v")]int id, [FromQuery]int c)
     {
         return Task.CompletedTask;
     }
