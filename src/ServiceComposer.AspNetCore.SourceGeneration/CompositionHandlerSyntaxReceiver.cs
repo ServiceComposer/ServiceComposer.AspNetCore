@@ -9,7 +9,7 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         "HttpGet", "HttpPost", "HttpPatch", "HttpPut", "HttpDelete",
         "HttpGetAttribute", "HttpPostAttribute", "HttpPatchAttribute", "HttpPutAttribute", "HttpDeleteAttribute"
     ];
-    public List<(MethodDeclarationSyntax Method, AttributeSyntax HttpAttribute, string Namespace, string ClassName)> CompositionHandlerMethods { get; } = [];
+    public List<(MethodDeclarationSyntax Method, AttributeSyntax[] HttpAttributes, string Namespace, string ClassName)> CompositionHandlerMethods { get; } = [];
 
     public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
     {
@@ -23,10 +23,10 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
             return;
         }
             
-        // TODO how do we signal a compiler error if there are multiple HTTP attributes on the same method? In theory we could support multiple attributes, but we have to match method arguments to the route template to understand where they should be coming from. If different attributes have different templates, it's a shit show
-        var httpAttribute = methodDeclaration.AttributeLists
+        var httpAttributes = methodDeclaration.AttributeLists
             .SelectMany(al => al.Attributes)
-            .SingleOrDefault(attributeSyntax => supportedAttributes.Contains(attributeSyntax.Name.ToString()));
+            .Where(attributeSyntax => supportedAttributes.Contains(attributeSyntax.Name.ToString()))
+            .ToArray();
 
         var userClassNamespace = GetNamespace(methodDeclaration);
         var userClassName = GetClassName(methodDeclaration);
@@ -39,9 +39,9 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
 
-        if (httpAttribute != null && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
+        if (httpAttributes.Any() && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
         {
-            CompositionHandlerMethods.Add((methodDeclaration, httpAttribute, userClassNamespace!, userClassName));
+            CompositionHandlerMethods.Add((methodDeclaration, httpAttributes, userClassNamespace!, userClassName));
         }
     }
 
