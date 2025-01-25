@@ -75,21 +75,27 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 
                 foreach (var method in receiver.CompositionHandlerMethods)
                 {
-                    var generatedClassName = $"{method.ClassName}_{method.Method.Identifier.Text}_Parameters";
-                    var generatedClassNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
+                    var parameters = method.Method.ParameterList.Parameters;
+                    var typeAndName = parameters.Select(p =>
+                    {
+                        var semanticModel = context.Compilation.GetSemanticModel(p.Type!.SyntaxTree);
+                        return $"{GetTypeFullname(semanticModel, p.Type).Replace('.', '_')}_{p.Identifier.Text}";
+                    });
+                    
+                    var generatedHandlerClassName = $"{method.ClassName}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}";
+                    var generatedNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
                     var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
                     var userMethodRouteTemplate = GetRouteTemplate(method.HttpAttribute);
-                    var parameters = method.Method.ParameterList.Parameters;
 
                     var source = GenerateWrapperClass(
                         context,
-                        generatedClassNamespace,
-                        generatedClassName,
+                        generatedNamespace,
+                        generatedHandlerClassName,
                         userClassFullTypeName,
                         method.Method.Identifier.Text,
                         userMethodRouteTemplate,
                         parameters);
-                    context.AddSource($"{generatedClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
+                    context.AddSource($"{generatedHandlerClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
                 }
             }
             catch (Exception ex)
@@ -130,16 +136,50 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             builder.AppendLine("{");
 
             // Generate the wrapper class
-            builder.AppendLine($"    public class {generatedClassName}({userClassFullTypeName} userHandler) : {ServiceComposerNamespace}.ICompositionRequestsHandler"); // TODO how do we ensure types are in sync?
+            builder.AppendLine($"    public class {generatedClassName}({userClassFullTypeName} userHandler)");
+            builder.AppendLine($"         : {ServiceComposerNamespace}.ICompositionRequestsHandler");
             builder.AppendLine("    {");
+            
+            var propertyNames = GenerateParametersInnerClass(context, builder, parameters);
+            builder.AppendLine();
 
+            //TODO copy here all the attributes declared on the user method
+            //TODO we don't want to bind to a class with properties. Instead for each parameter we need to have a corresponding bind* attribute, and then use arguments. Otherwise, filters will get a list of arguments that is different from the one expressed by user code 
+            builder.AppendLine($"        [{ServiceComposerNamespace}.Bind<Parameters>]");
+            builder.AppendLine("        public System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request)");
+            builder.AppendLine("        {");
+            builder.AppendLine($"            var ctx = {ServiceComposerNamespace}.HttpRequestExtensions.GetCompositionContext(request);");
+            builder.AppendLine("            var arguments = ctx.GetArguments(this);");
+            builder.AppendLine($"            var parameters = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<Parameters>(arguments);");
+            builder.AppendLine();            
+            builder.AppendLine($"            return userHandler.{userMethodName}(");
+            builder.AppendLine(string.Join(",\n", propertyNames.Select(propertyName => 
+                $"                    parameters.{propertyName}")));
+            builder.AppendLine($"            );");
+            builder.AppendLine("        }");
+            
+            builder.AppendLine("    }");
+            builder.AppendLine("}");
+            builder.AppendLine("#pragma warning restore SC0001");
+
+            var code = builder.ToString();
+
+            return code;
+        }
+
+        List<string> GenerateParametersInnerClass(GeneratorExecutionContext context, StringBuilder builder,
+            SeparatedSyntaxList<ParameterSyntax> parameters)
+        {
+            builder.AppendLine("        public class Parameters");
+            builder.AppendLine("        {");
+            
             List<string> propertyNames = [];
             // Generate properties for each parameter
             foreach (var param in parameters)
             {
                 var semanticModel = context.Compilation.GetSemanticModel(param.Type!.SyntaxTree);
                 var paramTypeFullName = GetTypeFullname(semanticModel, param.Type);
-                var propertyName = char.ToUpper(param.Identifier.Text[0]) + param.Identifier.Text.Substring(1);
+                var propertyName = param.Identifier.Text; //char.ToUpper(param.Identifier.Text[0]) + param.Identifier.Text.Substring(1);
                 propertyNames.Add(propertyName);
 
                 // Check for [FromBody] attribute
@@ -152,32 +192,11 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
 //                    builder.AppendLine($"        [JsonPropertyName(\"{param.Identifier.Text}\")]");
                 }
 
-                builder.AppendLine($"        public {paramTypeFullName} {propertyName} {{ get; set; }}");
-                builder.AppendLine();
+                builder.AppendLine($"            public {paramTypeFullName} {propertyName} {{ get; set; }}");
             }
-
-            //TODO copy here all the attributes declared on the user method
-            //TODO we don't want to bind to a class with properties. Instead for each parameter we need to have a corresponding bind* attribute, and then use arguments. Otherwise, filters will get a list of arguments that is different from the one expressed by user code 
-            builder.AppendLine($"        [{ServiceComposerNamespace}.Bind<{generatedClassName}>]");
-            builder.AppendLine("        public System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request)");
-            builder.AppendLine("        {");
-            builder.AppendLine($"            var ctx = {ServiceComposerNamespace}.HttpRequestExtensions.GetCompositionContext(request);");
-            builder.AppendLine("            var arguments = ctx.GetArguments(this);");
-            builder.AppendLine($"            var self = {ServiceComposerNamespace}.ModelBindingArgumentExtensions.Argument<{generatedClassName}>(arguments);");
-            builder.AppendLine();            
-            builder.AppendLine($"            return userHandler.{userMethodName}(");
-            builder.AppendLine(string.Join(",\n", propertyNames.Select(propertyName => 
-                $"                    self.{propertyName}")));
-            builder.AppendLine($"            );");
             builder.AppendLine("        }");
             
-            builder.AppendLine("    }");
-            builder.AppendLine("}");
-            builder.AppendLine("#pragma warning restore SC0001");
-
-            var code = builder.ToString();
-
-            return code;
+            return propertyNames;
         }
     }
 }
