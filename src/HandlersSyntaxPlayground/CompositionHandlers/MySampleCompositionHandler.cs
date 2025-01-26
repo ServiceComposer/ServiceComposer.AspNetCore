@@ -22,6 +22,12 @@ public class MySampleCompositionHandler
     {
         return Task.CompletedTask;
     }
+    
+    [HttpPost("/sample/{id}")]
+    public Task Post(int id, [FromForm(Name = "sampleC")]int c, [FromForm(Name = "sampleX")]string x)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 public class BodyClass

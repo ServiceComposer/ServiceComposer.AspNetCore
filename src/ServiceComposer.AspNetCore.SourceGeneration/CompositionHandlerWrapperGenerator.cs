@@ -236,8 +236,38 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
                    || simpleTypes.Contains(typeSymbol.ToDisplayString());
         }
         
+        bool TryAppendBindingFromForm(GeneratorExecutionContext context, StringBuilder builder,
+            ParameterSyntax parameter, string _,
+            out (string parameterName, string parameterType, string bindingSource) boundParam)
+        {
+            // TODO Can I create the semantic model once and pass it around?
+            var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
+            var typeSymbol = semanticModel.GetTypeInfo(parameter.Type).Type;
+            var isSimpleType = IsSimpleType(typeSymbol!);
+            var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+
+            const string bindingSource = "BindingSource.Form";
+            string[] attributeNames = ["FromForm", "FromFormAttribute"];
+            
+            var (attribute, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
+
+            if (attribute is not null)
+            {
+                var paramName = nameArgument is null 
+                    ? parameter.Identifier.Text
+                    : nameArgument.Expression.ToString().Trim('"');
+
+                builder.AppendLine($"        [{ServiceComposerNamespace}.BindFromForm<{paramTypeFullName}>(\"{paramName}\")]");
+                boundParam = (paramName, paramTypeFullName, bindingSource);
+                return true;
+            }
+
+            boundParam = ("", "", "");
+            return false;
+        }
+        
         bool TryAppendBindingFromBody(GeneratorExecutionContext context, StringBuilder builder,
-            ParameterSyntax parameter, string userMethodRouteTemplate,
+            ParameterSyntax parameter, string _,
             out (string parameterName, string parameterType, string bindingSource) boundParam)
         {
             var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
@@ -264,7 +294,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
         }
 
         bool TryAppendBindingFromQuery(GeneratorExecutionContext context, StringBuilder builder,
-            ParameterSyntax parameter, string userMethodRouteTemplate,
+            ParameterSyntax parameter, string _,
             out (string parameterName, string parameterType, string bindingSource) boundParam)
         {
             var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
@@ -341,17 +371,14 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
             List<(string parameterName, string parameterType, string bindingSource)> boundParameters = [];
             foreach (var param in parameters)
             {
+                // TODO all the TryAppendBinding must check if there are other valid attributes
+                //   that are not relevant to them, otherwise the order here matters. For example,
+                //   without that check the FromQuery must be las, otherwise if the argument type
+                //   is a simple type it'll win even if there are other relevant attributes
                 if (TryAppendBindingFromRoute(context, builder, param, userMethodRouteTemplate,
                         out var fromRouteBoundParam))
                 {
                     boundParameters.Add(fromRouteBoundParam);
-                    continue;
-                }
-
-                if (TryAppendBindingFromQuery(context, builder, param, userMethodRouteTemplate,
-                        out var fromQueryBoundParam))
-                {
-                    boundParameters.Add(fromQueryBoundParam);
                     continue;
                 }
                 
@@ -359,6 +386,20 @@ namespace ServiceComposer.AspNetCore.SourceGeneration
                         out var fromBodyBoundParam))
                 {
                     boundParameters.Add(fromBodyBoundParam);
+                    continue;
+                }
+                
+                if (TryAppendBindingFromForm(context, builder, param, userMethodRouteTemplate,
+                        out var fromFormBoundParam))
+                {
+                    boundParameters.Add(fromFormBoundParam);
+                    continue;
+                }
+                
+                if (TryAppendBindingFromQuery(context, builder, param, userMethodRouteTemplate,
+                        out var fromQueryBoundParam))
+                {
+                    boundParameters.Add(fromQueryBoundParam);
                     continue;
                 }
             }
