@@ -91,13 +91,16 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlersTests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        //options.RegisterCompositionHandler<TestGetStringHandler>();
-                        //options.RegisterCompositionHandler<TestGetIntegerHandler>();
+                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetIntegerCompositionHandler));
+                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetStringCompositionHandler));
+                        options.RegisterCompositionHandler<TestGetStringCompositionHandler_AnotherMethod>();
+                        options.RegisterCompositionHandler<TestGetIntegerCompositionHandler_SomeMethod_int_id>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();
                     services.AddControllers()
                         .AddNewtonsoftJson();
+                    services.AddHttpContextAccessor();
                 },
                 configure: app =>
                 {
