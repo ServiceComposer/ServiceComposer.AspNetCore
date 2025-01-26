@@ -32,11 +32,10 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         var userClassName = GetClassName(methodDeclaration);
 
         // TODO How are conventions shared with ServiceComposer?
-        // somehow this conventions must be shared with ServiceComposer
-        // that uses them to register user types in the IoC container
-        var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace == "userClassNamespace" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
+        //   somehow this conventions must be shared with ServiceComposer
+        //   that uses them to register user types in the IoC container
+        var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace == "CompositionHandlers" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
         var classNameMatchesConventions = userClassName.EndsWith("CompositionHandler");
-        
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
 
         if (httpAttributes.Any() && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
@@ -56,7 +55,8 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
             
         return ((ClassDeclarationSyntax)potentialClassParent!).Identifier.Text;
     }
-        
+
+    // TODO nested namespaces are not supported
     static string GetNamespace(MethodDeclarationSyntax methodSyntax)
     {
         var potentialNamespaceParent = methodSyntax.Parent;
