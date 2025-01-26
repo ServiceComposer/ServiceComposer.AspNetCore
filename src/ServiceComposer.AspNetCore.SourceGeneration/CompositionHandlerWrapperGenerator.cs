@@ -107,12 +107,10 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
 
             foreach (var method in receiver.CompositionHandlerMethods)
             {
+                var semanticModel = context.Compilation.GetSemanticModel(method.Method.SyntaxTree);
+                
                 var parameters = method.Method.ParameterList.Parameters;
-                var typeAndName = parameters.Select(p =>
-                {
-                    var semanticModel = context.Compilation.GetSemanticModel(p.Type!.SyntaxTree);
-                    return $"{GetTypeFullname(semanticModel, p.Type).Replace('.', '_')}_{p.Identifier.Text}";
-                });
+                var typeAndName = parameters.Select(p => $"{GetTypeFullname(semanticModel, p.Type!).Replace('.', '_')}_{p.Identifier.Text}");
 
                 if (!TryGetHttpAttribute(context, method.Method, method.HttpAttributes, out var httpAttribute))
                 {
@@ -126,7 +124,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                 var userMethodRouteTemplate = GetRouteTemplate(httpAttribute!);
 
                 var source = GenerateWrapperClass(
-                    context,
+                    semanticModel,
                     generatedNamespace,
                     generatedHandlerClassName,
                     userClassFullTypeName,
@@ -156,7 +154,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
     }
 
     string GenerateWrapperClass(
-        GeneratorExecutionContext context,
+        SemanticModel semanticModel,
         string generatedClassNamespace,
         string generatedClassName,
         string userClassFullTypeName,
@@ -177,14 +175,13 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         builder.AppendLine($"         : {ServiceComposerNamespace}.ICompositionRequestsHandler");
         builder.AppendLine("    {");
 
-        var semanticModel = context.Compilation.GetSemanticModel(userMethod.SyntaxTree);
-        var userMethodAttributes = SerializeUserHandlerAttributeList(userMethod.AttributeLists, semanticModel);
+        var userMethodAttributes = SerializeUserHandlerAttributeList(semanticModel, userMethod.AttributeLists);
         foreach (var userMethodAttribute in userMethodAttributes)
         {
             builder.AppendLine($"        {userMethodAttribute}");
         }
 
-        var boundParameters = AppendBindAttributes(context, builder, parameters, userMethodRouteTemplate);
+        var boundParameters = AppendBindAttributes(semanticModel, builder, parameters, userMethodRouteTemplate);
         builder.AppendLine("        public System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request)");
         builder.AppendLine("        {");
         builder.AppendLine($"            var ctx = {ServiceComposerNamespace}.HttpRequestExtensions.GetCompositionContext(request);");
@@ -239,13 +236,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                || simpleTypes.Contains(typeSymbol.ToDisplayString());
     }
 
-    bool TryAppendBindingFromForm(GeneratorExecutionContext context, StringBuilder builder,
+    bool TryAppendBindingFromForm(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, string _,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        // TODO Can I create the semantic model once and pass it around?
-        var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
 
         const string bindingSource = "BindingSource.Form";
         string[] attributeNames = ["FromForm", "FromFormAttribute"];
@@ -268,14 +263,13 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return false;
     }
 
-    bool TryAppendBindingFromBody(GeneratorExecutionContext context, StringBuilder builder,
+    bool TryAppendBindingFromBody(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, string _,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
-        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type).Type;
+        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
         var isSimpleType = IsSimpleType(typeSymbol!);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
 
         const string bindingSource = "BindingSource.Body";
         string[] attributeNames = ["FromBody", "FromBodyAttribute"];
@@ -295,14 +289,13 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return false;
     }
 
-    bool TryAppendBindingFromQuery(GeneratorExecutionContext context, StringBuilder builder,
+    bool TryAppendBindingFromQuery(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, string _,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
-        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type).Type;
+        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
         var isSimpleType = IsSimpleType(typeSymbol!);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
 
         const string bindingSource = "BindingSource.Query";
         string[] attributeNames = ["FromQuery", "FromQueryAttribute"];
@@ -325,12 +318,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return false;
     }
 
-    bool TryAppendBindingFromRoute(GeneratorExecutionContext context, StringBuilder builder,
+    bool TryAppendBindingFromRoute(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, string userMethodRouteTemplate,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var semanticModel = context.Compilation.GetSemanticModel(parameter.Type!.SyntaxTree);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type);
+        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
 
         const string bindingSource = "BindingSource.Path";
         string[] possibleMatches =
@@ -370,7 +362,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
     }
 
     List<(string parameterName, string parameterType, string bindingSource)> AppendBindAttributes(
-        GeneratorExecutionContext context, StringBuilder builder,
+        SemanticModel semanticModel, StringBuilder builder,
         SeparatedSyntaxList<ParameterSyntax> parameters, string userMethodRouteTemplate)
     {
         List<(string parameterName, string parameterType, string bindingSource)> boundParameters = [];
@@ -380,28 +372,28 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
             //   that are not relevant to them, otherwise the order here matters. For example,
             //   without that check the FromQuery must be las, otherwise if the argument type
             //   is a simple type it'll win even if there are other relevant attributes
-            if (TryAppendBindingFromRoute(context, builder, param, userMethodRouteTemplate,
+            if (TryAppendBindingFromRoute(semanticModel, builder, param, userMethodRouteTemplate,
                     out var fromRouteBoundParam))
             {
                 boundParameters.Add(fromRouteBoundParam);
                 continue;
             }
 
-            if (TryAppendBindingFromBody(context, builder, param, userMethodRouteTemplate,
+            if (TryAppendBindingFromBody(semanticModel, builder, param, userMethodRouteTemplate,
                     out var fromBodyBoundParam))
             {
                 boundParameters.Add(fromBodyBoundParam);
                 continue;
             }
 
-            if (TryAppendBindingFromForm(context, builder, param, userMethodRouteTemplate,
+            if (TryAppendBindingFromForm(semanticModel, builder, param, userMethodRouteTemplate,
                     out var fromFormBoundParam))
             {
                 boundParameters.Add(fromFormBoundParam);
                 continue;
             }
 
-            if (TryAppendBindingFromQuery(context, builder, param, userMethodRouteTemplate,
+            if (TryAppendBindingFromQuery(semanticModel, builder, param, userMethodRouteTemplate,
                     out var fromQueryBoundParam))
             {
                 boundParameters.Add(fromQueryBoundParam);
@@ -412,7 +404,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return boundParameters;
     }
 
-    List<string> SerializeUserHandlerAttributeList(SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semanticModel)
+    List<string> SerializeUserHandlerAttributeList(SemanticModel semanticModel, SyntaxList<AttributeListSyntax> attributeLists)
     {
         var serializedAttributes = new List<string>();
 
