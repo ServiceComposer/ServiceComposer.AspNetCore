@@ -118,7 +118,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                 }
 
                 var generatedHandlerClassName =
-                    $"{method.ClassName}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}";
+                    $"{method.ClassName}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
                 var generatedNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
                 var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
                 var userMethodRouteTemplate = GetRouteTemplate(httpAttribute!);
