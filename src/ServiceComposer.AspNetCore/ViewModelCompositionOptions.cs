@@ -206,7 +206,7 @@ namespace ServiceComposer.AspNetCore
                     {
                         foreach (var type in types)
                         {
-                            RegisterUserCompositionHandler(type);
+                            RegisterContractLessCompositionHandler(type);
                         }
                     });
 
@@ -257,7 +257,7 @@ namespace ServiceComposer.AspNetCore
                 });
         }
         
-        void RegisterUserCompositionHandler(Type type)
+        internal void RegisterContractLessCompositionHandler(Type type)
         {
             Services.AddTransient(type);
         }
