@@ -9,7 +9,7 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         "HttpGet", "HttpPost", "HttpPatch", "HttpPut", "HttpDelete",
         "HttpGetAttribute", "HttpPostAttribute", "HttpPatchAttribute", "HttpPutAttribute", "HttpDeleteAttribute"
     ];
-    public List<(MethodDeclarationSyntax Method, AttributeSyntax[] HttpAttributes, string Namespace, string ClassName)> CompositionHandlerMethods { get; } = [];
+    public List<(MethodDeclarationSyntax Method, AttributeSyntax[] HttpAttributes, string Namespace, List<string> UserClassesHierarchy)> CompositionHandlerMethods { get; } = [];
 
     public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
     {
@@ -29,31 +29,38 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
             .ToArray();
 
         var userClassNamespace = GetNamespace(methodDeclaration);
-        var userClassName = GetClassName(methodDeclaration);
+        var userClassesHierarchy = GetUserClassesHierarchy(methodDeclaration);
 
         // TODO How are conventions shared with ServiceComposer?
         //   somehow this conventions must be shared with ServiceComposer
         //   that uses them to register user types in the IoC container
         var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace == "CompositionHandlers" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
-        var classNameMatchesConventions = userClassName.EndsWith("CompositionHandler");
+        var classNameMatchesConventions = userClassesHierarchy.Last().EndsWith("CompositionHandler");
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
 
         if (httpAttributes.Any() && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
         {
-            CompositionHandlerMethods.Add((methodDeclaration, httpAttributes, userClassNamespace!, userClassName));
+            CompositionHandlerMethods.Add((methodDeclaration, httpAttributes, userClassNamespace!, userClassesHierarchy));
         }
     }
 
-    static string GetClassName(MethodDeclarationSyntax methodSyntax)
+    static List<string> GetUserClassesHierarchy(MethodDeclarationSyntax methodSyntax)
     {
+        var result = new List<string>();
         var potentialClassParent = methodSyntax.Parent;
-        while (potentialClassParent != null &&
-               !(potentialClassParent is ClassDeclarationSyntax))
+        while (potentialClassParent != null)
         {
+            if (potentialClassParent is ClassDeclarationSyntax classDeclarationSyntax)
+            {
+                result.Add(classDeclarationSyntax.Identifier.Text);
+            }
+            
             potentialClassParent = potentialClassParent.Parent;
         }
-            
-        return ((ClassDeclarationSyntax)potentialClassParent!).Identifier.Text;
+
+        result.Reverse();
+        
+        return result;
     }
 
     // TODO nested namespaces are not supported

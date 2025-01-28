@@ -4,41 +4,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using ServiceComposer_AspNetCore_Tests_CompositionHandlersTests_CompositionHandlers_Generated;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
 
-namespace ServiceComposer.AspNetCore.Tests.CompositionHandlersTests.CompositionHandlers
-{
-    public class TestGetIntegerCompositionHandler(IHttpContextAccessor httpContextAccessor)
-    {
-        [HttpGet("/sample/{id}")]
-        public Task SomeMethod(int id)
-        {
-            var request = httpContextAccessor.HttpContext.Request;
-            var vm = request.GetComposedResponseModel();
-            vm.ANumber = id;
-                
-            return Task.CompletedTask;
-        }
-    }
-    
-    public class TestGetStringCompositionHandler(IHttpContextAccessor httpContextAccessor)
-    {
-        [HttpGet("/sample/{id}")]
-        public Task AnotherMethod()
-        {
-            var vm = httpContextAccessor.HttpContext.Request.GetComposedResponseModel();
-            vm.AString = "sample";
-            return Task.CompletedTask;
-        }
-    }
-}
-
-namespace ServiceComposer.AspNetCore.Tests.CompositionHandlersTests
+namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
 {
     public class Get_with_2_handlers
     {
+        public class TestGetIntegerCompositionHandler(IHttpContextAccessor httpContextAccessor)
+        {
+            [HttpGet("/sample/{id}")]
+            public Task SomeMethod(int id)
+            {
+                var request = httpContextAccessor.HttpContext.Request;
+                var vm = request.GetComposedResponseModel();
+                vm.ANumber = id;
+                
+                return Task.CompletedTask;
+            }
+        }
+    
+        public class TestGetStringCompositionHandler(IHttpContextAccessor httpContextAccessor)
+        {
+            [HttpGet("/sample/{id}")]
+            public Task AnotherMethod()
+            {
+                var vm = httpContextAccessor.HttpContext.Request.GetComposedResponseModel();
+                vm.AString = "sample";
+                return Task.CompletedTask;
+            }
+        }
+        
         [Fact]
         public async Task Returns_expected_response()
         {
@@ -50,10 +46,10 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlersTests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetIntegerCompositionHandler));
-                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetStringCompositionHandler));
-                        options.RegisterCompositionHandler<TestGetStringCompositionHandler_AnotherMethod>();
-                        options.RegisterCompositionHandler<TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
+                        options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -91,10 +87,10 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlersTests
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetIntegerCompositionHandler));
-                        options.RegisterContractLessCompositionHandler(typeof(CompositionHandlers.TestGetStringCompositionHandler));
-                        options.RegisterCompositionHandler<TestGetStringCompositionHandler_AnotherMethod>();
-                        options.RegisterCompositionHandler<TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
+                        options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();

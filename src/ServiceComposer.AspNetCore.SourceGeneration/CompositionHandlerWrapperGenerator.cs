@@ -116,11 +116,13 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                 {
                     return;
                 }
-
-                var generatedHandlerClassName =
-                    $"{method.ClassName}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
-                var generatedNamespace = $"{method.Namespace.Replace('.', '_')}_Generated";
-                var userClassFullTypeName = $"{method.Namespace}.{method.ClassName}";
+                
+                var flattenUserClassesHierarchy = string.Join("_", method.UserClassesHierarchy);
+                var generatedHandlerClassName = $"{flattenUserClassesHierarchy}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
+                var generatedNamespace = $"{method.Namespace}.Generated";
+                
+                var userClassName = string.Join(".", method.UserClassesHierarchy);
+                var userClassFullTypeName = $"{method.Namespace}.{userClassName}";
                 var userMethodRouteTemplate = GetRouteTemplate(httpAttribute!);
 
                 var source = GenerateWrapperClass(
