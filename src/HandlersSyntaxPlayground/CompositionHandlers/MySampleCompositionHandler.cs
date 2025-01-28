@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HandlersSyntaxPlayground.CompositionHandlers;
 
-public class MySampleCompositionHandler
+class MySampleCompositionHandler
 {
     [HttpPost("/sample/{id}")]
     //[HttpGet("/sample/{id}")]
