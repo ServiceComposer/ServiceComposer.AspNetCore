@@ -119,7 +119,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                 
                 var flattenUserClassesHierarchy = string.Join("_", method.UserClassesHierarchy);
                 var generatedHandlerClassName = $"{flattenUserClassesHierarchy}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
-                var generatedNamespace = $"{method.Namespace}.Generated";
+                var generatedNamespace = $"{method.Namespace}.GeneratedByServiceComposer";
                 
                 var userClassName = string.Join(".", method.UserClassesHierarchy);
                 var userClassFullTypeName = $"{method.Namespace}.{userClassName}";
