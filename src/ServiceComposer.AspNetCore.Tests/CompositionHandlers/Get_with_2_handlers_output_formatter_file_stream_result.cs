@@ -43,7 +43,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
-                        options.RegisterCompositionHandler<GeneratedByServiceComposer.Get_with_2_handlers_output_formatter_file_stream_result_TestGetStringCompositionHandler_Handle>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_output_formatter_file_stream_result_TestGetStringCompositionHandler_Handle>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();

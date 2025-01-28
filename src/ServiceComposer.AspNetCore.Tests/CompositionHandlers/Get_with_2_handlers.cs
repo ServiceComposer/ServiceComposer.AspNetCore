@@ -48,8 +48,8 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                         options.AssemblyScanner.Disable();
                         options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
                         options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
-                        options.RegisterCompositionHandler<GeneratedByServiceComposer.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
-                        options.RegisterCompositionHandler<GeneratedByServiceComposer.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -89,8 +89,8 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                         options.AssemblyScanner.Disable();
                         options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
                         options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
-                        options.RegisterCompositionHandler<GeneratedByServiceComposer.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
-                        options.RegisterCompositionHandler<GeneratedByServiceComposer.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
+                        options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                         options.ResponseSerialization.UseOutputFormatters = true;
                     });
                     services.AddRouting();
