@@ -63,6 +63,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         static bool _invokedCustomizations = false;
+
         class EmptyCustomizations : IViewModelCompositionOptionsCustomization
         {
             public void Customize(ViewModelCompositionOptions options)
@@ -70,9 +71,10 @@ namespace ServiceComposer.AspNetCore.Tests
                 _invokedCustomizations = true;
             }
         }
-        
-        
+
+
         static IConfiguration _customizationsThatAccessTheConfigurationConfig;
+
         class CustomizationsThatAccessTheConfiguration : IViewModelCompositionOptionsCustomization
         {
             public void Customize(ViewModelCompositionOptions options)
@@ -127,7 +129,7 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(_invokedCustomizations);
         }
-        
+
         [Fact]
         public void Options_customization_throws_if_configuration_is_not_available()
         {
@@ -169,7 +171,7 @@ namespace ServiceComposer.AspNetCore.Tests
                 ).CreateClient();
             });
         }
-        
+
         [Fact]
         public void Options_customization_can_access_configuration_if_set()
         {
@@ -212,7 +214,7 @@ namespace ServiceComposer.AspNetCore.Tests
 
             // Act
             var client = factory.CreateClient();
-            
+
             // Assert
             Assert.Same(config, _customizationsThatAccessTheConfigurationConfig);
         }
@@ -273,13 +275,13 @@ namespace ServiceComposer.AspNetCore.Tests
                 return new TestModel();
             }
         }
-        
+
         [Fact]
         public void Endpoint_scoped_factories_are_registered_automatically()
         {
             // Arrange
             TestEndpointScopedViewModelFactory expectedInstance = null;
-            
+
             var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
             (
                 configureServices: services =>
@@ -320,7 +322,7 @@ namespace ServiceComposer.AspNetCore.Tests
             // Assert
             Assert.NotNull(expectedInstance);
         }
-        
+
         [Fact]
         public async Task Endpoint_scoped_factories_is_used()
         {
@@ -367,10 +369,64 @@ namespace ServiceComposer.AspNetCore.Tests
 
             var responseString = await response.Content.ReadAsStringAsync();
             var responseObj = JsonSerializer.Deserialize<TestModel>(responseString);
-            
+
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal(expectedValue, responseObj.Value);
+        }
+
+        [Fact]
+        public async Task GenericEventHandlers_are_registered_and_used()
+        {
+            // Arrange
+            var expectedValue = 1;
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
+                    services.AddRouting();
+                    services.AddControllers();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync($"/raise-event/{expectedValue}");
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = JsonSerializer.Deserialize<TestModelWithEvent>(responseString);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(expectedValue, responseObj.Id);
+            Assert.Equal(expectedValue, responseObj.TheIdFromTheEvent);
         }
     }
 }
