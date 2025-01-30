@@ -179,5 +179,7 @@ namespace ServiceComposer.AspNetCore.Tests
             // Assert
             response.EnsureSuccessStatusCode();
         }
+        
+        // TODO add a test to verify contract-less handlers are registered in DI 
     }
 }
