@@ -183,7 +183,7 @@ namespace ServiceComposer.AspNetCore
                         var typeInfo = type.GetTypeInfo();
                         return !typeInfo.IsInterface
                                && !typeInfo.IsAbstract
-                               && typeof(ICompositionEventsHandler<>).IsAssignableFrom(type);
+                               && typeInfo.ImplementedInterfaces.Any(ii => ii.IsGenericType && ii.GetGenericTypeDefinition() == typeof(ICompositionEventsHandler<>));
                     },
                     registrationHandler: types =>
                     {
