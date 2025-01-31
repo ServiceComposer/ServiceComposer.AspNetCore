@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandlersSyntaxPlayground", "HandlersSyntaxPlayground\HandlersSyntaxPlayground.csproj", "{A2DCEB44-1496-402C-9E3F-A56EB13C6723}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.SourceGeneration.Tests", "ServiceComposer.AspNetCore.SourceGeneration.Tests\ServiceComposer.AspNetCore.SourceGeneration.Tests.csproj", "{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2DCEB44-1496-402C-9E3F-A56EB13C6723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
