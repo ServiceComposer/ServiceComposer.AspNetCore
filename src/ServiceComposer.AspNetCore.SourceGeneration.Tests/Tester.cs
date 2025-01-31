@@ -35,12 +35,12 @@ public class Tester
         var generator = new CompositionHandlerWrapperGenerator();
         foreach (var testFile in allTestFiles)
         {
-            var inputCode = File.ReadAllText(testFile);
+            var inputCode = await File.ReadAllTextAsync(testFile);
             var compilation = CreateCompilation(inputCode);
             
             GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, 
-                out var outputCompilation, 
+                out _, 
                 out var diagnostics);
             
             var runResult = driver.GetRunResult();
