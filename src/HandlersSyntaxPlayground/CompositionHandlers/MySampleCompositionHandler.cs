@@ -3,15 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HandlersSyntaxPlayground.CompositionHandlers;
 
-// TODO is this class was nested it requires the prefix of the parent
-//   class(es) since we're not using the full namespace anymore
-public class BodyClass
-{
-    public string? S { get; set; }
-}
-
 class MySampleCompositionHandler
 {
+    public class BodyClass
+    {
+        public string? S { get; set; }
+    }
+    
     [HttpPost("/sample/{id}")]
     public Task Post(int id, [FromQuery]string v, [FromBody]BodyClass body)
     {

@@ -16,17 +16,42 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new CompositionHandlerSyntaxReceiver());
     }
 
-    (string? typeName, string? nmespaceName) GetTypeFullname(SemanticModel semanticModel, TypeSyntax type)
+    (string? typeName, string? nmespaceName) GetTypeAndNamespaceName(SemanticModel semanticModel, TypeSyntax type)
     {
         var symbolInfo = semanticModel.GetSymbolInfo(type);
         var symbol = symbolInfo.Symbol;
 
         if (symbol is INamedTypeSymbol namedTypeSymbol)
         {
-            return (namedTypeSymbol.Name, namedTypeSymbol.ContainingNamespace.ToDisplayString());
+            return (GetClassNameIncludingParentClasses(namedTypeSymbol), namedTypeSymbol.ContainingNamespace.ToDisplayString());
         }
         
         return (null, null);
+    }
+
+    bool IsNestedClass(INamedTypeSymbol symbol)
+    {
+        bool isNestedClass = symbol is { TypeKind: TypeKind.Class, ContainingType: not null };
+        return isNestedClass;
+    }
+
+    string GetClassNameIncludingParentClasses(INamedTypeSymbol symbol)
+    {
+        if (!IsNestedClass(symbol))
+        {
+            return symbol.Name;
+        }
+
+        List<string> hierarchy = [symbol.Name];
+        var parent = symbol;
+        while (parent.ContainingType != null)
+        {
+            hierarchy.Add(parent.ContainingType.Name);
+            parent = parent.ContainingType;
+        }
+        
+        hierarchy.Reverse();
+        return string.Join(".", hierarchy);
     }
 
     string GetRouteTemplate(AttributeSyntax attribute)
@@ -271,7 +296,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         ParameterSyntax parameter, string _, List<string> requiredNamespaces,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
+        var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
         requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
         
         const string bindingSource = "BindingSource.Form";
@@ -301,7 +326,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
     {
         var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
         var isSimpleType = IsSimpleType(typeSymbol!);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
+        var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
         requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
 
         const string bindingSource = "BindingSource.Body";
@@ -328,7 +353,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
     {
         var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
         var isSimpleType = IsSimpleType(typeSymbol!);
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
+        var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
         requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
 
         const string bindingSource = "BindingSource.Query";
@@ -356,7 +381,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         ParameterSyntax parameter, string userMethodRouteTemplate, List<string> requiredNamespaces,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var paramTypeFullName = GetTypeFullname(semanticModel, parameter.Type!);
+        var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
         requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
 
         const string bindingSource = "BindingSource.Path";
