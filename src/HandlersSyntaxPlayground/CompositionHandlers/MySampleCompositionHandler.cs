@@ -15,13 +15,7 @@ class MySampleCompositionHandler
     {
         return Task.CompletedTask;
     }
-    
-    [HttpPost("/sample/{id}"), Authorize]
-    public Task Post(int id, [FromQuery(Name = "x")]int renamed, [FromBody]BodyClass body)
-    {
-        return Task.CompletedTask;
-    }
-    
+
     [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Client), HttpPost("/sample/{v}")]
     public Task Post([FromRoute(Name = "v")]int id, int c)
     {
