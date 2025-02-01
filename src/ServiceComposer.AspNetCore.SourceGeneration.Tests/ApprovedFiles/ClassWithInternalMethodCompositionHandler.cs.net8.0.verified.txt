@@ -19,16 +19,16 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
         [HttpPostAttribute("/sample/{id}")]
         [BindFromRoute<Int32>("id")]
         [BindFromForm<Int32>("sampleC")]
-        [BindFromBody<String>()]
+        [BindFromForm<String>("sampleX")]
         public Task Handle(HttpRequest request)
         {
             var ctx = HttpRequestExtensions.GetCompositionContext(request);
             var arguments = ctx.GetArguments(this);
             var p0_id = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "id", BindingSource.Path);
             var p1_sampleC = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "sampleC", BindingSource.Form);
-            var p2_x = ModelBindingArgumentExtensions.Argument<String>(arguments, "x", BindingSource.Body);
+            var p2_sampleX = ModelBindingArgumentExtensions.Argument<String>(arguments, "sampleX", BindingSource.Form);
 
-            return userHandler.Post(p0_id, p1_sampleC, p2_x);
+            return userHandler.Post(p0_id, p1_sampleC, p2_sampleX);
         }
     }
 }
