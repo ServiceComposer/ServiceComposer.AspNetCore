@@ -2,6 +2,7 @@
 using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using NuGet.Frameworks;
 
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests;
 
@@ -15,12 +16,12 @@ static class StringExtensions
 
 public class Tester
 {
-    static Version GetTargetFrameworkVersion()
+    static (Version Version, string Name) GetTargetFramework()
     {
         var targetFrameworkAttribute = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<TargetFrameworkAttribute>();
         var framework = new FrameworkName(targetFrameworkAttribute?.FrameworkName);
-        return framework.Version;   
+        return (framework.Version, targetFrameworkAttribute?.FrameworkName);
     }
     
     static Compilation CreateCompilation(string source)
@@ -35,10 +36,8 @@ public class Tester
             ],
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         
-        // Add basic runtime references
         var references = new List<MetadataReference>();
         
-        // Add core framework reference
         var trustedPlatformAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")?.ToString()?.Split(Path.PathSeparator);
         if (trustedPlatformAssemblies != null)
         {
@@ -90,10 +89,10 @@ public class Tester
         
         if (Directory.Exists(aspNetCorePath))
         {
-            var targetFrameworkVersion = GetTargetFrameworkVersion();
+            var targetFrameworkVersion = GetTargetFramework();
             var latestPatch = Directory.GetDirectories(aspNetCorePath)
                 .Select(d => new Version(Path.GetFileName(d)))
-                .Where(v => v.Major == targetFrameworkVersion.Major)
+                .Where(v => v.Major == targetFrameworkVersion.Version.Major)
                 .Max();
             
             var aspNetCoreAssemblies = Directory.GetFiles(
@@ -131,10 +130,15 @@ public class Tester
             Assert.Empty(diagnostics);
             
             var generatedSource = runResult.GeneratedTrees[0].ToString();
+
+            var targetFramework = GetTargetFramework();
+
+            var nugetFramework = NuGetFramework.Parse(targetFramework.Name);
+            var shortFolderName = nugetFramework.GetShortFolderName();
             
             await Verify(generatedSource.NormalizeLineEndings())
                 .UseDirectory("ApprovedFiles")
-                .UseFileName(Path.GetFileName(testFile));
+                .UseFileName($"{Path.GetFileName(testFile)}.{shortFolderName}");
         }
     }
 }
