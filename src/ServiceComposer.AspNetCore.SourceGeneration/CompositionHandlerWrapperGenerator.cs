@@ -292,6 +292,19 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
                || simpleTypes.Contains(typeSymbol.ToDisplayString());
     }
 
+    bool HasIncompatibleAttributes(ParameterSyntax parameter, string[] requiredAttributeNames)
+    {
+        var hasSupportedAttributes = parameter.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .Any(a=> supportedBindingAttributes.Contains(a.Name.ToString()));
+        
+        var hasMatchingRequiredAttributes = parameter.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .Any(a=> requiredAttributeNames.Contains(a.Name.ToString()));
+
+        return hasSupportedAttributes && !hasMatchingRequiredAttributes;
+    }
+
     bool TryAppendBindingFromForm(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, string _, List<string> requiredNamespaces,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
@@ -301,6 +314,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         
         const string bindingSource = "BindingSource.Form";
         string[] attributeNames = ["FromForm", "FromFormAttribute"];
+        if (HasIncompatibleAttributes(parameter, attributeNames))
+        {
+            boundParam = ("", "", "");
+            return false;
+        }
 
         var (attribute, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
 
@@ -331,6 +349,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
 
         const string bindingSource = "BindingSource.Body";
         string[] attributeNames = ["FromBody", "FromBodyAttribute"];
+        if (HasIncompatibleAttributes(parameter, attributeNames))
+        {
+            boundParam = ("", "", "");
+            return false;
+        }
 
         // TODO can we somehow support the EmptyBodyBehavior?
         var (attribute, _) = GetAttributeAndArgument(parameter, attributeNames, "EmptyBodyBehavior");
@@ -358,6 +381,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
 
         const string bindingSource = "BindingSource.Query";
         string[] attributeNames = ["FromQuery", "FromQueryAttribute"];
+        if (HasIncompatibleAttributes(parameter, attributeNames))
+        {
+            boundParam = ("", "", "");
+            return false;
+        }
 
         var (attribute, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
         var addAttribute = attribute is not null || isSimpleType;
@@ -391,6 +419,11 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
             "{" + parameter.Identifier.Text + ":"
         ];
         string[] attributeNames = ["FromRoute", "FromRouteAttribute"];
+        if (HasIncompatibleAttributes(parameter, attributeNames))
+        {
+            boundParam = ("", "", "");
+            return false;
+        }
 
         var (_, nameArgument) = GetAttributeAndArgument(parameter, attributeNames, "Name");
         var appendAttribute = nameArgument is not null || possibleMatches.Any(userMethodRouteTemplate.Contains);
@@ -421,6 +454,18 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return (attribute, argument);
     }
 
+    List<string> supportedBindingAttributes = 
+    [
+        "FromRoute",
+        "FromQuery",
+        "FromBody",
+        "FromForm",
+        "FromRouteAttribute",
+        "FromQueryAttribute",
+        "FromBodyAttribute",
+        "FromFormAttribute"
+    ];
+    
     List<(string parameterName, string parameterType, string bindingSource)> AppendBindAttributes(
         SemanticModel semanticModel, StringBuilder builder,
         SeparatedSyntaxList<ParameterSyntax> parameters, string userMethodRouteTemplate, List<string> requiredNamespaces)
@@ -428,10 +473,6 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         List<(string parameterName, string parameterType, string bindingSource)> boundParameters = [];
         foreach (var param in parameters)
         {
-            // TODO all the TryAppendBinding must check if there are other valid attributes
-            //   that are not relevant to them, otherwise the order here matters. For example,
-            //   without that check the FromQuery must be las, otherwise if the argument type
-            //   is a simple type it'll win even if there are other relevant attributes
             if (TryAppendBindingFromRoute(semanticModel, builder, param, userMethodRouteTemplate, requiredNamespaces,
                     out var fromRouteBoundParam))
             {
