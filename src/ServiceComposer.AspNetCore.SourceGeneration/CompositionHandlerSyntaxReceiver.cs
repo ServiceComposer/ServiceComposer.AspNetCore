@@ -37,8 +37,9 @@ public class CompositionHandlerSyntaxReceiver : ISyntaxContextReceiver
         var namespaceMatchesConventions = userClassNamespace != null ? userClassNamespace == "CompositionHandlers" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
         var classNameMatchesConventions = userClassesHierarchy.Last().EndsWith("CompositionHandler");
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
+        var isMethodPublic = methodDeclaration.Modifiers.Any(m=>m.Text != "private");
 
-        if (httpAttributes.Any() && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
+        if (isMethodPublic && httpAttributes.Any() && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
         {
             CompositionHandlerMethods.Add((methodDeclaration, httpAttributes, userClassNamespace!, userClassesHierarchy));
         }

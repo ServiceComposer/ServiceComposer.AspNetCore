@@ -24,7 +24,7 @@ class MySampleCompositionHandler
     
     [Authorize]
     [HttpPost("/sample/{id}")]
-    public Task Post(int id, [FromForm(Name = "sampleC")]int c, [FromForm(Name = "sampleX")]string x)
+    internal Task Post(int id, [FromForm(Name = "sampleC")]int c, [FromForm(Name = "sampleX")]string x)
     {
         return Task.CompletedTask;
     }
