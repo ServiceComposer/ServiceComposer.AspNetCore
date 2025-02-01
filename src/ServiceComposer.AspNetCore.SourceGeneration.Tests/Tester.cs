@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -20,8 +21,9 @@ public class Tester
     {
         var targetFrameworkAttribute = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<TargetFrameworkAttribute>();
-        var framework = new FrameworkName(targetFrameworkAttribute?.FrameworkName);
-        return (framework.Version, targetFrameworkAttribute?.FrameworkName);
+        Debug.Assert(targetFrameworkAttribute?.FrameworkName != null, "targetFrameworkAttribute?.FrameworkName != null");
+        var framework = new FrameworkName(targetFrameworkAttribute.FrameworkName);
+        return (framework.Version, targetFrameworkAttribute.FrameworkName);
     }
     
     static Compilation CreateCompilation(string source)
@@ -94,7 +96,8 @@ public class Tester
                 .Select(d => new Version(Path.GetFileName(d)))
                 .Where(v => v.Major == targetFrameworkVersion.Version.Major)
                 .Max();
-            
+
+            Debug.Assert(latestPatch != null, nameof(latestPatch) + " != null");
             var aspNetCoreAssemblies = Directory.GetFiles(
                 Path.Combine(aspNetCorePath, latestPatch.ToString()),
                 "*.dll"
