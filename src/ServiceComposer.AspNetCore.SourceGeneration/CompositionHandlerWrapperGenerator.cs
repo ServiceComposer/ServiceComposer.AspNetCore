@@ -87,7 +87,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         if (attributes.Length > 1)
         {
             var descriptor = new DiagnosticDescriptor(
-                id: "SC001",
+                id: "SC002",
                 title: "Configuration not supported",
                 messageFormat:
                 "The method {0} contains more than one Http* attribute. This version of ServiceComposer supports only one Http* per method.",
