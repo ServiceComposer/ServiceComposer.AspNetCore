@@ -4,8 +4,10 @@ _Available starting version 4.2.0-beta.1_
 
 Contract-less composition handlers allow to write composition handlers using a syntax like the following:
 
-```csharp
-namespace CompositionHandlers;
+<!-- snippet: contract-less-handler-sample -->
+<a id='snippet-contract-less-handler-sample'></a>
+```cs
+namespace Snippets.Contractless.CompositionHandlers;
 
 class SampleCompositionHandler
 {
@@ -16,6 +18,8 @@ class SampleCompositionHandler
     }
 }
 ```
+<sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 The syntax is nonetheless similar to ASP.Net controller actions. At compilation time, ServiceComposer identifies contract-less composition request handlers by matching classes and methods against a set of conventions:
 
@@ -38,15 +42,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ServiceComposer.AspNetCore;
+using Snippets.Contractless.CompositionHandlers;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
 #pragma warning disable SC0001
-namespace CompositionHandlers.Generated
+namespace Snippets.Contractless.CompositionHandlers.Generated
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    class SampleCompositionHandler_SampleMethod_int_id_string_aValue_CompositionHandlers_ComplexType_ct(CompositionHandlers.SampleCompositionHandler userHandler)
+    class SampleCompositionHandler_SampleMethod_int_id_string_aValue_Snippets_Contractless_CompositionHandlers_ComplexType_ct(Snippets.Contractless.CompositionHandlers.SampleCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
         [HttpGetAttribute("/sample/{id}")]
