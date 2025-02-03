@@ -8,7 +8,6 @@ Contract-less composition handlers allow to write composition handlers using a s
 <a id='snippet-contract-less-handler-sample'></a>
 ```cs
 namespace Snippets.Contractless.CompositionHandlers;
-
 class SampleCompositionHandler
 {
     [HttpGet("/sample/{id}")]
@@ -18,7 +17,7 @@ class SampleCompositionHandler
     }
 }
 ```
-<sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The syntax is nonetheless similar to ASP.Net controller actions. At compilation time, ServiceComposer identifies contract-less composition request handlers by matching classes and methods against a set of conventions:
