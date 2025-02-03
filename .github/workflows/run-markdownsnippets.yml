@@ -21,4 +21,4 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git diff-index --quiet HEAD || git commit -m "docs: update markdown snippets [skip ci]" && git push
+        git diff-index --quiet HEAD || git commit -m "docs: update markdown snippets" && git push
