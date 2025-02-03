@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 #region contract-less-handler-sample
 namespace Snippets.Contractless.CompositionHandlers;
-
 class SampleCompositionHandler
 {
     [HttpGet("/sample/{id}")]
