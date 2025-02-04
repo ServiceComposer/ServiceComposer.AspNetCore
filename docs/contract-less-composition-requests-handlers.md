@@ -20,6 +20,8 @@ class SampleCompositionHandler
 <sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
+Compared to what's available today, when using classes implementing `ICompositionRequestsHandler`, contract-less composition request handlers allow grouping handlers belonging to the same logical context instead of being forced to artificially split them into multiple classes because of the need to implement an interface.
+
 The syntax is nonetheless similar to ASP.Net controller actions. At compilation time, ServiceComposer identifies contract-less composition request handlers by matching classes and methods against a set of conventions:
 
 - Contract-less composition request handlers must be defined in a `CompositionHandlers` namespace or a namespace ending with `.CompositionHandlers`.
