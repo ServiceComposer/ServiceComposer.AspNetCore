@@ -119,9 +119,9 @@ namespace ServiceComposer.AspNetCore
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
                 
                 // TODO use source generators
-                // When we'll have convention-based handlers this could be
-                // source-generated to use the the most appropriate filter
-                // invocation context based on the number of arguments to bind
+                //   When we'll have convention-based handlers this could be
+                //   source-generated to use the the most appropriate filter
+                //   invocation context based on the number of arguments to bind
                 EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
                 var viewModel = await pipeline(invocationContext);
                 

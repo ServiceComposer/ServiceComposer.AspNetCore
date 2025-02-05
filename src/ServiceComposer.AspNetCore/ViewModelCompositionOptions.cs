@@ -192,6 +192,23 @@ namespace ServiceComposer.AspNetCore
                             RegisterCompositionEventsHandler(type);
                         }
                     });
+                
+                AddTypesRegistrationHandler(
+                    typesFilter: type =>
+                    {
+                        var typeInfo = type.GetTypeInfo();
+                        return !typeInfo.IsInterface
+                               && !typeInfo.IsAbstract
+                               && type.Namespace != null
+                               && (type.Namespace == "userClassNamespace" || type.Namespace!.EndsWith(".CompositionHandlers"));
+                    },
+                    registrationHandler: types =>
+                    {
+                        foreach (var type in types)
+                        {
+                            RegisterContractLessCompositionHandler(type);
+                        }
+                    });
 
                 var assemblies = AssemblyScanner.Scan();
                 var allTypes = assemblies
@@ -238,6 +255,11 @@ namespace ServiceComposer.AspNetCore
                     Services.AddTransient(type);
                     _compositionMetadataRegistry.AddEventHandler(eventType, type);
                 });
+        }
+        
+        internal void RegisterContractLessCompositionHandler(Type type)
+        {
+            Services.AddTransient(type);
         }
 
         public AssemblyScanner AssemblyScanner { get; }

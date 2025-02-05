@@ -428,5 +428,59 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal(expectedValue, responseObj.Id);
             Assert.Equal(expectedValue, responseObj.TheIdFromTheEvent);
         }
+        
+        [Fact]
+        public async Task ContractLessCompositionHandlers_are_registered_and_used()
+        {
+            // Arrange
+            var expectedValue = 1;
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<When_using_assembly_scanner>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
+                        options.TypesFilter = type =>
+                        {
+                            if (type.Assembly.FullName.Contains("TestClassLibraryWithHandlers"))
+                            {
+                                return true;
+                            }
+
+                            if (type == typeof(CustomizationsThatAccessTheConfiguration))
+                            {
+                                return false;
+                            }
+
+                            if (type.IsNestedTypeOf<When_using_assembly_scanner>())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        };
+                    });
+                    services.AddRouting();
+                    services.AddControllers();
+                    services.AddHttpContextAccessor();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder => builder.MapCompositionHandlers());
+                }
+            ).CreateClient();
+
+            // Act
+            var response = await client.GetAsync($"/contract-less-handler/{expectedValue}");
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseObj = JsonSerializer.Deserialize<TestModel>(responseString);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(expectedValue, responseObj.Value);
+        }
     }
 }
