@@ -20,6 +20,13 @@
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup Label="Include the source generators in the output package">
+    <None Include="..\ServiceComposer.AspNetCore.SourceGeneration\bin\$(Configuration)\netstandard2.0\ServiceComposer.AspNetCore.SourceGeneration.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
+
   <PropertyGroup>
     <MinVerMinimumMajorMinor>4.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
