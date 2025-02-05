@@ -10,6 +10,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceComposer.AspNetCore.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snippets", "Snippets\Snippets.csproj", "{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.SourceGeneration", "ServiceComposer.AspNetCore.SourceGeneration\ServiceComposer.AspNetCore.SourceGeneration.csproj", "{AB24BA80-141D-4E25-BAF4-C716B90E0451}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceComposer.AspNetCore.SourceGeneration.Tests", "ServiceComposer.AspNetCore.SourceGeneration.Tests\ServiceComposer.AspNetCore.SourceGeneration.Tests.csproj", "{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +36,14 @@ Global
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AC48B68-BFB3-451F-8165-367A3D6FA4FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB24BA80-141D-4E25-BAF4-C716B90E0451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEF14607-169A-4821-B2BF-AF2FEED4F6EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
