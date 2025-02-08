@@ -46,8 +46,8 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
-                        options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
+                        options.RegisterCompositionHandler<TestGetIntegerCompositionHandler>();
+                        options.RegisterCompositionHandler<TestGetStringCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
                         options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                     });
@@ -87,8 +87,8 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
-                        options.RegisterContractLessCompositionHandler(typeof(TestGetIntegerCompositionHandler));
-                        options.RegisterContractLessCompositionHandler(typeof(TestGetStringCompositionHandler));
+                        options.RegisterCompositionHandler<TestGetIntegerCompositionHandler>();
+                        options.RegisterCompositionHandler<TestGetStringCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetIntegerCompositionHandler_SomeMethod_int_id>();
                         options.RegisterCompositionHandler<Generated.Get_with_2_handlers_TestGetStringCompositionHandler_AnotherMethod>();
                         options.ResponseSerialization.UseOutputFormatters = true;

@@ -194,19 +194,12 @@ namespace ServiceComposer.AspNetCore
                     });
                 
                 AddTypesRegistrationHandler(
-                    typesFilter: type =>
-                    {
-                        var typeInfo = type.GetTypeInfo();
-                        return !typeInfo.IsInterface
-                               && !typeInfo.IsAbstract
-                               && type.Namespace != null
-                               && (type.Namespace == "userClassNamespace" || type.Namespace!.EndsWith(".CompositionHandlers"));
-                    },
+                    typesFilter: IsContractlessCompositionHandler,
                     registrationHandler: types =>
                     {
                         foreach (var type in types)
                         {
-                            RegisterContractLessCompositionHandler(type);
+                            RegisterCompositionComponents(type);
                         }
                     });
 
@@ -252,14 +245,10 @@ namespace ServiceComposer.AspNetCore
                 .ForEach(compositionEventsHandlerGenericInterfaceType =>
                 {
                     var eventType = compositionEventsHandlerGenericInterfaceType.GetGenericArguments()[0];
+                    // TODO: do we need to support configurationHandlers here?
                     Services.AddTransient(type);
                     _compositionMetadataRegistry.AddEventHandler(eventType, type);
                 });
-        }
-        
-        internal void RegisterContractLessCompositionHandler(Type type)
-        {
-            Services.AddTransient(type);
         }
 
         public AssemblyScanner AssemblyScanner { get; }
@@ -298,12 +287,20 @@ namespace ServiceComposer.AspNetCore
                 didSomething = true;
             }
 
+            var isContractlessCompositionHandler = IsContractlessCompositionHandler(type);
             if (typeof(ICompositionRequestsHandler).IsAssignableFrom(type)
                 || typeof(ICompositionEventsSubscriber).IsAssignableFrom(type)
-                || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type))
+                || typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(type)
+                || isContractlessCompositionHandler)
             {
+                if (!isContractlessCompositionHandler)
+                {
+                    // We don't want (yet?) to register contract-less composition handlers
+                    // in the metadata registry because they they are not a first-class citizen
+                    // in the ASP.Net endpoint
+                    _compositionMetadataRegistry.AddComponent(type);
+                }
 
-                _compositionMetadataRegistry.AddComponent(type);
                 if (configurationHandlers.TryGetValue(type, out var handler))
                 {
                     handler(type, Services);
@@ -318,10 +315,20 @@ namespace ServiceComposer.AspNetCore
             if (didSomething == false)
             {
                 const string message = $"Registered types must be either {nameof(ICompositionRequestsHandler)}, " +
-                                       $"{nameof(ICompositionEventsSubscriber)}, {nameof(ICompositionEventsHandler<SomeEvent>)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+                                       $"{nameof(ICompositionEventsSubscriber)}, {nameof(ICompositionEventsHandler<SomeEvent>)}, {nameof(IEndpointScopedViewModelFactory)}, or a contract-less composition handler.";
 
                 throw new NotSupportedException(message);
             }
+        }
+
+        static bool IsContractlessCompositionHandler(Type type)
+        {
+            var typeInfo = type.GetTypeInfo();
+            return !typeInfo.IsInterface
+                   && !typeInfo.IsAbstract
+                   && type.Namespace != null
+                   && (type.Namespace == "CompositionHandlers" || type.Namespace!.EndsWith(".CompositionHandlers")
+                       && type.Name.EndsWith("CompositionHandler"));
         }
 
         void RegisterEndpointScopedViewModelFactory(Type viewModelFactoryType)
