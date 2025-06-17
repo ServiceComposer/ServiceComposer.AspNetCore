@@ -1,19 +1,137 @@
 using System.Text;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace ServiceComposer.AspNetCore.SourceGeneration;
 
-[Generator]
-public class CompositionHandlerWrapperGenerator : ISourceGenerator
+class CompositionHandlerMethodInfo
 {
-    // const string ServiceComposerNamespace = "ServiceComposer.AspNetCore";
+    public MethodDeclarationSyntax Method { get; }
+    public AttributeSyntax[] HttpAttributes { get; }
+    public string Namespace { get; }
+    public List<string> UserClassesHierarchy { get; }
 
-    public void Initialize(GeneratorInitializationContext context)
+    public CompositionHandlerMethodInfo(
+        MethodDeclarationSyntax method,
+        AttributeSyntax[] httpAttributes,
+        string @namespace,
+        List<string> userClassesHierarchy)
     {
-        // Register a syntax receiver that will gather the methods we need to process
-        context.RegisterForSyntaxNotifications(() => new CompositionHandlerSyntaxReceiver());
+        Method = method;
+        HttpAttributes = httpAttributes;
+        Namespace = @namespace;
+        UserClassesHierarchy = userClassesHierarchy;
+    }
+}
+
+[Generator]
+public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
+{
+    readonly HashSet<string> supportedAttributes = [
+        "HttpGet", "HttpPost", "HttpPatch", "HttpPut", "HttpDelete",
+        "HttpGetAttribute", "HttpPostAttribute", "HttpPatchAttribute", "HttpPutAttribute", "HttpDeleteAttribute"
+    ];
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        // Create a provider that finds all methods with HTTP attributes
+        var methodProvider = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IsMethodWithAttributes(node),
+                transform: (ctx, _) => GetCompositionHandlerMethod(ctx))
+            .Where(static m => m is not null)
+            .Select(static (m, _) => m!);
+
+        // Combine with compilation to get semantic information
+        var compilationAndMethods = context.CompilationProvider.Combine(methodProvider.Collect());
+
+        // Register source output
+        context.RegisterSourceOutput(compilationAndMethods, 
+            (spc, source) => Execute(spc, source.Left, source.Right));
+    }
+
+    static bool IsMethodWithAttributes(SyntaxNode node)
+    {
+        return node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } method
+               && !method.SyntaxTree.FilePath.EndsWith(".g.cs");
+    }
+
+    CompositionHandlerMethodInfo? GetCompositionHandlerMethod(GeneratorSyntaxContext context)
+    {
+        if (context.Node is not MethodDeclarationSyntax methodDeclaration)
+            return null;
+
+        var httpAttributes = methodDeclaration.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .Where(attributeSyntax => supportedAttributes.Contains(attributeSyntax.Name.ToString()))
+            .ToArray();
+
+        if (!httpAttributes.Any())
+            return null;
+
+        var userClassNamespace = GetNamespace(methodDeclaration);
+        var userClassesHierarchy = GetUserClassesHierarchy(methodDeclaration);
+
+        // TODO How are conventions shared with ServiceComposer?
+        //   somehow this conventions must be shared with ServiceComposer
+        //   that uses them to register user types in the IoC container
+        var namespaceMatchesConventions = userClassNamespace != null ? 
+            userClassNamespace == "CompositionHandlers" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
+        var classNameMatchesConventions = userClassesHierarchy.Last().EndsWith("CompositionHandler");
+        var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
+        var isMethodPublic = methodDeclaration.Modifiers.Any(m => m.Text != "private");
+
+        if (isMethodPublic && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
+        {
+            return new CompositionHandlerMethodInfo(
+                methodDeclaration, 
+                httpAttributes, 
+                userClassNamespace!, 
+                userClassesHierarchy);
+        }
+
+        return null;
+    }
+
+    static List<string> GetUserClassesHierarchy(MethodDeclarationSyntax methodSyntax)
+    {
+        var result = new List<string>();
+        var potentialClassParent = methodSyntax.Parent;
+        while (potentialClassParent != null)
+        {
+            if (potentialClassParent is ClassDeclarationSyntax classDeclarationSyntax)
+            {
+                result.Add(classDeclarationSyntax.Identifier.Text);
+            }
+            
+            potentialClassParent = potentialClassParent.Parent;
+        }
+
+        result.Reverse();
+        
+        return result;
+    }
+
+    // TODO nested namespaces are not supported
+    static string GetNamespace(MethodDeclarationSyntax methodSyntax)
+    {
+        var potentialNamespaceParent = methodSyntax.Parent;
+        while (potentialNamespaceParent != null &&
+               !(potentialNamespaceParent is NamespaceDeclarationSyntax || potentialNamespaceParent is FileScopedNamespaceDeclarationSyntax))
+        {
+            potentialNamespaceParent = potentialNamespaceParent?.Parent;
+        }
+
+        var nameSpace = potentialNamespaceParent switch
+        {
+            NamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Name.ToString(),
+            FileScopedNamespaceDeclarationSyntax filerScopedNamespaceDeclaration => filerScopedNamespaceDeclaration.Name.ToString(),
+            _ => "UndefinedNamespace"
+        };
+
+        return nameSpace;
     }
 
     (string? typeName, string? nmespaceName) GetTypeAndNamespaceName(SemanticModel semanticModel, TypeSyntax type)
@@ -81,7 +199,7 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return routeTemplate ?? string.Empty;
     }
 
-    bool TryGetHttpAttribute(GeneratorExecutionContext context, MethodDeclarationSyntax method,
+    bool TryGetHttpAttribute(SourceProductionContext context, MethodDeclarationSyntax method,
         AttributeSyntax[] attributes, out AttributeSyntax? attribute)
     {
         if (attributes.Length > 1)
@@ -112,31 +230,13 @@ public class CompositionHandlerWrapperGenerator : ISourceGenerator
         return true;
     }
 
-    public void Execute(GeneratorExecutionContext context)
+    void Execute(SourceProductionContext context, Compilation compilation, ImmutableArray<CompositionHandlerMethodInfo> methods)
     {
         try
         {
-            if (!(context.SyntaxContextReceiver is CompositionHandlerSyntaxReceiver receiver))
+            foreach (var method in methods)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        new DiagnosticDescriptor(
-                            "SG0002",
-                            "Error",
-                            "Invalid syntax receiver",
-                            "Generator",
-                            DiagnosticSeverity.Error,
-                            true
-                        ),
-                        Location.None
-                    )
-                );
-                return;
-            }
-
-            foreach (var method in receiver.CompositionHandlerMethods)
-            {
-                var semanticModel = context.Compilation.GetSemanticModel(method.Method.SyntaxTree);
+                var semanticModel = compilation.GetSemanticModel(method.Method.SyntaxTree);
                 
                 var parameters = method.Method.ParameterList.Parameters;
                 var typeAndName = parameters.Select(p =>
