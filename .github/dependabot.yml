@@ -6,6 +6,8 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   target-branch: master
+  ignore:
+    - dependency-name: "Microsoft.CodeAnalysis.CSharp"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
