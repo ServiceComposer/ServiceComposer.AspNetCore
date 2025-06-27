@@ -20,9 +20,9 @@ class SampleCompositionHandler
 <sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-Compared to what's available today, when using classes implementing `ICompositionRequestsHandler`, contract-less composition request handlers allow grouping handlers belonging to the same logical context instead of being forced to artificially split them into multiple classes because of the need to implement an interface.
+Compared to what is available today, when using classes that implement `ICompositionRequestsHandler`, contract-less composition request handlers allow grouping handlers belonging to the same logical context, rather than being forced to artificially split them into multiple classes due to the need to implement an interface.
 
-The syntax is nonetheless similar to ASP.Net controller actions. At compilation time, ServiceComposer identifies contract-less composition request handlers by matching classes and methods against a set of conventions:
+The syntax is nonetheless similar to ASP.NET controller actions. At compilation time, ServiceComposer identifies contract-less composition request handlers by matching classes and methods against a set of conventions:
 
 - Contract-less composition request handlers must be defined in a `CompositionHandlers` namespace or a namespace ending with `.CompositionHandlers`.
 - Contract-less composition request handlers class names must be suffixed with `CompositionHandler`
@@ -30,7 +30,12 @@ The syntax is nonetheless similar to ASP.Net controller actions. At compilation 
   - Be either `public` or `internal`
   - Return a `Task`
   - Be decorated with one, and only one, `Http*` attribute (known limitation for now)
-  - Can use the standard ASP.Net `From*` attributes to control model binding
+  - Can use the standard ASP.NET `From*` attributes to control model binding
+
+### Known limitations
+
+- Different from classes implementing `ICompositionRequestsHandler`, contract-less composition handlers, at the moment, support only one `Http*` attribute per method;
+- At the moment, contract-less composition handlers cannot be used when using [composition over controllers](composition-over-controllers.md);
 
 ## Source generation
 
