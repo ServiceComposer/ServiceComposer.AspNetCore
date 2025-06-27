@@ -21,6 +21,12 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <!--
+            Dependabot is configured to only allow patches to this dependency.
+            4.11.0 is compatible with .NET 8 and is forward compatible with .NET 9.
+            4.12.0 is NOT compatible with .NET 8, and when run in environments with
+            only the .NET 8 runtime creates unwanted consequences with the DLR
+        -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
     </ItemGroup>
 
