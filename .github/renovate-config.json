@@ -1,0 +1,15 @@
+{
+  extends: [
+    //'config:base',
+    'github>whitesource/merge-confidence:beta'
+  ],
+  rebaseWhen: 'conflicted',
+  automergeType: "pr",
+  ignoreTests: false,
+  branchPrefix: 'renovate/',
+  platform: 'github',
+  repositories: ['ServiceComposer/ServiceComposer.AspNetCore'],
+  packageRules: [],
+  onboarding: false,
+  requireConfig: 'required'
+}
