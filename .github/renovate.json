@@ -9,6 +9,7 @@
      "enabled": false
    },{
       "matchUpdateTypes": ["patch", "minor"],
+      "platformAutomerge": true,
       "automerge": true
   }
  ]
