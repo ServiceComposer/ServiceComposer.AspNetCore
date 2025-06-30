@@ -14,3 +14,4 @@ jobs:
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
           configurationFile: .github/renovate.json
+          repositories: ${{ github.repository }}
