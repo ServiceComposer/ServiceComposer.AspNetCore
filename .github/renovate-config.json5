@@ -13,6 +13,6 @@
      "enabled": false
    }
  ],
- "onboarding": false,
+ "onboarding": true,
  "requireConfig": "required"
 }
