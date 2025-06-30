@@ -9,7 +9,11 @@
   branchPrefix: 'renovate/',
   platform: 'github',
   repositories: ['ServiceComposer/ServiceComposer.AspNetCore'],
-  packageRules: [],
+  packageRules: [{
+      "matchPackageNames": ["Microsoft.CodeAnalysis.CSharp"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    }],
   onboarding: false,
   requireConfig: 'required'
 }
