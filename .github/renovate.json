@@ -1,6 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "branchPrefix": "renovate/",
+  "platform": "github",
+  "repositories": ["ServiceComposer/ServiceComposer.AspNetCore"],
   "packageRules": [
    {
      "matchPackageNames": ["Microsoft.CodeAnalysis.CSharp"],
