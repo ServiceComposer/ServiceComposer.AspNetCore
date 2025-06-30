@@ -2,13 +2,14 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "branchPrefix": "renovate/",
-  "platform": "github",
   "repositories": ["ServiceComposer/ServiceComposer.AspNetCore"],
-  "packageRules": [
-   {
+  "packageRules": [{
      "matchPackageNames": ["Microsoft.CodeAnalysis.CSharp"],
      "matchUpdateTypes": ["minor", "major"],
      "enabled": false
-   }
+   },{
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+  }
  ]
 }
