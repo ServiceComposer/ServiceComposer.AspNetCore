@@ -1,0 +1,19 @@
+{
+  extends: [
+    //'config:base',
+    'github>whitesource/merge-confidence:beta'
+  ],
+  rebaseWhen: 'conflicted',
+  automergeType: "pr",
+  ignoreTests: false,
+  branchPrefix: 'renovate/',
+  platform: 'github',
+  repositories: ['ServiceComposer/ServiceComposer.AspNetCore'],
+  packageRules: [{
+      "matchPackageNames": ["Microsoft.CodeAnalysis.CSharp"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    }],
+  onboarding: false,
+  requireConfig: 'required'
+}
