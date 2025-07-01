@@ -16,3 +16,4 @@ jobs:
           configurationFile: .github/renovate.json
         env:
           RENOVATE_REPOSITORIES: ${{ github.repository }}
+          RENOVATE_PR_CONCURRENT_LIMIT: 0
