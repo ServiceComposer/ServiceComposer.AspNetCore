@@ -7,6 +7,10 @@
      "matchUpdateTypes": ["minor", "major"],
      "enabled": false
    },{
+     "matchPackageNames": ["ServiceComposer.AspNetCore.Testing"],
+     "matchUpdateTypes": ["minor", "major"],
+     "enabled": false
+   },{
       "matchUpdateTypes": ["patch", "minor"],
       "platformAutomerge": true,
       "automerge": true
