@@ -14,7 +14,7 @@
     <ItemGroup>
         <PackageReference Include="NuGet.Frameworks" Version="6.14.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
-        <PackageReference Include="Verify.Xunit" Version="30.19.2" />
+        <PackageReference Include="Verify.Xunit" Version="30.20.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <!-- this is needed to allow tests to correctly load the xunit.runner.utility required by Verify.Xunit -->
