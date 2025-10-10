@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ServiceComposer.AspNetCore.Tests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54589;http://localhost:54590"
+    }
+  }
+}
