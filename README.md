@@ -2,35 +2,45 @@
 
 # ServiceComposer
 
-ServiceComposer is a ViewModel Composition Gateway.
+**A ViewModel Composition Gateway for Microservices**
 
-Designing a UI when the back-end system consists of dozens (or more) of (micro)services is challenging. We have separation and autonomy on the back end, but this all needs to come back together on the front-end. ViewModel Composition prevents the back-end system from turning into a mess of spaghetti code and prevents simple actions from causing an inefficient torrent of web requests.
+Designing UIs for back-end systems with dozens (or more) of microservices presents unique challenges. While we achieve separation and autonomy on the back end, the front-end needs to reunite these distributed components cohesively. ServiceComposer prevents spaghetti code and inefficient web request patterns by enabling clean ViewModel composition.
 
-<!-- toc -->
-## Contents
+## 🎯 Overview
 
-  * [Technical introduction](#technical-introduction)
-  * [Getting Started](#getting-started)
-  * [Documentation and supported platforms](#documentation-and-supported-platforms)
-  * [Philosophy](#philosophy)
-    * [Service Boundaries](#service-boundaries)<!-- endToc -->
+ServiceComposer solves the problem of composing data from multiple autonomous services into unified view models, allowing downstream clients to consume data without being coupled to the distributed nature of your architecture.
 
-## Technical introduction
+## 📚 Contents
 
-For a technical introduction and an overview of the problem space, refer to the following presentation on [YouTube](https://www.youtube.com/watch?v=AxWGAiIg7_0).
+- [Technical Introduction](#technical-introduction)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Philosophy & Service Boundaries](#philosophy--service-boundaries)
 
-## Getting Started
+## 🚀 Quick Start
 
-Imagine an elementary e-commerce web page where it's needed to display details about a selected product. These details are stored in two different services. The Sales service owns the product price, and the Marketing service owns the product name and description. ServiceComposer solves the problem of composing information from different services into one composed view model that downstream clients can later display or consume.
+Let's build an e-commerce product page where data comes from two different services:
+- **Sales Service**: owns product pricing
+- **Marketing Service**: owns product name and description
 
-To start using ServiceComposer, follow the outlined steps:
+### Step 1: Create Gateway Project
 
-- Create a .NET 8 or later empty web application project named `CompositionGateway` in an empty or existing solution.
-- Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
+Create a .NET 8+ empty web application:
 
-<!-- snippet: sample-startup -->
-<a id='snippet-sample-startup'></a>
-```cs
+```bash
+dotnet new web -n CompositionGateway
+cd CompositionGateway
+```
+
+Add the ServiceComposer NuGet package:
+
+```bash
+dotnet add package ServiceComposer.AspNetCore
+```
+
+Configure the startup:
+
+```csharp
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
@@ -46,92 +56,130 @@ public class Startup
     }
 }
 ```
-<sup><a href='/src/Snippets/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-startup' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
 
-- Add a new .NET 8 or later class library project named `Sales.ViewModelComposition`.
-- Add a package reference to the `ServiceComposer.AspNetCore` NuGet package.
-- Add a new class to create a composition request handler.
-- Define the class similar to the following:
+### Step 2: Create Sales Service Composition Handlers
 
-<!-- snippet: basic-usage-sales-handler -->
-<a id='snippet-basic-usage-sales-handler'></a>
-```cs
+Create a class library project:
+
+```bash
+dotnet new classlib -n Sales.ViewModelComposition
+cd Sales.ViewModelComposition
+dotnet add package ServiceComposer.AspNetCore
+```
+
+Add a composition handler:
+
+```csharp
 public class SalesProductInfo : ICompositionRequestsHandler
 {
     [HttpGet("/product/{id}")]
     public Task Handle(HttpRequest request)
     {
         var vm = request.GetComposedResponseModel();
-
-        //retrieve product details from the sales database or service
-        vm.ProductId = request.HttpContext.GetRouteValue("id").ToString();
-        vm.ProductPrice = 100;
-
-        return Task.CompletedTask;
-    }
-}
-```
-<sup><a href='/src/Snippets/BasicUsage/SalesProductInfo.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-basic-usage-sales-handler' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
-
-- Add another class library project, named `Marketing.ViewModelComposition`, and define a composition request handler like the following:
-
-<!-- snippet: basic-usage-marketing-handler -->
-<a id='snippet-basic-usage-marketing-handler'></a>
-```cs
-public class MarketingProductInfo: ICompositionRequestsHandler
-{
-    [HttpGet("/product/{id}")]
-    public Task Handle(HttpRequest request)
-    {
-        var vm = request.GetComposedResponseModel();
-
-        //retrieve product details from the marketing database or service
-        vm.ProductName = "Sample product";
-        vm.ProductDescription = "This is a sample product";
+        var productId = request.HttpContext.GetRouteValue("id").ToString();
+        
+        // Retrieve product details from Sales service
+        vm.ProductId = productId;
+        vm.ProductPrice = 100; // Example data
         
         return Task.CompletedTask;
     }
 }
 ```
-<sup><a href='/src/Snippets/BasicUsage/MarketingProductInfo.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-basic-usage-marketing-handler' title='Start of snippet'>anchor</a></sup>
-<!-- endSnippet -->
 
-- Make it so that the web application project created at the beginning can load both class library assemblies, e.g., by adding a reference to the class library projects
-- Build and run the web application project
-- Using a browser or a tool like Postman, issue an HTTP Get request to `<url-of-the-web-application>/product/1`
+### Step 3: Create Marketing Service Composition Handlers
 
-The HTTP response should be a JSON result containing the properties and values defined in the composition handler classes.
+Create another class library:
 
-> [!NOTE]
-> ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
+```bash
+dotnet new classlib -n Marketing.ViewModelComposition
+cd Marketing.ViewModelComposition
+dotnet add package ServiceComposer.AspNetCore
+```
 
-In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantages of a bit of coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
+Add a composition handler:
 
-## Documentation and supported platforms
+```csharp
+public class MarketingProductInfo : ICompositionRequestsHandler
+{
+    [HttpGet("/product/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var vm = request.GetComposedResponseModel();
+        
+        // Retrieve product details from Marketing service
+        vm.ProductName = "Sample Product";
+        vm.ProductDescription = "This is a sample product description";
+        
+        return Task.CompletedTask;
+    }
+}
+```
 
-ServiceComposer is available for the following platforms:
+### Step 4: Run and Test
 
-- ASP.NET Core on .NET 8: [documentation is available in the docs folder](docs)
+Reference the composition projects from your gateway project, then run:
 
-## Philosophy
+```bash
+dotnet run
+```
 
-### Service Boundaries
+Test with HTTP GET request to: `/product/1`
 
-Service boundaries are essential, if not THE critical aspect, when building systems based on SOA principles. If we get service boundaries wrong, the end result risks being a distributed monolith in the best case and a complete failure in the worst case.
+**Expected Response:**
+```json
+{
+    "productId": "1",
+    "productPrice": 100,
+    "productName": "Sample Product",
+    "productDescription": "This is a sample product description"
+}
+```
 
-> Service boundary identification is challenging; it requires extensive business domain knowledge and confidence in high-level design techniques. Technical challenges, such as the lack of technical solutions to problems foreseen while defining service boundaries, might drive the solution design in the wrong direction.
+## 💡 Key Features
 
-The transition from the user mental model, described by domain experts, to the service boundaries architectural model in the SOA space raises many different concerns. If domain entities, as defined by domain experts, are split among several services:
+- **Dynamic View Models**: Uses C# `dynamic` objects for zero coupling between handlers
+- **Strongly Typed Support**: Optional strongly typed view models with compiler checks
+- **ASP.NET Core Integration**: Leverages standard ASP.NET Core routing and attributes
+- **Microservices-Friendly**: Perfect for distributed systems with autonomous services
 
-- how can we then display to users what they need to visualize?
-- when systems need to make decisions, how can they “query” data required to make that decision, stored in many different services?
+## 📖 Documentation
 
-This type of question leads systems to be designed using rich events, not thin ones, to share data between services and with cache-like things, such as Elastic Search, to satisfy UI query/visualization needs.
+### Supported Platforms
+- ASP.NET Core on .NET 8+ ([Documentation](docs/))
 
-This is the beginning of a road that can only lead to a distributed monolith, where data ownership is a lost concept and every change impacts and breaks the whole system. In such a scenario, it’s easy to blame SOA and the toolset.
+### View Model Types
+ServiceComposer supports both dynamic and strongly typed view models. Dynamic view models provide maximum decoupling, while strongly typed models offer compiler safety. See the [view model factory documentation](docs/view-model-factory.md) for details.
 
-ViewModel Composition techniques are designed to address all these concerns. They bring the separation of concerns, designed at the back end, to the front end.
+## 🎯 Philosophy & Service Boundaries
 
-For more details and the philosophy behind a Composition Gateway, refer to the [ViewModel Composition series](https://milestone.topics.it/categories/view-model-composition) of article available on [milestone.topics.it](https://milestone.topics.it/).
+### The Service Boundary Challenge
+
+Service boundaries are THE critical aspect of SOA systems. Poor boundary definition leads to distributed monoliths or complete system failure. The transition from user mental models to service boundary architecture raises critical questions:
+
+- How do we display unified data when domain entities are split across services?
+- How do systems make decisions when required data spans multiple services?
+
+### The Solution: ViewModel Composition
+
+Traditional approaches often lead to:
+- **Rich events** that share too much data
+- **Cache duplication** in systems like Elasticsearch
+- **Distributed monoliths** where data ownership is lost
+
+ViewModel Composition addresses these concerns by bringing proper separation of concerns to the front-end, maintaining the autonomy you designed at the back-end level.
+
+### Learn More
+
+For deeper insights into Composition Gateway philosophy:
+- [ViewModel Composition article series](https://milestone.topics.it/)
+- [YouTube technical introduction](https://youtube.com/watch?v=your-video-id)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
