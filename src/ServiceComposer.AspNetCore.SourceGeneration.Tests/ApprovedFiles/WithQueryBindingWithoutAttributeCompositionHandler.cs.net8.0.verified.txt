@@ -28,7 +28,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
             var p0_v = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "v", BindingSource.Path);
             var p1_c = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "c", BindingSource.Query);
             var p2_v = ModelBindingArgumentExtensions.Argument<String>(arguments, "v", BindingSource.Query);
-            var p3_body = ModelBindingArgumentExtensions.Argument<WithQueryBindingWithoutAttributeBodyClass>(arguments, "body", BindingSource.Body);
+            var p3_body = ModelBindingArgumentExtensions.Argument<WithQueryBindingWithoutAttributeBodyClass>(arguments, BindingSource.Body);
 
             return userHandler.Post(p0_v, p1_c, p2_v, p3_body);
         }

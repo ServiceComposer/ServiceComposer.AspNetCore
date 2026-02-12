@@ -342,7 +342,14 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             var boundParameter = boundParameters[i];
             var arg = $"p{i}_{boundParameter.parameterName}";
             generatedArgs.Add(arg);
-            builder.AppendLine($"            var {arg} = ModelBindingArgumentExtensions.Argument<{boundParameter.parameterType}>(arguments, \"{boundParameter.parameterName}\", {boundParameter.bindingSource});");
+            if (boundParameter.bindingSource is "BindingSource.Body" or "BindingSource.ModelBinding")
+            {
+                builder.AppendLine($"            var {arg} = ModelBindingArgumentExtensions.Argument<{boundParameter.parameterType}>(arguments, {boundParameter.bindingSource});");
+            }
+            else
+            {
+                builder.AppendLine($"            var {arg} = ModelBindingArgumentExtensions.Argument<{boundParameter.parameterType}>(arguments, \"{boundParameter.parameterName}\", {boundParameter.bindingSource});");
+            }
         }
 
         builder.AppendLine();
@@ -442,8 +449,6 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         ParameterSyntax parameter, string _, List<string> requiredNamespaces,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
-        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
-        var isSimpleType = IsSimpleType(typeSymbol!);
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
         requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
 
@@ -457,9 +462,8 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
 
         // TODO can we somehow support the EmptyBodyBehavior?
         var (attribute, _) = GetAttributeAndArgument(parameter, attributeNames, "EmptyBodyBehavior");
-        var addAttribute = attribute is not null || isSimpleType == false;
 
-        if (addAttribute)
+        if (attribute is not null)
         {
             builder.AppendLine($"        [BindFromBody<{paramTypeFullName.typeName}>()]");
             boundParam = (parameter.Identifier.Text, paramTypeFullName.typeName!, bindingSource);
@@ -543,6 +547,28 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return false;
     }
 
+    bool TryAppendMultiSourceBinding(SemanticModel semanticModel, StringBuilder builder,
+        ParameterSyntax parameter, List<string> requiredNamespaces,
+        out (string parameterName, string parameterType, string bindingSource) boundParam)
+    {
+        var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
+        var isSimpleType = IsSimpleType(typeSymbol!);
+
+        if (!isSimpleType)
+        {
+            var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
+            requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+
+            const string bindingSource = "BindingSource.ModelBinding";
+            builder.AppendLine($"        [Bind<{paramTypeFullName.typeName}>()]");
+            boundParam = (parameter.Identifier.Text, paramTypeFullName.typeName!, bindingSource);
+            return true;
+        }
+
+        boundParam = ("", "", "");
+        return false;
+    }
+
     static (AttributeSyntax? attribute, AttributeArgumentSyntax? argument) GetAttributeAndArgument(
         ParameterSyntax parameter, string[] attributeNamesToMatch, string argumentName)
     {
@@ -599,6 +625,12 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             {
                 boundParameters.Add(fromQueryBoundParam);
                 continue;
+            }
+
+            if (TryAppendMultiSourceBinding(semanticModel, builder, param, requiredNamespaces,
+                    out var multiSourceBoundParam))
+            {
+                boundParameters.Add(multiSourceBoundParam);
             }
         }
 

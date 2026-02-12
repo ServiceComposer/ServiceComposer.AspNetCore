@@ -15,8 +15,8 @@ namespace ServiceComposer.AspNetCore
 {
     public static partial class EndpointsExtensions
     {
-        static readonly Dictionary<string, Type[]> compositionOverControllerGetComponents = new();
-        static readonly Dictionary<string, Type[]> compositionOverControllerPostComponents = new();
+        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents = new();
+        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents = new();
 
         public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
@@ -33,8 +33,8 @@ namespace ServiceComposer.AspNetCore
             {
                 var compositionOverControllersRoutes =
                     endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
-                compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
-                compositionOverControllersRoutes.AddPostComponentsSource(compositionOverControllerPostComponents);
+                compositionOverControllersRoutes.AddComponentsSource("get", compositionOverControllerGetComponents);
+                compositionOverControllersRoutes.AddComponentsSource("post", compositionOverControllerPostComponents);
             }
 
             var compositionMetadataRegistry =
@@ -92,8 +92,7 @@ namespace ServiceComposer.AspNetCore
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
-                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
-                    compositionOverControllerGetComponents[componentsGroup.Key] = componentTypes;
+                    compositionOverControllerGetComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
                 }
                 else
                 {
@@ -118,8 +117,7 @@ namespace ServiceComposer.AspNetCore
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
-                    var componentTypes = componentsGroup.Select(c => c.ComponentType).ToArray();
-                    compositionOverControllerPostComponents[componentsGroup.Key] = componentTypes;
+                    compositionOverControllerPostComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
                 }
                 else
                 {
@@ -220,6 +218,14 @@ namespace ServiceComposer.AspNetCore
 
             endpoint = null;
             return false;
+        }
+
+        static (Type ComponentType, IList<object> Metadata)[] ExtractComponentsWithMetadata(
+            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup)
+        {
+            return componentsGroup
+                .Select(c => (c.ComponentType, (IList<object>)c.Method.GetCustomAttributes(inherit: true)))
+                .ToArray();
         }
 
         static CompositionEndpointBuilder CreateCompositionEndpointBuilder(

@@ -296,7 +296,7 @@ namespace ServiceComposer.AspNetCore
                 if (!isContractlessCompositionHandler)
                 {
                     // We don't want (yet?) to register contract-less composition handlers
-                    // in the metadata registry because they they are not a first-class citizen
+                    // in the metadata registry because they are not a first-class citizen
                     // in the ASP.Net endpoint
                     _compositionMetadataRegistry.AddComponent(type);
                 }

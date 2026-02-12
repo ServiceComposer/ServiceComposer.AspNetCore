@@ -35,7 +35,6 @@ The syntax is nonetheless similar to ASP.NET controller actions. At compilation 
 ### Known limitations
 
 - Different from classes implementing `ICompositionRequestsHandler`, contract-less composition handlers, at the moment, support only one `Http*` attribute per method;
-- At the moment, contract-less composition handlers cannot be used when using [composition over controllers](composition-over-controllers.md);
 
 ## Source generation
 
@@ -70,7 +69,7 @@ namespace Snippets.Contractless.CompositionHandlers.Generated
             var arguments = ctx.GetArguments(this);
             var p0_id = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "id", BindingSource.Path);
             var p1_c = ModelBindingArgumentExtensions.Argument<String>(arguments, "c", BindingSource.Query);
-            var p2_ct = ModelBindingArgumentExtensions.Argument<ComplexType>(arguments, "ct", BindingSource.Body);
+            var p2_ct = ModelBindingArgumentExtensions.Argument<ComplexType>(arguments, BindingSource.Body);
 
             return userHandler.SampleMethod(p0_id, p1_c, p2_ct);
         }
