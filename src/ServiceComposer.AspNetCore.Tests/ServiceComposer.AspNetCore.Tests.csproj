@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -29,7 +29,7 @@
     <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.1.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.13" />
     <PackageReference Include="ServiceComposer.AspNetCore.Testing" Version="2.2.0" />
