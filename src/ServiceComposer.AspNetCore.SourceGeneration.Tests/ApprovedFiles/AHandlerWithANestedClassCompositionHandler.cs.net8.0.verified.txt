@@ -27,7 +27,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
             var arguments = ctx.GetArguments(this);
             var p0_id = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "id", BindingSource.Path);
             var p1_x = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "x", BindingSource.Query);
-            var p2_body = ModelBindingArgumentExtensions.Argument<AHandlerWithANestedClassCompositionHandler.BodyClass>(arguments, "body", BindingSource.Body);
+            var p2_body = ModelBindingArgumentExtensions.Argument<AHandlerWithANestedClassCompositionHandler.BodyClass>(arguments, BindingSource.Body);
 
             return userHandler.Post(p0_id, p1_x, p2_body);
         }
