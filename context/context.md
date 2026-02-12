@@ -87,7 +87,7 @@ endpoints.MapCompositionHandlers()
   - Groups all registered components by route template (from [HttpGet], [HttpPost], etc.)
   - For each unique route+method combination, creates a CompositionEndpointBuilder
   - If CompositionOverControllers is enabled AND a controller already owns the route,
-    stores those handler types in CompositionOverControllersRoutes instead
+    stores those handler types and their method metadata in CompositionOverControllersRoutes instead
   - Registers endpoints via CompositionEndpointDataSource
 ```
 
@@ -100,10 +100,11 @@ HTTP Request
 Enable request body buffering (allows multiple handlers to read body)
   |
   v
-Model Binding Phase (CompositionEndpointBuilder.BindingArguments)
+Model Binding Phase (ComponentsModelBinder)
   - For each component with [BindModel*] attributes on its Handle/Subscribe method
   - Uses RequestModelBinder (wraps ASP.NET Core's IModelBinderFactory)
   - Results stored in IDictionary<Type, IList<ModelBindingArgument>>
+  - Shared by both composition endpoints and composition over controllers
   |
   v
 Endpoint Filter Pipeline (ASP.NET Core IEndpointFilter chain, cached after first build)
@@ -149,6 +150,7 @@ Controller executes normally and produces a result
 OnResultExecutionAsync fires
   - Matches the route against CompositionOverControllersRoutes
   - If composition handlers exist for this route:
+    -> Performs model binding via ComponentsModelBinder using stored handler metadata
     -> Runs the full composition pipeline (same as above)
     -> Merges the composed view model into:
        - ViewResult.ViewData.Model (MVC)
@@ -158,7 +160,7 @@ OnResultExecutionAsync fires
 Result executes with composed data
 ```
 
-**Limitation:** Model binding arguments are NOT supported in this mode (an explicit `NotSupportedException` is thrown).
+Both contract-based (`ICompositionRequestsHandler`) and contract-less composition handlers are supported in this mode.
 
 ## Composition Events System
 
@@ -211,6 +213,13 @@ public Task Handle(HttpRequest request)
 
 ### 3. Source-Generated (contract-less handlers)
 Convention: class in `*.CompositionHandlers` namespace, name ends with `CompositionHandler`, method decorated with `[Http*]` attribute, returns `Task`. The source generator creates a wrapper implementing `ICompositionRequestsHandler` with appropriate `BindModel` attributes.
+
+Source generator binding heuristics for method parameters (evaluated in order):
+1. Parameter name matches route template placeholder → `BindFromRoute<T>`
+2. Parameter has explicit `[FromBody]` → `BindFromBody<T>`
+3. Parameter has explicit `[FromForm]` → `BindFromForm<T>`
+4. Parameter has explicit `[FromQuery]` or is a simple type → `BindFromQuery<T>`
+5. Complex type without explicit binding attribute → `Bind<T>` (multi-source, respects property-level attributes like `[FromRoute]`)
 
 ### Binding Attributes
 | Attribute | Binding Source |
@@ -318,7 +327,8 @@ A convention-based alternative to implementing `ICompositionRequestsHandler`. Ru
 | `ViewModelCompositionOptions.cs` | `ViewModelCompositionOptions` - registration orchestrator |
 | `EndpointsExtensions.cs` | `MapCompositionHandlers()` - endpoint mapping |
 | `CompositionEndpointBuilder.cs` | `Build()` - creates the endpoint request delegate |
-| `CompositionEndpointBuilder.BindingArguments.cs` | `GetAllComponentsArguments()` - model binding |
+| `ComponentsModelBinder.cs` | `BindAll()` - shared model binding for all composition paths |
+| `CompositionEndpointBuilder.BindingArguments.cs` | `GetAllComponentsArguments()` - delegates to `ComponentsModelBinder` |
 | `CompositionEndpointBuilder.CompositionFilters.cs` | Composition filter pipeline builder |
 | `CompositionEndpointBuilder.EndpointFilters.cs` | Endpoint filter pipeline builder (cached) |
 | `CompositionEndpointDataSource.cs` | Custom `EndpointDataSource` implementation |
@@ -360,7 +370,7 @@ A convention-based alternative to implementing `ICompositionRequestsHandler`. Ru
 | File | Purpose |
 |---|---|
 | `CompositionOverControllersActionFilter.cs` | `IAsyncResultFilter` - intercepts controller results |
-| `CompositionOverControllersRoutes.cs` | Registry of routes with composition handlers |
+| `CompositionOverControllersRoutes.cs` | Registry of routes with composition handlers and their method metadata |
 | `CompositionOverControllersOptions.cs` | `IsEnabled`, `UseCaseInsensitiveRouteMatching` |
 
 ### Discovery
@@ -393,5 +403,5 @@ A convention-based alternative to implementing `ICompositionRequestsHandler`. Ru
 - `CompositionHandler.cs:38` - Second 404 shortcut
 - `CompositionHandler.cs:42` - Apply composition filter per-handler, not before whole composition
 - `CompositionEndpointBuilder.cs:121` - Source-generate convention-based filter invocation context
-- `CompositionEndpointBuilder.BindingArguments.cs:31` - Cache RequestModelBinder instance
-- `CompositionEndpointBuilder.BindingArguments.cs:38` - Throw if binding failed
+- `ComponentsModelBinder.cs:33` - Cache RequestModelBinder instance
+- `ComponentsModelBinder.cs:40` - Throw if binding failed
