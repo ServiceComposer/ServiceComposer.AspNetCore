@@ -15,8 +15,8 @@ namespace ServiceComposer.AspNetCore
 {
     public static partial class EndpointsExtensions
     {
-        static readonly Dictionary<string, Type[]> compositionOverControllerGetComponents = new();
-        static readonly Dictionary<string, Type[]> compositionOverControllerPostComponents = new();
+        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents = new();
+        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents = new();
 
         public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
@@ -33,8 +33,8 @@ namespace ServiceComposer.AspNetCore
             {
                 var compositionOverControllersRoutes =
                     endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
-                compositionOverControllersRoutes.AddGetComponentsSource(compositionOverControllerGetComponents);
-                compositionOverControllersRoutes.AddPostComponentsSource(compositionOverControllerPostComponents);
+                compositionOverControllersRoutes.AddComponentsSource("get", compositionOverControllerGetComponents);
+                compositionOverControllersRoutes.AddComponentsSource("post", compositionOverControllerPostComponents);
             }
 
             var compositionMetadataRegistry =
