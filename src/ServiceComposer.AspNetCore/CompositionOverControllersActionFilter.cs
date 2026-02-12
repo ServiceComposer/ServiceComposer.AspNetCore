@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,26 +28,27 @@ namespace ServiceComposer.AspNetCore
                 var rawTemplate = _compositionOverControllersOptions.UseCaseInsensitiveRouteMatching
                     ? endpoint.RoutePattern.RawText.ToLowerInvariant()
                     : endpoint.RoutePattern.RawText;
-                var handlerTypes = _compositionOverControllersRoutes.HandlersForRoute(rawTemplate, context.HttpContext.Request.Method);
+                var handlers = _compositionOverControllersRoutes.HandlersForRoute(rawTemplate, context.HttpContext.Request.Method);
 
-                if (handlerTypes.Any())
+                if (handlers.Any())
                 {
                     // We need the body to be seekable otherwise if more than one
                     // composition handler tries to bind a model to the body
                     // it'll fail and only the first one succeeds
                     context.HttpContext.Request.EnableBuffering();
-                    
+
+                    var argumentsByComponent = await ComponentsModelBinder.BindAll(handlers, context.HttpContext);
+
                     var requestId = context.HttpContext.EnsureRequestIdIsSetup();
                     var compositionContext = new CompositionContext
                     (
                         requestId,
                         context.HttpContext.Request,
                         context.HttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
-                        //arguments binding is unsupported when using composition over controllers
-                        new Dictionary<Type, IList<ModelBindingArgument>>(),
-                        usingCompositionOverControllers: true
+                        argumentsByComponent
                     );
 
+                    var handlerTypes = handlers.Select(h => h.ComponentType).ToArray();
                     var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, compositionContext, handlerTypes);
                     switch (context.Result)
                     {
