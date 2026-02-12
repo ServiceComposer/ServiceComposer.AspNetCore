@@ -13,8 +13,7 @@ namespace ServiceComposer.AspNetCore
         string requestId,
         HttpRequest httpRequest,
         CompositionMetadataRegistry metadataRegistry,
-        IDictionary<Type, IList<ModelBindingArgument>> componentsArguments,
-        bool usingCompositionOverControllers = false)
+        IDictionary<Type, IList<ModelBindingArgument>> componentsArguments)
         : ICompositionContext, ICompositionEventsPublisher
     {
         readonly ConcurrentDictionary<Type, List<CompositionEventHandler<object>>> _compositionEventsSubscriptions = new();
@@ -55,11 +54,6 @@ namespace ServiceComposer.AspNetCore
 
         IList<ModelBindingArgument>? GetArguments(Type owningComponentType)
         {
-            if (usingCompositionOverControllers)
-            {
-                throw new NotSupportedException("Model binding arguments are unsupported when using composition over controllers.");
-            }
-            
             componentsArguments.TryGetValue(owningComponentType, out var arguments);
             return arguments;
         }
