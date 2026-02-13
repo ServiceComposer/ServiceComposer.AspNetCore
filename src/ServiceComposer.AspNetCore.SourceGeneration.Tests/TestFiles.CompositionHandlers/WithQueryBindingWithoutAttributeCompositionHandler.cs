@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers;
 
+[CompositionHandler]
 class WithQueryBindingWithoutAttributeCompositionHandler
 {
     [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Client), HttpPost("/sample/{v}")]

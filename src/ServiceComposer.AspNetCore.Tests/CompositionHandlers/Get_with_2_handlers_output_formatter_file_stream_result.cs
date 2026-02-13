@@ -15,6 +15,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
     {
         static readonly string expected_string_content = Guid.NewGuid().ToString();
 
+        [CompositionHandler]
         public class TestGetStringCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/sample/using-body-stream")]

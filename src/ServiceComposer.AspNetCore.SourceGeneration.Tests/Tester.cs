@@ -34,7 +34,8 @@ public class Tester
             references:
             [
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location)
+                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(CompositionHandlerAttribute).Assembly.Location)
             ],
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         

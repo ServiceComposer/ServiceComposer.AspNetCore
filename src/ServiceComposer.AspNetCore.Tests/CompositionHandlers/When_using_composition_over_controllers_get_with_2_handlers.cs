@@ -35,6 +35,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
             
         }
  
+        [CompositionHandler]
         public class CaseInsensitiveRouteTestGetIntegerCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/api/compositionovercontrollerusingcompositionhandlers/{id}")]
@@ -47,6 +48,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
             }
         }
 
+        [CompositionHandler]
         public class CaseSensitiveRouteTestGetIntegerCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/api/CompositionOverControllerUsingCompositionHandlers/{id}")]
@@ -59,6 +61,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
             }
         }
 
+        [CompositionHandler]
         public class TestGetStringCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/api/CompositionOverControllerUsingCompositionHandlers/{id}")]

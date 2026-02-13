@@ -11,6 +11,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
 {
     public class Get_with_2_handlers
     {
+        [CompositionHandler]
         public class TestGetIntegerCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/sample/{id}")]
@@ -24,6 +25,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
             }
         }
     
+        [CompositionHandler]
         public class TestGetStringCompositionHandler(IHttpContextAccessor httpContextAccessor)
         {
             [HttpGet("/sample/{id}")]
