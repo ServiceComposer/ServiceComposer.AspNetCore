@@ -4,6 +4,7 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
 
 public class ContainerWithNestedClass
 {
+    [CompositionHandler]
     public class NestedClassCompositionHandler
     {
         [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Client), HttpPost("/sample/{v}")]

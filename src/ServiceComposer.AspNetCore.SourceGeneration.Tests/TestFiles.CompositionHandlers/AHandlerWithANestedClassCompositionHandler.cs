@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers;
 
+[CompositionHandler]
 class AHandlerWithANestedClassCompositionHandler
 {
     public class BodyClass

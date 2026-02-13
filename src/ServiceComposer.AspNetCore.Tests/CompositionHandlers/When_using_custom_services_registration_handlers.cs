@@ -9,6 +9,7 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
 {
     public class When_using_custom_services_registration_handlers
     {
+        [CompositionHandler]
         public class TestNoOpCompositionHandler
         {
             [HttpGet("/sample/{id}")]

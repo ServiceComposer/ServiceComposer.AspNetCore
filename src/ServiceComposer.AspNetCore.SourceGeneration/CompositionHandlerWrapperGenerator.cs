@@ -36,10 +36,10 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Create a provider that finds all methods with HTTP attributes
+        // Create a provider that finds methods in classes with [CompositionHandler] attribute
         var methodProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => IsMethodWithAttributes(node),
+                predicate: static (node, _) => IsCompositionHandlerMethod(node),
                 transform: (ctx, _) => GetCompositionHandlerMethod(ctx))
             .Where(static m => m is not null)
             .Select(static (m, _) => m!);
@@ -52,10 +52,33 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             (spc, source) => Execute(spc, source.Left, source.Right));
     }
 
-    static bool IsMethodWithAttributes(SyntaxNode node)
+    static bool IsCompositionHandlerMethod(SyntaxNode node)
     {
-        return node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } method
-               && !method.SyntaxTree.FilePath.EndsWith(".g.cs");
+        // Fast syntax-only check: method with attributes in a class that has CompositionHandler attribute
+        if (node is not MethodDeclarationSyntax { AttributeLists.Count: > 0 } method)
+            return false;
+        
+        if (method.SyntaxTree.FilePath.EndsWith(".g.cs"))
+            return false;
+
+        // Check if the containing class has an attribute that looks like CompositionHandler
+        if (method.Parent is not ClassDeclarationSyntax classDeclaration)
+            return false;
+
+        // Quick syntax check for CompositionHandler attribute on the class
+        foreach (var attributeList in classDeclaration.AttributeLists)
+        {
+            foreach (var attribute in attributeList.Attributes)
+            {
+                var attributeName = attribute.Name.ToString();
+                if (attributeName is "CompositionHandler" or "CompositionHandlerAttribute")
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     CompositionHandlerMethodInfo? GetCompositionHandlerMethod(GeneratorSyntaxContext context)
@@ -74,16 +97,11 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var userClassNamespace = GetNamespace(methodDeclaration);
         var userClassesHierarchy = GetUserClassesHierarchy(methodDeclaration);
 
-        // TODO How are conventions shared with ServiceComposer?
-        //   somehow this conventions must be shared with ServiceComposer
-        //   that uses them to register user types in the IoC container
-        var namespaceMatchesConventions = userClassNamespace != null ? 
-            userClassNamespace == "CompositionHandlers" || userClassNamespace.EndsWith(".CompositionHandlers") : false;
-        var classNameMatchesConventions = userClassesHierarchy.Last().EndsWith("CompositionHandler");
+        // Predicate already verified the class has [CompositionHandler] attribute
         var isTaskReturnType = methodDeclaration.ReturnType.ToString() == "Task";
         var isMethodPublic = methodDeclaration.Modifiers.Any(m => m.Text != "private");
 
-        if (isMethodPublic && namespaceMatchesConventions && classNameMatchesConventions && isTaskReturnType)
+        if (isMethodPublic && isTaskReturnType)
         {
             return new CompositionHandlerMethodInfo(
                 methodDeclaration, 

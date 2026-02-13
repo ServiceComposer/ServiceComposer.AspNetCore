@@ -326,9 +326,7 @@ namespace ServiceComposer.AspNetCore
             var typeInfo = type.GetTypeInfo();
             return !typeInfo.IsInterface
                    && !typeInfo.IsAbstract
-                   && type.Namespace != null
-                   && (type.Namespace == "CompositionHandlers" || type.Namespace!.EndsWith(".CompositionHandlers")
-                       && type.Name.EndsWith("CompositionHandler"));
+                   && type.GetCustomAttributes(typeof(CompositionHandlerAttribute), false).Length > 0;
         }
 
         void RegisterEndpointScopedViewModelFactory(Type viewModelFactoryType)

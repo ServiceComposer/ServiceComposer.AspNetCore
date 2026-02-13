@@ -53,6 +53,11 @@ namespace ServiceComposer.AspNetCore
     }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class CompositionHandler { }
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
+    public sealed class CompositionHandlerAttribute : System.Attribute
+    {
+        public CompositionHandlerAttribute() { }
+    }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public abstract class CompositionRequestFilterAttribute : System.Attribute, ServiceComposer.AspNetCore.ICompositionRequestFilter
     {

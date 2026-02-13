@@ -5,6 +5,7 @@ using ServiceComposer.AspNetCore;
 
 namespace TestClassLibraryWithHandlers.CompositionHandlers;
 
+[CompositionHandler]
 public class TestContractLessCompositionHandler(IHttpContextAccessor contextAccessor)
 {
     [HttpGet("/contract-less-handler/{id}")]
