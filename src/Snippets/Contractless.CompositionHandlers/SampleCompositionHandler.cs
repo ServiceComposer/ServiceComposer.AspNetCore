@@ -1,8 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using ServiceComposer.AspNetCore;
+
+namespace Snippets.Contractless.CompositionHandlers;
 
 #region contract-less-handler-sample
-namespace Snippets.Contractless.CompositionHandlers;
+[CompositionHandler]
 class SampleCompositionHandler
 {
     [HttpGet("/sample/{id}")]
