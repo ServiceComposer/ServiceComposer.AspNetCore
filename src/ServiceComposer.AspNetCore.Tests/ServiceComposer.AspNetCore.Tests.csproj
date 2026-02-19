@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.ValueTuple" Version="4.6.1" />
+    <PackageReference Include="System.ValueTuple" Version="4.6.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.13" />
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.13" />
   </ItemGroup>
