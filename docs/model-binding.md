@@ -169,6 +169,7 @@ The declarative model binding supports several binding sources through the follo
 - `BindFromRouteAttribute<T>`: Binds the given type T to the incoming route element identified by the `routeValueKey` argument.
 - `BindFromQueryAttribute<T>`: Binds the given type T to the incoming query string parameter value identified by the `queryParameterName` argument.
 - `BindFromFormAttribute<T>`: Binds the given type T to the incoming form fields collection. If the optional `formFieldName` is specified the binding operation only takes into account the specified form field as binding source; otherwise, the binding operation expects to bind to a `IFormCollection` type.
+- `BindFromServicesAttribute<T>`: Resolves the given type T from the dependency injection container. The required `parameterName` argument identifies the argument in the composition context.
 - `BindAttribute<T>`: Binds the given type T from multiple sources. Each `T` type property can specify the source using the various `FromBody`, `FromForm`, `FromRoute`, etc., default ASP.Net binding attributes.
 
 Once model binding is declared, the bound models are accessible from the `ICompositionContext` arguments API, as demonstrated by the following snippet:

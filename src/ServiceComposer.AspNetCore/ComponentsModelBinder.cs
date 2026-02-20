@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore;
@@ -30,6 +31,13 @@ static class ComponentsModelBinder
 
             foreach (var modelAttribute in modelAttributes)
             {
+                if (modelAttribute.BindingSource == BindingSource.Services)
+                {
+                    var service = context.RequestServices.GetRequiredService(modelAttribute.Type);
+                    arguments.Add(new ModelBindingArgument(modelAttribute.ModelName!, service, modelAttribute.BindingSource));
+                    continue;
+                }
+
                 // TODO: shall we cache the instance? We cannot access it earlier otherwise we need model binding support for every request even if it's not needed by user code
                 var binder = context.RequestServices.GetRequiredService<RequestModelBinder>();
                 var bindingResult = await binder.TryBind(
