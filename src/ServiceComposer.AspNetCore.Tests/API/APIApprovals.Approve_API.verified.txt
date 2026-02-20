@@ -39,6 +39,11 @@ namespace ServiceComposer.AspNetCore
         public BindFromRouteAttribute(string routeValueKey) { }
         public override string ModelName { get; }
     }
+    public sealed class BindFromServicesAttribute<T> : ServiceComposer.AspNetCore.BindModelAttribute
+    {
+        public BindFromServicesAttribute(string parameterName) { }
+        public override string ModelName { get; }
+    }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public abstract class BindModelAttribute : System.Attribute
     {
