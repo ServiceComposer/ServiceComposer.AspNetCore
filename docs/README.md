@@ -5,7 +5,7 @@ ServiceComposer can be added to existing or new ASP.NET Core projects, or it can
 
 ## Supported .NET versions
 
-ServiceComposer targets .NET 8. Tests are executed against .NET 8 and .NET 9.
+Starting with version 5.0, ServiceComposer targets .NET 10 only.
 
 ## Note about thread safety
 
