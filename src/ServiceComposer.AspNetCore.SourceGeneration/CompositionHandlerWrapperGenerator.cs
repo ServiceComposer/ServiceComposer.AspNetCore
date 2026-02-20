@@ -565,6 +565,35 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return false;
     }
 
+    bool TryAppendBindingFromServices(SemanticModel semanticModel, StringBuilder builder,
+        ParameterSyntax parameter, string _, List<string> requiredNamespaces,
+        out (string parameterName, string parameterType, string bindingSource) boundParam)
+    {
+        var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
+        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+
+        const string bindingSource = "BindingSource.Services";
+        string[] attributeNames = ["FromServices", "FromServicesAttribute"];
+        if (HasIncompatibleAttributes(parameter, attributeNames))
+        {
+            boundParam = ("", "", "");
+            return false;
+        }
+
+        var (attribute, _) = GetAttributeAndArgument(parameter, attributeNames, "");
+
+        if (attribute is not null)
+        {
+            var paramName = parameter.Identifier.Text;
+            builder.AppendLine($"        [BindFromServices<{paramTypeFullName.typeName}>(\"{paramName}\")]");
+            boundParam = (paramName, paramTypeFullName.typeName!, bindingSource);
+            return true;
+        }
+
+        boundParam = ("", "", "");
+        return false;
+    }
+
     bool TryAppendMultiSourceBinding(SemanticModel semanticModel, StringBuilder builder,
         ParameterSyntax parameter, List<string> requiredNamespaces,
         out (string parameterName, string parameterType, string bindingSource) boundParam)
@@ -604,10 +633,12 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         "FromQuery",
         "FromBody",
         "FromForm",
+        "FromServices",
         "FromRouteAttribute",
         "FromQueryAttribute",
         "FromBodyAttribute",
-        "FromFormAttribute"
+        "FromFormAttribute",
+        "FromServicesAttribute"
     ];
     
     List<(string parameterName, string parameterType, string bindingSource)> AppendBindAttributes(
@@ -642,6 +673,13 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
                     out var fromQueryBoundParam))
             {
                 boundParameters.Add(fromQueryBoundParam);
+                continue;
+            }
+
+            if (TryAppendBindingFromServices(semanticModel, builder, param, userMethodRouteTemplate, requiredNamespaces,
+                    out var fromServicesBoundParam))
+            {
+                boundParameters.Add(fromServicesBoundParam);
                 continue;
             }
 
