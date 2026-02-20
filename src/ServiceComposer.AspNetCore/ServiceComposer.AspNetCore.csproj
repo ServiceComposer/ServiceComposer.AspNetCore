@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <MinVerMinimumMajorMinor>4.0</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>5.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -41,13 +41,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="System.ValueTuple" Version="[4.5.0, 5.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[8.0.0, 11.0.0)" />
-    <PackageReference Include="System.Reflection.Metadata" Version="[8.0.0, 11.0.0)" />
-  </ItemGroup>
-
-  <ItemGroup Label="Dependencies not directly used but required to address security vulnerabilities">
-    <PackageReference Include="System.Text.Json" Version="[8.0.5, 11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="[10.0.3, 11.0.0)" />
   </ItemGroup>
 
   <ItemGroup>
