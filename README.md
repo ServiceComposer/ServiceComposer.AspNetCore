@@ -107,7 +107,7 @@ The HTTP response should be a JSON result containing the properties and values d
 > [!NOTE]
 > ServiceComposer uses regular ASP.NET Core attribute routing to configure routes for which composition support is required.
 
-In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantages of a bit of coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
+In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantages of a bit of coupling. Refer to the [view model factory documentation](docs/view-model-factory.md) for more information.
 
 ## Documentation and supported platforms
 
