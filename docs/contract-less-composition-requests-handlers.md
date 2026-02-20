@@ -29,7 +29,7 @@ The syntax is nonetheless similar to ASP.NET controller actions. At compilation 
   - Be either `public` or `internal`
   - Return a `Task`
   - Be decorated with one, and only one, `Http*` attribute (known limitation for now)
-  - Can use the standard ASP.NET `From*` attributes to control model binding
+  - Can use the standard ASP.NET `From*` attributes to control model binding, including `[FromServices]` to resolve dependencies from the DI container
 
 ### Known limitations
 
@@ -76,3 +76,36 @@ namespace YourNamespace.Generated
 ```
 
 Both classes will be registered in DI, allowing the injection of dependencies into the user contract-less composition handler. If the user contract-less composition handler defines more than one method matching the above requirements, one class for each method will be generated. The generated class name will guarantee uniqueness.
+
+### Services injection via `[FromServices]`
+
+Parameters decorated with `[FromServices]` are resolved from the DI container at request time. For example:
+
+```csharp
+[CompositionHandler]
+class SampleCompositionHandler
+{
+    [HttpGet("/sample/{id}")]
+    public Task SampleMethod(int id, [FromServices] IMyService myService)
+    {
+        return Task.CompletedTask;
+    }
+}
+```
+
+The source generator will emit a `[BindFromServices<T>]` attribute for the parameter and resolve it via the DI container when the request is handled:
+
+```csharp
+[HttpGetAttribute("/sample/{id}")]
+[BindFromRoute<Int32>("id")]
+[BindFromServices<IMyService>("myService")]
+public Task Handle(HttpRequest request)
+{
+    var ctx = HttpRequestExtensions.GetCompositionContext(request);
+    var arguments = ctx.GetArguments(this);
+    var p0_id = ModelBindingArgumentExtensions.Argument<Int32>(arguments, "id", BindingSource.Path);
+    var p1_myService = ModelBindingArgumentExtensions.Argument<IMyService>(arguments, "myService", BindingSource.Services);
+
+    return userHandler.SampleMethod(p0_id, p1_myService);
+}
+```
