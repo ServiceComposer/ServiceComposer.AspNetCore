@@ -152,7 +152,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return nameSpace;
     }
 
-    (string? typeName, string? nmespaceName) GetTypeAndNamespaceName(SemanticModel semanticModel, TypeSyntax type)
+    (string? typeName, string? namespaceName) GetTypeAndNamespaceName(SemanticModel semanticModel, TypeSyntax type)
     {
         var symbolInfo = semanticModel.GetSymbolInfo(type);
         var symbol = symbolInfo.Symbol;
@@ -435,7 +435,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+        requiredNamespaces.Add(paramTypeFullName.namespaceName!);
         
         const string bindingSource = "BindingSource.Form";
         string[] attributeNames = ["FromForm", "FromFormAttribute"];
@@ -468,7 +468,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+        requiredNamespaces.Add(paramTypeFullName.namespaceName!);
 
         const string bindingSource = "BindingSource.Body";
         string[] attributeNames = ["FromBody", "FromBodyAttribute"];
@@ -499,7 +499,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var typeSymbol = semanticModel.GetTypeInfo(parameter.Type!).Type;
         var isSimpleType = IsSimpleType(typeSymbol!);
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+        requiredNamespaces.Add(paramTypeFullName.namespaceName!);
 
         const string bindingSource = "BindingSource.Query";
         string[] attributeNames = ["FromQuery", "FromQueryAttribute"];
@@ -532,7 +532,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+        requiredNamespaces.Add(paramTypeFullName.namespaceName!);
 
         const string bindingSource = "BindingSource.Path";
         string[] possibleMatches =
@@ -570,7 +570,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         out (string parameterName, string parameterType, string bindingSource) boundParam)
     {
         var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-        requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+        requiredNamespaces.Add(paramTypeFullName.namespaceName!);
 
         const string bindingSource = "BindingSource.Services";
         string[] attributeNames = ["FromServices", "FromServicesAttribute"];
@@ -604,7 +604,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         if (!isSimpleType)
         {
             var paramTypeFullName = GetTypeAndNamespaceName(semanticModel, parameter.Type!);
-            requiredNamespaces.Add(paramTypeFullName.nmespaceName!);
+            requiredNamespaces.Add(paramTypeFullName.namespaceName!);
 
             const string bindingSource = "BindingSource.ModelBinding";
             builder.AppendLine($"        [Bind<{paramTypeFullName.typeName}>()]");
