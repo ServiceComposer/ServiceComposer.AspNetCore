@@ -83,6 +83,6 @@ jobs:
         run: |
           echo "Tag is production"
           echo "Pushing package to NuGet.org"
-          dotnet nuget push ./nugets/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push ./nugets/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           echo "Pushing Symbols to NuGet.org"
-          dotnet nuget push ./nugets/*.snupkg --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push ./nugets/*.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}

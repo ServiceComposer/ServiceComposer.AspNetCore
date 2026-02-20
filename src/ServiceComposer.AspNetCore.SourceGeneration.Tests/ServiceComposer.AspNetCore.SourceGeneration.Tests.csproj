@@ -30,8 +30,4 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="ApprovedFiles\" />
-    </ItemGroup>
 </Project>

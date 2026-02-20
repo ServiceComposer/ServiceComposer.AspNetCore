@@ -65,3 +65,14 @@ public sealed class BindFromFormAttribute<T>(string? formFieldName = null)
 {
     public override string ModelName { get; } = formFieldName ?? "";
 }
+
+/// <summary>
+/// Binds a model from the dependency injection services container
+/// </summary>
+/// <param name="parameterName">The parameter name used to identify this service argument</param>
+/// <typeparam name="T">The type of the service to resolve</typeparam>
+public sealed class BindFromServicesAttribute<T>(string parameterName)
+    : BindModelAttribute(typeof(T), BindingSource.Services)
+{
+    public override string ModelName { get; } = parameterName;
+}
