@@ -20,7 +20,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L11-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The above configuration snippet configures ServiceComposer to handle HTTP requests matching the template. Each time a matching request is dealt with, ServiceComposer invokes each configured gatherer and merges responses from each one into a response returned to the original issuer.
@@ -50,10 +50,99 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L12-L27' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L11-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The same approach can be used to customize the downstream URL before invocation.
+
+## Forwarding headers
+
+By default, `HttpGatherer` forwards all incoming request headers to the downstream destination. This behavior is controlled by the `ForwardHeaders` property (default: `true`) and can be customized using the `HeadersMapper` delegate, following the same pattern as `DefaultDestinationUrlMapper`/`DestinationUrlMapper`.
+
+### Disabling header forwarding
+
+To prevent any headers from being forwarded, set `ForwardHeaders = false`:
+
+<!-- snippet: scatter-gather-disable-header-forwarding -->
+<a id='snippet-scatter-gather-disable-header-forwarding'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<IGatherer>
+        {
+            new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+            {
+                ForwardHeaders = false
+            }
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L13-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Filtering headers
+
+To selectively forward headers, replace the `HeadersMapper` delegate. The default implementation (`DefaultHeadersMapper`) copies all incoming request headers. Assign a custom delegate to filter, modify, add or remove headers before the downstream request is dispatched:
+
+<!-- snippet: scatter-gather-filter-headers -->
+<a id='snippet-scatter-gather-filter-headers'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<IGatherer>
+        {
+            new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+            {
+                HeadersMapper = (incomingRequest, outgoingMessage) =>
+                {
+                    foreach (var header in incomingRequest.Headers)
+                    {
+                        if (header.Key.Equals("x-do-not-forward", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        outgoingMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+                    }
+                }
+            }
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L32-L52' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Adding headers
+
+To inject additional headers alongside the forwarded ones:
+
+<!-- snippet: scatter-gather-add-headers -->
+<a id='snippet-scatter-gather-add-headers'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<IGatherer>
+        {
+            new HttpGatherer("ASamplesSource", "https://a.web.server/api/samples/ASamplesSource")
+            {
+                HeadersMapper = (incomingRequest, outgoingMessage) =>
+                {
+                    foreach (var header in incomingRequest.Headers)
+                        outgoingMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+                    outgoingMessage.Headers.TryAddWithoutValidation("x-custom-header", "custom-value");
+                }
+            }
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L59-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 ## Data format
 
@@ -63,13 +152,24 @@ By default, `HttpGatherer` assumes that the downstream endpoint result can be co
 
 Scatter/gather endpoints can participate in ASP.NET Core's MVC content negotiation (JSON, XML, etc.) by setting `UseOutputFormatters = true` in `ScatterGatherOptions`. When enabled, the response format is determined by the client's `Accept` header instead of always producing JSON.
 
-```csharp
-app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+<!-- snippet: scatter-gather-use-output-formatters -->
+<a id='snippet-scatter-gather-use-output-formatters'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
 {
-    UseOutputFormatters = true,
-    Gatherers = new List<IGatherer> { /* ... */ }
-}));
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        UseOutputFormatters = true,
+        Gatherers = new List<IGatherer>
+        {
+            new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource"),
+            new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
+        }
+    }));
+}
 ```
+<sup><a href='/src/Snippets/ScatterGather/UseOutputFormatters.cs#L11-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 To use output formatters, MVC services must be registered (e.g., `services.AddControllers()`).
 
@@ -83,24 +183,40 @@ original request expects an XML response:
    serializers (which need to know the element type at compile time) can serialize the result.
 3. `UseOutputFormatters = true` lets ASP.NET Core pick the right formatter based on the `Accept` header.
 
-```csharp
-class JsonSourceGatherer : Gatherer<SampleItem>
+The gatherers, model, and aggregator:
+
+<!-- snippet: scatter-gather-mixed-format-gatherers -->
+<a id='snippet-scatter-gather-mixed-format-gatherers'></a>
+```cs
+public class SampleItem
 {
-    public override async Task<IEnumerable<SampleItem>> Gather(HttpContext context)
+    public string Value { get; set; }
+    public string Source { get; set; }
+}
+
+public class JsonSourceGatherer : Gatherer<SampleItem>
+{
+    public JsonSourceGatherer() : base("JsonSource") { }
+
+    public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
-        // fetch JSON, deserialize to SampleItem[]
+        // fetch JSON from downstream service and deserialize to SampleItem[]
+        throw new NotImplementedException();
     }
 }
 
-class XmlSourceGatherer : Gatherer<SampleItem>
+public class XmlSourceGatherer : Gatherer<SampleItem>
 {
-    public override async Task<IEnumerable<SampleItem>> Gather(HttpContext context)
+    public XmlSourceGatherer() : base("XmlSource") { }
+
+    public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
-        // fetch XML, parse to List<SampleItem>
+        // fetch XML from downstream service and parse to List<SampleItem>
+        throw new NotImplementedException();
     }
 }
 
-class TypedAggregator : IAggregator
+public class TypedAggregator : IAggregator
 {
     readonly ConcurrentBag<SampleItem> allItems = new();
 
@@ -111,22 +227,37 @@ class TypedAggregator : IAggregator
 
     public Task<object> Aggregate() => Task.FromResult((object)allItems.ToArray());
 }
-
-// Registration
-services.AddControllers().AddXmlSerializerFormatters();
-services.AddTransient<TypedAggregator>();
-
-app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
-{
-    UseOutputFormatters = true,
-    CustomAggregator = typeof(TypedAggregator),
-    Gatherers = new List<IGatherer>
-    {
-        new JsonSourceGatherer(),
-        new XmlSourceGatherer()
-    }
-}));
 ```
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L51' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Register the aggregator and XML formatter, then configure the endpoint:
+
+<!-- snippet: scatter-gather-mixed-format-startup -->
+<a id='snippet-scatter-gather-mixed-format-startup'></a>
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllers().AddXmlSerializerFormatters();
+    services.AddTransient<TypedAggregator>();
+}
+
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        UseOutputFormatters = true,
+        CustomAggregator = typeof(TypedAggregator),
+        Gatherers = new List<IGatherer>
+        {
+            new JsonSourceGatherer(),
+            new XmlSourceGatherer()
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L58-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 A client sending `Accept: application/xml` now receives XML; a client sending `Accept: application/json` receives JSON — with the same gatherers and aggregator.
 
@@ -176,7 +307,9 @@ public class CustomHttpGatherer : HttpGatherer
 
 It is possible to implement fully custom gatherers by implementing the `IGatherer` interface directly. This allows non-HTTP data sources, in-memory data, or any other data retrieval mechanism:
 
-```csharp
+<!-- snippet: scatter-gather-custom-gatherer -->
+<a id='snippet-scatter-gather-custom-gatherer'></a>
+```cs
 class CustomGatherer : IGatherer
 {
     public string Key { get; } = "CustomGatherer";
@@ -188,3 +321,5 @@ class CustomGatherer : IGatherer
     }
 }
 ```
+<sup><a href='/src/Snippets/ScatterGather/CustomGatherer.cs#L9-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
