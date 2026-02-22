@@ -78,9 +78,26 @@ namespace ServiceComposer.AspNetCore
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
     }
+    public abstract class Gatherer<T> : ServiceComposer.AspNetCore.IGatherer
+        where T :  class
+    {
+        protected Gatherer(string key) { }
+        public string Key { get; }
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<T>> Gather(Microsoft.AspNetCore.Http.HttpContext context);
+    }
     public static class HttpContextExtensions
     {
         public static string EnsureRequestIdIsSetup(this Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+    public class HttpGatherer : ServiceComposer.AspNetCore.Gatherer<System.Text.Json.Nodes.JsonNode>
+    {
+        public HttpGatherer(string key, string destinationUrl) { }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
+        public string DestinationUrl { get; }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DestinationUrlMapper { get; init; }
+        public override System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }
+        protected virtual string MapDestinationUrl(Microsoft.AspNetCore.Http.HttpRequest request, string destination) { }
+        protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
     public static class HttpRequestExtensions
     {
@@ -100,6 +117,11 @@ namespace ServiceComposer.AspNetCore
                 "ModelState"})]
         public static System.Threading.Tasks.Task<System.ValueTuple<T, bool, Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary>> TryBind<T>(this Microsoft.AspNetCore.Http.HttpRequest request)
             where T : new() { }
+    }
+    public interface IAggregator
+    {
+        void Add(System.Collections.Generic.IEnumerable<object> nodes);
+        System.Threading.Tasks.Task<object> Aggregate();
     }
     public interface ICompositionContext
     {
@@ -141,6 +163,11 @@ namespace ServiceComposer.AspNetCore
         System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpRequest request);
     }
     public interface IEndpointScopedViewModelFactory : ServiceComposer.AspNetCore.IViewModelFactory { }
+    public interface IGatherer
+    {
+        string Key { get; }
+        System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> Gather(Microsoft.AspNetCore.Http.HttpContext context);
+    }
     public interface IViewModelCompositionOptionsCustomization
     {
         void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
@@ -177,6 +204,16 @@ namespace ServiceComposer.AspNetCore
         public ServiceComposer.AspNetCore.ResponseCasing DefaultResponseCasing { get; set; }
         public bool UseOutputFormatters { get; set; }
         public void UseCustomJsonSerializerSettings(System.Func<Microsoft.AspNetCore.Http.HttpRequest, System.Text.Json.JsonSerializerOptions> jsonSerializerSettingsConfig) { }
+    }
+    public static class ScatterGatherEndpointBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapScatterGather(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string template, ServiceComposer.AspNetCore.ScatterGatherOptions options) { }
+    }
+    public class ScatterGatherOptions
+    {
+        public ScatterGatherOptions() { }
+        public System.Type CustomAggregator { get; set; }
+        public System.Collections.Generic.IList<ServiceComposer.AspNetCore.IGatherer> Gatherers { get; set; }
     }
     public static class ServiceCollectionExtensions
     {
