@@ -9,6 +9,17 @@ public class ScatterGatherOptions
 {
     public Type CustomAggregator { get; set; }
 
+    /// <summary>
+    /// Configures scatter/gather to use the MVC defined output formatters for content negotiation.
+    /// When enabled, the response format (e.g. JSON, XML) is chosen based on the incoming
+    /// <c>Accept</c> header. Gatherers should return plain .NET objects rather than
+    /// <see cref="System.Text.Json.Nodes.JsonNode"/> values so that all formatters can serialize them.
+    /// To use output formatters MVC services must be configured, e.g. via
+    /// <c>services.AddControllers()</c>.
+    /// Default value is <c>false</c>.
+    /// </summary>
+    public bool UseOutputFormatters { get; set; }
+
     internal IAggregator GetAggregator(HttpContext httpContext)
     {
         if (CustomAggregator != null)
@@ -16,7 +27,7 @@ public class ScatterGatherOptions
             return (IAggregator)httpContext.RequestServices.GetRequiredService(CustomAggregator);
         }
 
-        return new DefaultAggregator();
+        return UseOutputFormatters ? new DefaultObjectAggregator() : new DefaultAggregator();
     }
 
     public IList<IGatherer> Gatherers { get; set; }

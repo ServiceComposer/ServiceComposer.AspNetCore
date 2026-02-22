@@ -59,6 +59,77 @@ The same approach can be used to customize the downstream URL before invocation.
 
 By default, `HttpGatherer` assumes that the downstream endpoint result can be converted into a `JsonArray`. Custom gatherers implementing `IGatherer` can return any object type; the default aggregator will serialize non-JSON values automatically.
 
+### Content negotiation and output formatters
+
+Scatter/gather endpoints can participate in ASP.NET Core's MVC content negotiation (JSON, XML, etc.) by setting `UseOutputFormatters = true` in `ScatterGatherOptions`. When enabled, the response format is determined by the client's `Accept` header instead of always producing JSON.
+
+```csharp
+app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+{
+    UseOutputFormatters = true,
+    Gatherers = new List<IGatherer> { /* ... */ }
+}));
+```
+
+To use output formatters, MVC services must be registered (e.g., `services.AddControllers()`).
+
+#### Mixed-format scenario: one JSON source, one XML source, XML response expected
+
+Consider a scenario where one gatherer fetches a JSON response and another fetches XML, and the
+original request expects an XML response:
+
+1. Both gatherers normalize downstream data to the same typed C# model.
+2. A typed custom aggregator collects the objects and returns a concrete `SampleItem[]` so that XML
+   serializers (which need to know the element type at compile time) can serialize the result.
+3. `UseOutputFormatters = true` lets ASP.NET Core pick the right formatter based on the `Accept` header.
+
+```csharp
+class JsonSourceGatherer : Gatherer<SampleItem>
+{
+    public override async Task<IEnumerable<SampleItem>> Gather(HttpContext context)
+    {
+        // fetch JSON, deserialize to SampleItem[]
+    }
+}
+
+class XmlSourceGatherer : Gatherer<SampleItem>
+{
+    public override async Task<IEnumerable<SampleItem>> Gather(HttpContext context)
+    {
+        // fetch XML, parse to List<SampleItem>
+    }
+}
+
+class TypedAggregator : IAggregator
+{
+    readonly ConcurrentBag<SampleItem> allItems = new();
+
+    public void Add(IEnumerable<object> nodes)
+    {
+        foreach (var node in nodes) allItems.Add((SampleItem)node);
+    }
+
+    public Task<object> Aggregate() => Task.FromResult((object)allItems.ToArray());
+}
+
+// Registration
+services.AddControllers().AddXmlSerializerFormatters();
+services.AddTransient<TypedAggregator>();
+
+app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+{
+    UseOutputFormatters = true,
+    CustomAggregator = typeof(TypedAggregator),
+    Gatherers = new List<IGatherer>
+    {
+        new JsonSourceGatherer(),
+        new XmlSourceGatherer()
+    }
+}));
+```
+
+A client sending `Accept: application/xml` now receives XML; a client sending `Accept: application/json` receives JSON — with the same gatherers and aggregator.
+
 ### Transforming returned data
 
 If there is a need to transform downstream data to respect the expected format, it's possible to create a custom gatherer and override the `TransformResponse` method:

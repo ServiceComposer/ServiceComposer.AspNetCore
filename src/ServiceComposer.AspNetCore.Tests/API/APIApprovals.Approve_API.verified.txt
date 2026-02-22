@@ -214,6 +214,7 @@ namespace ServiceComposer.AspNetCore
         public ScatterGatherOptions() { }
         public System.Type CustomAggregator { get; set; }
         public System.Collections.Generic.IList<ServiceComposer.AspNetCore.IGatherer> Gatherers { get; set; }
+        public bool UseOutputFormatters { get; set; }
     }
     public static class ServiceCollectionExtensions
     {
