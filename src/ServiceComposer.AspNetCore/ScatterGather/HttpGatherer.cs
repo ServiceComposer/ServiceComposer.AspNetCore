@@ -70,25 +70,24 @@ public class HttpGatherer : Gatherer<JsonNode>
 
     protected virtual async Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
     {
-        var nodes = new List<JsonNode>();
         var gathererResponsesAsString = await responseMessage.Content.ReadAsStringAsync();
         // default behavior assumes downstream service returns a JSON array
         var gathererResponses = JsonNode.Parse(gathererResponsesAsString)?.AsArray();
-        if (gathererResponses is { Count: > 0 })
+        if (gathererResponses is not { Count: > 0 })
         {
-            // this has the side effect of reversing the order
-            // of the responses. This is why we reverse below.
-            for (var i = gathererResponses.Count - 1; i >= 0; i--)
-            {
-                var nodeAtIndex = gathererResponses[i];
-                gathererResponses.Remove(nodeAtIndex);
-                nodes.Add(nodeAtIndex);
-            }
-
-            nodes.Reverse();
+            return [];
         }
-
+        
+        var nodes = new JsonNode[gathererResponses.Count];
+        for (var i = gathererResponses.Count - 1; i >= 0; i--)
+        {
+            var nodeAtIndex = gathererResponses[i];
+            gathererResponses.Remove(nodeAtIndex);
+            nodes[i] = nodeAtIndex;
+        }
+            
         return nodes;
+
     }
 
     public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
