@@ -17,6 +17,9 @@ public class HttpGatherer : Gatherer<JsonNode>
 
         DefaultDestinationUrlMapper = MapDestinationUrl;
         DestinationUrlMapper = (request, destination) => DefaultDestinationUrlMapper(request, destination);
+
+        DefaultHeadersMapper = MapHeaders;
+        HeadersMapper = (request, requestMessage) => DefaultHeadersMapper(request, requestMessage);
     }
 
     public string DestinationUrl { get; }
@@ -25,11 +28,44 @@ public class HttpGatherer : Gatherer<JsonNode>
 
     public Func<HttpRequest, string, string> DestinationUrlMapper { get; init; }
 
+    /// <summary>
+    /// Controls whether incoming request headers are forwarded to the downstream destination.
+    /// Default value is <c>true</c>.
+    /// </summary>
+    public bool ForwardHeaders { get; init; } = true;
+
+    /// <summary>
+    /// The default header-forwarding implementation. Forwards all incoming request headers
+    /// to the outgoing <see cref="HttpRequestMessage"/> when <see cref="ForwardHeaders"/> is
+    /// <c>true</c>. Assign <see cref="HeadersMapper"/> to customize, filter, add or remove headers.
+    /// </summary>
+    public Action<HttpRequest, HttpRequestMessage> DefaultHeadersMapper { get; }
+
+    /// <summary>
+    /// Delegate applied to the outgoing <see cref="HttpRequestMessage"/> before the downstream
+    /// request is sent. Replace this to customize, filter, add or remove headers.
+    /// Defaults to calling <see cref="DefaultHeadersMapper"/>.
+    /// </summary>
+    public Action<HttpRequest, HttpRequestMessage> HeadersMapper { get; init; }
+
     protected virtual string MapDestinationUrl(HttpRequest request, string destination)
     {
         return request.Query.Count == 0
             ? destination
             : $"{destination}{request.QueryString}";
+    }
+
+    protected virtual void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
+    {
+        if (!ForwardHeaders)
+        {
+            return;
+        }
+
+        foreach (var header in request.Headers)
+        {
+            requestMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+        }
     }
 
     protected virtual async Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
@@ -60,7 +96,9 @@ public class HttpGatherer : Gatherer<JsonNode>
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);
         var destination = DestinationUrlMapper(context.Request, DestinationUrl);
-        var response = await client.GetAsync(destination);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, destination);
+        HeadersMapper(context.Request, requestMessage);
+        var response = await client.SendAsync(requestMessage);
         return await TransformResponse(response);
     }
 }
