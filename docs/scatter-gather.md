@@ -20,7 +20,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L11-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L10-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The above configuration snippet configures ServiceComposer to handle HTTP requests matching the template. Each time a matching request is dealt with, ServiceComposer invokes each configured gatherer and merges responses from each one into a response returned to the original issuer.
@@ -50,7 +50,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L11-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L10-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The same approach can be used to customize the downstream URL before invocation.
@@ -80,7 +80,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L13-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L12-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Filtering headers
@@ -112,7 +112,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L32-L52' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L31-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Adding headers
@@ -141,7 +141,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L59-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L58-L77' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Data format
@@ -168,7 +168,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/UseOutputFormatters.cs#L11-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/UseOutputFormatters.cs#L10-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-use-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 To use output formatters, MVC services must be registered (e.g., `services.AddControllers()`).
@@ -228,7 +228,7 @@ public class TypedAggregator : IAggregator
     public Task<object> Aggregate() => Task.FromResult((object)allItems.ToArray());
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L51' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Register the aggregator and XML formatter, then configure the endpoint:
@@ -256,7 +256,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L58-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L57-L77' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 A client sending `Accept: application/xml` now receives XML; a client sending `Accept: application/json` receives JSON — with the same gatherers and aggregator.
@@ -280,7 +280,7 @@ public class CustomHttpGatherer : HttpGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L13-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
@@ -300,7 +300,7 @@ public class CustomHttpGatherer : HttpGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L12-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L11-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Custom gatherers
@@ -321,5 +321,5 @@ class CustomGatherer : IGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/CustomGatherer.cs#L9-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/CustomGatherer.cs#L8-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
