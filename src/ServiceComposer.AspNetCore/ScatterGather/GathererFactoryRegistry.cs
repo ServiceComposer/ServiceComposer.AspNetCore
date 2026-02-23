@@ -13,7 +13,7 @@ sealed class GathererFactoryRegistry
     {
         if (!_factories.TryAdd(type, factory))
         {
-            throw new ArgumentException("Duplicate gather factory type: " + type);
+            throw new ArgumentException("Duplicate gatherer factory type: " + type);
         }
     }
 
