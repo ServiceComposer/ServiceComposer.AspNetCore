@@ -23,7 +23,7 @@ public class SampleCompositionFilterAttribute : CompositionRequestFilterAttribut
     }
 }
 ```
-<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L9-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-attribute' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L8-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-attribute' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > [!NOTE]
@@ -44,7 +44,7 @@ public class SampleHandler : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L29-L39' title='Snippet source file'>snippet source</a> | <a href='#snippet-handler-with-composition-filter' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L28-L38' title='Snippet source file'>snippet source</a> | <a href='#snippet-handler-with-composition-filter' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Defining composition requests filters as classes
@@ -62,7 +62,7 @@ public class SampleCompositionFilter : ICompositionRequestFilter<SampleHandler>
     }
 }
 ```
-<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L19-L27' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-class' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionFilters/SampleHandler.cs#L18-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-class' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The above snippet defines a filter intercepting requests to the `SampleHandler` composition handler.
