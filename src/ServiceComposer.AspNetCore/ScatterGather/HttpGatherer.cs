@@ -91,7 +91,8 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         MapHeaders(context.Request, requestMessage);
 
         var response = await client.SendAsync(requestMessage);
-        
+        response.EnsureSuccessStatusCode();
+
         return await TransformResponse(response);
     }
 }
