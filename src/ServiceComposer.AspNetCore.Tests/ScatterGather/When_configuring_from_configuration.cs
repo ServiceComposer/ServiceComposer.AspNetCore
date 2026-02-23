@@ -78,6 +78,82 @@ public class When_configuring_from_configuration
     }
 
     [Fact]
+    public void Missing_AddScatterGather_throws_meaningful_exception()
+    {
+        var config = BuildConfiguration(
+            (template: "/items", gatherers: [("Source", "/upstream/source")]));
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+            (
+                configureServices: services =>
+                {
+                    services.AddRouting();
+                    // AddScatterGather() intentionally omitted
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapScatterGather(config.GetSection("Routes"));
+                    });
+                }
+            ).CreateClient());
+
+        Assert.Contains("AddScatterGather", ex.Message);
+    }
+
+    [Fact]
+    public void Unknown_gatherer_type_throws_meaningful_exception()
+    {
+        var config = BuildConfigurationWithType(
+            (template: "/items", gatherers: [("Source", "UnknownType", null)]));
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+            (
+                configureServices: services =>
+                {
+                    services.AddRouting();
+                    services.AddScatterGather(); // no factory registered for "UnknownType"
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapScatterGather(config.GetSection("Routes"));
+                    });
+                }
+            ).CreateClient());
+
+        Assert.Contains("UnknownType", ex.Message);
+        Assert.Contains("AddScatterGather", ex.Message);
+    }
+
+    [Fact]
+    public void Duplicate_gatherer_factory_type_throws()
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+            (
+                configureServices: services =>
+                {
+                    services.AddRouting();
+                    services.AddScatterGather(config =>
+                    {
+                        config.AddGathererFactory("MyType", (_, _) => null);
+                        config.AddGathererFactory("MyType", (_, _) => null); // duplicate
+                    });
+                },
+                configure: app => app.UseRouting()
+            ).CreateClient());
+
+        Assert.Contains("MyType", ex.Message);
+    }
+
+    [Fact]
     public async Task Custom_gatherer_type_can_be_configured()
     {
         // Arrange
