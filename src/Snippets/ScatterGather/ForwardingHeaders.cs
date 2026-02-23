@@ -66,8 +66,7 @@ public class AddHeaders
                 {
                     HeadersMapper = (incomingRequest, outgoingMessage) =>
                     {
-                        foreach (var header in incomingRequest.Headers)
-                            outgoingMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+                        HttpGatherer.DefaultHeadersMapper(incomingRequest, outgoingMessage);
                         outgoingMessage.Headers.TryAddWithoutValidation("x-custom-header", "custom-value");
                     }
                 }

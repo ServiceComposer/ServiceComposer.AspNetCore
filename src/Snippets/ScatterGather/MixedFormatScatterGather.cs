@@ -17,10 +17,8 @@ public class SampleItem
     public string Source { get; set; }
 }
 
-public class JsonSourceGatherer : Gatherer<SampleItem>
+public class JsonSourceGatherer() : Gatherer<SampleItem>("JsonSource")
 {
-    public JsonSourceGatherer() : base("JsonSource") { }
-
     public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
         // fetch JSON from downstream service and deserialize to SampleItem[]
@@ -28,10 +26,8 @@ public class JsonSourceGatherer : Gatherer<SampleItem>
     }
 }
 
-public class XmlSourceGatherer : Gatherer<SampleItem>
+public class XmlSourceGatherer() : Gatherer<SampleItem>("XmlSource")
 {
-    public XmlSourceGatherer() : base("XmlSource") { }
-
     public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
         // fetch XML from downstream service and parse to List<SampleItem>
@@ -45,10 +41,13 @@ public class TypedAggregator : IAggregator
 
     public void Add(IEnumerable<object> nodes)
     {
-        foreach (var node in nodes) allItems.Add((SampleItem)node);
+        foreach (var node in nodes)
+        {
+            allItems.Add((SampleItem)node);
+        }
     }
 
-    public Task<object> Aggregate() => Task.FromResult((object)allItems.ToArray());
+    public Task<object> Aggregate() => Task.FromResult<object>(allItems.ToArray());
 }
 // end-snippet
 

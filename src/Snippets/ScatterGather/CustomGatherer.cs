@@ -12,7 +12,7 @@ class CustomGatherer : IGatherer
 
     public Task<IEnumerable<object>> Gather(HttpContext context)
     {
-        var data = (IEnumerable<object>)new[] { new { Value = "ACustomSample" } };
+        var data = (IEnumerable<object>)[new { Value = "ACustomSample" }];
         return Task.FromResult(data);
     }
 }
