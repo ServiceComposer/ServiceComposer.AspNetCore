@@ -109,7 +109,7 @@ public static class ScatterGatherEndpointBuilderExtensions
             return new HttpGatherer(section["Key"], section["DestinationUrl"]);
         }
 
-        if (registry?.TryGet(type, out var factory) == true)
+        if (registry.TryGet(type, out var factory))
         {
             return factory(section, sp);
         }
