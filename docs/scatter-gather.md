@@ -61,6 +61,8 @@ The same approach can be used to customize the downstream URL before invocation.
 
 By default, `HttpGatherer` forwards all incoming request headers to the downstream destination. This behavior is controlled by the `ForwardHeaders` property (default: `true`) and can be customized using the `HeadersMapper` delegate, following the same pattern as `DefaultDestinationUrlMapper`/`DestinationUrlMapper`.
 
+> **Security note:** The default `DefaultHeadersMapper` forwards **all** headers verbatim, including sensitive ones such as `Authorization` and `Cookie`. If the downstream service should receive a different credential (e.g. a service-to-service token) or no credential at all, replace `HeadersMapper` to filter or substitute those headers before the request is dispatched.
+
 ### Disabling header forwarding
 
 To prevent any headers from being forwarded, set `ForwardHeaders = false`:
@@ -492,7 +494,9 @@ public void ConfigureServices(IServiceCollection services)
 
 The factory receives:
 - `IConfigurationSection` — the raw section for the gatherer entry (access any field via `section["FieldName"]`)
-- `IServiceProvider` — the application's service provider, useful when the gatherer depends on registered services
+- `IServiceProvider` — the application's **root** (singleton) service provider
+
+> **Lifetime note:** Factories are invoked once at startup, not per request. The `IServiceProvider` argument is the singleton root provider — resolving a scoped service (e.g. a `DbContext`) from it will either throw a scope-validation error or silently return a root-lifetime instance. If your gatherer needs per-request services, accept them via `HttpContext.RequestServices` inside `IGatherer.Gather` instead.
 
 Then map as usual:
 
