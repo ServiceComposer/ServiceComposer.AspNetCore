@@ -65,7 +65,11 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         {
             return [];
         }
-        
+
+        // JsonNode elements are owned by their parent JsonArray. Detaching each node by calling
+        // Remove() before storing it in the output array is required; adding an already-parented
+        // node to another structure (e.g. the aggregator's collection) would throw. Iterating in
+        // reverse avoids index-shifting issues while removing.
         var nodes = new JsonNode[gathererResponses.Count];
         for (var i = gathererResponses.Count - 1; i >= 0; i--)
         {
