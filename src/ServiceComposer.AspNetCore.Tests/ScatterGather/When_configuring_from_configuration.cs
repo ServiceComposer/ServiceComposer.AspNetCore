@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ServiceComposer.AspNetCore.Testing;
+using ServiceComposer.AspNetCore.Tests.CompositionHandlers.Generated;
 using ServiceComposer.AspNetCore.Tests.Utils;
 using Xunit;
 
@@ -101,6 +102,30 @@ public class When_configuring_from_configuration
             ).CreateClient());
 
         Assert.Contains("AddScatterGather", ex.Message);
+    }
+    
+    [Fact]
+    public void Configuration_with_http_gather_should_create_gatherer()
+    {
+        var config = BuildConfigurationWithType(
+            (template: "/items", gatherers: [("Source", "http", "/upstream/source")]));
+
+        _ = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services =>
+            {
+                services.AddRouting();
+                services.AddScatterGather();
+            },
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    builder.MapScatterGather(config.GetSection("Routes"));
+                });
+            }
+        ).CreateClient();
     }
 
     [Fact]

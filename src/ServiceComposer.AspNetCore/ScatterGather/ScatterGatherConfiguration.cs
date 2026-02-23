@@ -27,4 +27,12 @@ public class ScatterGatherConfiguration
     {
         Registry.Register(type, factory);
     }
+
+    internal void RegisterKnownGatherers()
+    {
+        AddGathererFactory("http", (section, provider) => new HttpGatherer(section["Key"], section["DestinationUrl"])
+        {
+            IgnoreDownstreamRequestErrors = section.GetValue<bool>("IgnoreDownstreamRequestErrors")
+        });
+    }
 }
