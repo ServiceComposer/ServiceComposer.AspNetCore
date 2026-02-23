@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +12,13 @@ namespace ServiceComposer.AspNetCore;
 
 public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode>(key)
 {
-    public string DestinationUrl { get; } = destinationUrl;
+    static string ValidateDestination(string value, [CallerArgumentExpression(nameof(value))] string name = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, name);
+        return value;
+    }
+    
+    public string DestinationUrl { get; } = ValidateDestination(destinationUrl);
 
     public static Func<HttpRequest, string, string> DefaultDestinationUrlMapper { get; } = (request, destination) => request.Query.Count == 0
         ? destination

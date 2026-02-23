@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace ServiceComposer.AspNetCore;
 
-public abstract class Gatherer<T> : IGatherer where T : class
+public abstract class Gatherer<T>(string key) : IGatherer
+    where T : class
 {
-    protected Gatherer(string key)
+    static string ValidateKey(string value, [CallerArgumentExpression(nameof(value))] string name = null)
     {
-        Key = key;
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, name);
+        return value;
     }
-
-    public string Key { get; }
+    
+    public string Key { get; } = ValidateKey(key);
 
     async Task<IEnumerable<object>> IGatherer.Gather(HttpContext context)
     {

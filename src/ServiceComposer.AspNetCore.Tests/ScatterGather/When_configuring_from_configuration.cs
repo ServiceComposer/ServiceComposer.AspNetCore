@@ -127,6 +127,33 @@ public class When_configuring_from_configuration
             }
         ).CreateClient();
     }
+    
+    [Fact]
+    public void Configuration_with_http_gather_should_throw_if_empty_destination_url()
+    {
+        var config = BuildConfigurationWithType(
+            (template: "/items", gatherers: [("Source", "http", "")]));
+
+        Assert.Throws<ArgumentException>(() =>
+        {
+            _ = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+            (
+                configureServices: services =>
+                {
+                    services.AddRouting();
+                    services.AddScatterGather();
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapScatterGather(config.GetSection("Routes"));
+                    });
+                }
+            ).CreateClient(); 
+        });
+    }
 
     [Fact]
     public void Unknown_gatherer_type_throws_meaningful_exception()
