@@ -90,7 +90,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
-                services.AddScatterGatherer(config=> config.AddGathererFactory("StaticData", (section, _) => new StaticDataGatherer(section["Key"])));
+                services.AddScatterGather(config=> config.AddGathererFactory("StaticData", (section, _) => new StaticDataGatherer(section["Key"])));
             },
             configure: app =>
             {
@@ -128,7 +128,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
-                services.AddScatterGatherer();
+                services.AddScatterGather();
                 services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
                     new DelegateHttpClientFactory(_ => downstreamClient)));
             },
@@ -168,7 +168,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
-                services.AddScatterGatherer();
+                services.AddScatterGather();
                 HttpClient ClientProvider(string name) => name switch
                 {
                     "ConfigSource" => configSourceClient,
@@ -228,7 +228,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
-                services.AddScatterGatherer();
+                services.AddScatterGather();
                 HttpClient ClientProvider(string name) => name switch
                 {
                     "ConfigSource" => configSourceClient,

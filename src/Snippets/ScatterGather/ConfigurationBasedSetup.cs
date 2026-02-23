@@ -16,7 +16,7 @@ public class ConfigurationBasedSetupBasic
     {
         services.AddRouting();
         services.AddHttpClient();
-        services.AddScatterGatherer();
+        services.AddScatterGather();
     }
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
@@ -109,7 +109,7 @@ public class ConfigurationBasedSetupWithCustomGathererType
     {
         services.AddRouting();
         services.AddHttpClient();
-        services.AddScatterGatherer(config =>
+        services.AddScatterGather(config =>
         {
             config.AddGathererFactory(
                 "StaticProductDetails",
@@ -137,7 +137,7 @@ public class ConfigurationBasedSetupWithCustomGathererTypeAndExtraProperties
     {
         services.AddRouting();
         services.AddHttpClient();
-        services.AddScatterGatherer(config =>
+        services.AddScatterGather(config =>
         {
             config.AddGathererFactory(
                 "WithProperties",

@@ -228,7 +228,7 @@ namespace ServiceComposer.AspNetCore
     }
     public static class ScatterGatherServiceCollectionExtensions
     {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddScatterGatherer(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ScatterGatherConfiguration> configure = null) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddScatterGather(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ScatterGatherConfiguration> configure = null) { }
     }
     public static class ServiceCollectionExtensions
     {
