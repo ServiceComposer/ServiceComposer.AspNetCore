@@ -155,12 +155,9 @@ public class When_configuring_from_configuration
         var configSourceClient = BuildDownstreamClient("/upstream/config-source", new[] { new { Value = "FromConfig" } });
         var extraSourceClient = BuildDownstreamClient("/upstream/extra-source", new[] { new { Value = "FromCustomization" } });
 
-        var config = BuildConfiguration(
-            (template: "/items", gatherers: [("ConfigSource", "/upstream/config-source")]));
-
         var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
         (
-            configureServices: services =>
+            configureServices: (_,services) =>
             {
                 services.AddRouting();
                 services.AddControllers();
@@ -173,13 +170,13 @@ public class When_configuring_from_configuration
                 services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
                     new DelegateHttpClientFactory(ClientProvider)));
             },
-            configure: app =>
+            configure: (ctx, app) =>
             {
                 app.UseRouting();
                 app.UseEndpoints(builder =>
                 {
                     builder.MapScatterGatherFromConfiguration(
-                        config.GetSection("Routes"),
+                        ctx.Configuration.GetSection("Routes"),
                         customize: (template, options) =>
                         {
                             // Add an extra gatherer that is not in the config file
@@ -187,7 +184,18 @@ public class When_configuring_from_configuration
                         });
                 });
             }
-        ).CreateClient();
+        )
+        {
+            BuilderCustomization = webHostBuilder =>
+            {
+                webHostBuilder.ConfigureAppConfiguration((_, configurationBuilder) =>
+                {
+                    var config = BuildConfiguration(
+                        (template: "/items", gatherers: [("ConfigSource", "/upstream/config-source")]));
+                    configurationBuilder.AddConfiguration(config);
+                });
+            }
+        }.CreateClient();
 
         // Act
         var response = await client.GetAsync("/items");
