@@ -71,7 +71,10 @@ public static class ScatterGatherEndpointBuilderExtensions
             return [];
         }
 
-        var scatterGatherConfiguration = builder.ServiceProvider.GetRequiredService<ScatterGatherConfiguration>();
+        var scatterGatherConfiguration = builder.ServiceProvider.GetService<ScatterGatherConfiguration>()
+            ?? throw new InvalidOperationException(
+                "ScatterGather services are not registered. " +
+                "Call services.AddScatterGather() in ConfigureServices before calling MapScatterGather with an IConfiguration argument.");
         var sp = builder.ServiceProvider;
 
         var result = new List<IEndpointConventionBuilder>(routeSections.Count);
