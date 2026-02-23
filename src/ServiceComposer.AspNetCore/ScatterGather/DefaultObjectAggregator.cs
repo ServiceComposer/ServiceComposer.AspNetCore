@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore;
 
+// Used when UseOutputFormatters = true. Keeps items as their original CLR types so that MVC
+// output formatters receive the real runtime type for content negotiation (JSON, XML, etc.).
+// Handing a pre-serialized JsonArray to formatters would lose type fidelity.
 class DefaultObjectAggregator : IAggregator
 {
     readonly ConcurrentBag<object> allObjects = new();

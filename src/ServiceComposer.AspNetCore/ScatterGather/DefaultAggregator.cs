@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore;
 
+// Used when UseOutputFormatters = false. Converts all items to JsonNode and produces a JsonArray
+// that is written directly via Response.WriteAsync. Pre-serializing here means the downstream
+// write path only needs a plain JsonSerializer.Serialize call.
 class DefaultAggregator : IAggregator
 {
     readonly ConcurrentBag<JsonNode> allNodes = new();
