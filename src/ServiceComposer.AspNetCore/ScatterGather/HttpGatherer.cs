@@ -19,6 +19,14 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
     public Func<HttpRequest, string, string> DestinationUrlMapper { get; set; } = DefaultDestinationUrlMapper;
 
     /// <summary>
+    /// When <c>true</c>, any exception thrown during the downstream call — including network
+    /// failures and non-2xx HTTP responses — is silently swallowed and an empty result is
+    /// returned, allowing the other gatherers to contribute to the composed response.
+    /// Default value is <c>false</c> (errors propagate and fail the entire request).
+    /// </summary>
+    public bool IgnoreDownstreamRequestErrors { get; set; }
+
+    /// <summary>
     /// Controls whether incoming request headers are forwarded to the downstream destination.
     /// Default value is <c>true</c>.
     /// </summary>
@@ -90,9 +98,16 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, destination);
         MapHeaders(context.Request, requestMessage);
 
-        var response = await client.SendAsync(requestMessage);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var response = await client.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
 
-        return await TransformResponse(response);
+            return await TransformResponse(response);
+        }
+        catch(HttpRequestException) when (IgnoreDownstreamRequestErrors)
+        {
+            return [];
+        }
     }
 }

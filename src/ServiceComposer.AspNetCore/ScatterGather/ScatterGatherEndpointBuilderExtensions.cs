@@ -106,7 +106,10 @@ public static class ScatterGatherEndpointBuilderExtensions
         var type = section["Type"];
         if (string.IsNullOrWhiteSpace(type))
         {
-            return new HttpGatherer(section["Key"], section["DestinationUrl"]);
+            return new HttpGatherer(section["Key"], section["DestinationUrl"])
+            {
+                IgnoreDownstreamRequestErrors = section.GetValue<bool>("IgnoreDownstreamRequestErrors")
+            };
         }
 
         if (registry.TryGet(type, out var factory))

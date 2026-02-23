@@ -84,7 +84,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L12-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L11-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Filtering headers
@@ -116,7 +116,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L31-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L30-L52' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Adding headers
@@ -144,7 +144,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L58-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L57-L75' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Data format
@@ -282,7 +282,7 @@ public class CustomHttpGatherer : HttpGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L12-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/TransformResponse.cs#L11-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-transform-response' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Taking control of the downstream invocation process
@@ -302,6 +302,54 @@ public class CustomHttpGatherer(string key, string destination) : HttpGatherer(k
 ```
 <sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L11-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+## Handling downstream errors
+
+By default, any failure in a gatherer — a network error or a non-2xx HTTP response — propagates as an exception and causes the entire composed request to fail.
+
+### Silently ignoring errors for individual gatherers
+
+Setting `IgnoreDownstreamRequestErrors = true` on an `HttpGatherer` makes that gatherer return an empty result instead of propagating an exception. The other gatherers continue normally, so a partial response is still returned.
+
+<!-- snippet: scatter-gather-ignore-errors -->
+<a id='snippet-scatter-gather-ignore-errors'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+{
+    app.UseRouting();
+    app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+    {
+        Gatherers = new List<IGatherer>
+        {
+            new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource")
+            {
+                IgnoreDownstreamRequestErrors = true
+            },
+            new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
+        }
+    }));
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L28-L44' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-ignore-errors' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+`IgnoreDownstreamRequestErrors` applies to all error conditions for that gatherer: HTTP error status codes, network timeouts, and any other exception thrown by the downstream call. It does not affect other gatherers in the same route.
+
+When using configuration-based setup, the same option can be set per entry:
+
+```json
+{
+  "ScatterGather": [
+    {
+      "Template": "api/products",
+      "Gatherers": [
+        { "Key": "Optional",  "DestinationUrl": "https://optional.web.server/api/data", "IgnoreDownstreamRequestErrors": true },
+        { "Key": "Required",  "DestinationUrl": "https://required.web.server/api/data" }
+      ]
+    }
+  ]
+}
+```
 
 ## Custom gatherers
 

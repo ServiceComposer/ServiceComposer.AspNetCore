@@ -96,6 +96,7 @@ namespace ServiceComposer.AspNetCore
         public System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DestinationUrlMapper { get; set; }
         public bool ForwardHeaders { get; set; }
         public System.Action<Microsoft.AspNetCore.Http.HttpRequest, System.Net.Http.HttpRequestMessage> HeadersMapper { get; set; }
+        public bool IgnoreDownstreamRequestErrors { get; set; }
         public static System.Func<Microsoft.AspNetCore.Http.HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
         public static System.Action<Microsoft.AspNetCore.Http.HttpRequest, System.Net.Http.HttpRequestMessage> DefaultHeadersMapper { get; }
         public override System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> Gather(Microsoft.AspNetCore.Http.HttpContext context) { }

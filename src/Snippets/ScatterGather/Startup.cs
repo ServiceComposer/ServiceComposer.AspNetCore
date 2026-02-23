@@ -22,3 +22,24 @@ public class Startup
     }
     // end-snippet
 }
+
+public class StartupWithIgnoreDownstreamRequestErrors
+{
+    // begin-snippet: scatter-gather-ignore-errors
+    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+    {
+        app.UseRouting();
+        app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+        {
+            Gatherers = new List<IGatherer>
+            {
+                new HttpGatherer(key: "ASamplesSource", destinationUrl: "https://a.web.server/api/samples/ASamplesSource")
+                {
+                    IgnoreDownstreamRequestErrors = true
+                },
+                new HttpGatherer(key: "AnotherSamplesSource", destinationUrl: "https://another.web.server/api/samples/AnotherSamplesSource")
+            }
+        }));
+    }
+    // end-snippet
+}
