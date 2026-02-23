@@ -44,7 +44,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
             {
                 DestinationUrlMapper = (request, destination) => destination.Replace(
                     "{this-is-contextual}",
-                    request.HttpContext.Request.Query["this-is-contextual"])
+                    request.Query["this-is-contextual"])
             }
         }
     }));
@@ -54,6 +54,8 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
 <!-- endSnippet -->
 
 The same approach can be used to customize the downstream URL before invocation.
+
+> **Note:** The default `DefaultDestinationUrlMapper` appends the incoming query string by concatenating `request.QueryString` (which includes the leading `?`). If `destinationUrl` already contains a query string, this will produce a malformed URL (e.g. `…?existing=1?new=2`). In that case, replace the default mapper with one that uses `&` to append additional parameters.
 
 ## Forwarding headers
 
@@ -353,7 +355,7 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddRouting();
     services.AddHttpClient();
-    services.AddScatterGatherer();
+    services.AddScatterGather();
 }
 
 public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
@@ -477,7 +479,7 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddRouting();
     services.AddHttpClient();
-    services.AddScatterGatherer(config =>
+    services.AddScatterGather(config =>
     {
         config.AddGathererFactory(
             "StaticProductDetails",
@@ -559,7 +561,7 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddRouting();
     services.AddHttpClient();
-    services.AddScatterGatherer(config =>
+    services.AddScatterGather(config =>
     {
         config.AddGathererFactory(
             "WithProperties",
