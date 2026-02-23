@@ -8,52 +8,43 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore;
 
-public class HttpGatherer : Gatherer<JsonNode>
+public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode>(key)
 {
-    public HttpGatherer(string key, string destinationUrl)
-        : base(key)
-    {
-        DestinationUrl = destinationUrl;
+    public string DestinationUrl { get; } = destinationUrl;
 
-        DefaultDestinationUrlMapper = MapDestinationUrl;
-        DestinationUrlMapper = (request, destination) => DefaultDestinationUrlMapper(request, destination);
+    public static Func<HttpRequest, string, string> DefaultDestinationUrlMapper { get; } = (request, destination) => request.Query.Count == 0
+        ? destination
+        : $"{destination}{request.QueryString}";
 
-        DefaultHeadersMapper = MapHeaders;
-        HeadersMapper = (request, requestMessage) => DefaultHeadersMapper(request, requestMessage);
-    }
-
-    public string DestinationUrl { get; }
-
-    public Func<HttpRequest, string, string> DefaultDestinationUrlMapper { get; }
-
-    public Func<HttpRequest, string, string> DestinationUrlMapper { get; init; }
+    public Func<HttpRequest, string, string> DestinationUrlMapper { get; set; } = DefaultDestinationUrlMapper;
 
     /// <summary>
     /// Controls whether incoming request headers are forwarded to the downstream destination.
     /// Default value is <c>true</c>.
     /// </summary>
-    public bool ForwardHeaders { get; init; } = true;
+    public bool ForwardHeaders { get; set; } = true;
 
     /// <summary>
     /// The default header-forwarding implementation. Forwards all incoming request headers
     /// to the outgoing <see cref="HttpRequestMessage"/> when <see cref="ForwardHeaders"/> is
     /// <c>true</c>. Assign <see cref="HeadersMapper"/> to customize, filter, add or remove headers.
     /// </summary>
-    public Action<HttpRequest, HttpRequestMessage> DefaultHeadersMapper { get; }
+    public static Action<HttpRequest, HttpRequestMessage> DefaultHeadersMapper { get; } = (incomingHttpRequest, outgoingRequestMessage) =>
+    {
+        foreach (var header in incomingHttpRequest.Headers)
+        {
+            outgoingRequestMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+        }
+    };
 
     /// <summary>
     /// Delegate applied to the outgoing <see cref="HttpRequestMessage"/> before the downstream
     /// request is sent. Replace this to customize, filter, add or remove headers.
     /// Defaults to calling <see cref="DefaultHeadersMapper"/>.
     /// </summary>
-    public Action<HttpRequest, HttpRequestMessage> HeadersMapper { get; init; }
+    public Action<HttpRequest, HttpRequestMessage> HeadersMapper { get; set; } = DefaultHeadersMapper;
 
-    protected virtual string MapDestinationUrl(HttpRequest request, string destination)
-    {
-        return request.Query.Count == 0
-            ? destination
-            : $"{destination}{request.QueryString}";
-    }
+    protected virtual string MapDestinationUrl(HttpRequest request, string destination) => DestinationUrlMapper(request, destination);
 
     protected virtual void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
     {
@@ -62,10 +53,7 @@ public class HttpGatherer : Gatherer<JsonNode>
             return;
         }
 
-        foreach (var header in request.Headers)
-        {
-            requestMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
-        }
+        HeadersMapper(request, requestMessage);
     }
 
     protected virtual async Task<IEnumerable<JsonNode>> TransformResponse(HttpResponseMessage responseMessage)
@@ -94,10 +82,13 @@ public class HttpGatherer : Gatherer<JsonNode>
     {
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);
-        var destination = DestinationUrlMapper(context.Request, DestinationUrl);
+        
+        var destination = MapDestinationUrl(context.Request, DestinationUrl);
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, destination);
-        HeadersMapper(context.Request, requestMessage);
+        MapHeaders(context.Request, requestMessage);
+        
         var response = await client.SendAsync(requestMessage);
+        
         return await TransformResponse(response);
     }
 }
