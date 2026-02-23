@@ -132,8 +132,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
             {
                 HeadersMapper = (incomingRequest, outgoingMessage) =>
                 {
-                    foreach (var header in incomingRequest.Headers)
-                        outgoingMessage.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
+                    HttpGatherer.DefaultHeadersMapper(incomingRequest, outgoingMessage);
                     outgoingMessage.Headers.TryAddWithoutValidation("x-custom-header", "custom-value");
                 }
             }
@@ -141,7 +140,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L58-L77' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L58-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Data format
@@ -194,10 +193,8 @@ public class SampleItem
     public string Source { get; set; }
 }
 
-public class JsonSourceGatherer : Gatherer<SampleItem>
+public class JsonSourceGatherer() : Gatherer<SampleItem>("JsonSource")
 {
-    public JsonSourceGatherer() : base("JsonSource") { }
-
     public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
         // fetch JSON from downstream service and deserialize to SampleItem[]
@@ -205,10 +202,8 @@ public class JsonSourceGatherer : Gatherer<SampleItem>
     }
 }
 
-public class XmlSourceGatherer : Gatherer<SampleItem>
+public class XmlSourceGatherer() : Gatherer<SampleItem>("XmlSource")
 {
-    public XmlSourceGatherer() : base("XmlSource") { }
-
     public override Task<IEnumerable<SampleItem>> Gather(HttpContext context)
     {
         // fetch XML from downstream service and parse to List<SampleItem>
@@ -222,13 +217,16 @@ public class TypedAggregator : IAggregator
 
     public void Add(IEnumerable<object> nodes)
     {
-        foreach (var node in nodes) allItems.Add((SampleItem)node);
+        foreach (var node in nodes)
+        {
+            allItems.Add((SampleItem)node);
+        }
     }
 
-    public Task<object> Aggregate() => Task.FromResult((object)allItems.ToArray());
+    public Task<object> Aggregate() => Task.FromResult<object>(allItems.ToArray());
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L52' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Register the aggregator and XML formatter, then configure the endpoint:
@@ -256,7 +254,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     }));
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L57-L77' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L56-L76' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 A client sending `Accept: application/xml` now receives XML; a client sending `Accept: application/json` receives JSON — with the same gatherers and aggregator.
@@ -290,17 +288,15 @@ If transforming returned data is not enough, it's possible to take full control 
 <!-- snippet: scatter-gather-gather-override -->
 <a id='snippet-scatter-gather-gather-override'></a>
 ```cs
-public class CustomHttpGatherer : HttpGatherer
+public class CustomHttpGatherer(string key, string destination) : HttpGatherer(key, destination)
 {
-    public CustomHttpGatherer(string key, string destination) : base(key, destination) { }
-
     public override Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
         return base.Gather(context);
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L11-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/GatherMethodOverride.cs#L11-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-gather-override' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Custom gatherers
@@ -316,7 +312,7 @@ class CustomGatherer : IGatherer
 
     public Task<IEnumerable<object>> Gather(HttpContext context)
     {
-        var data = (IEnumerable<object>)new[] { new { Value = "ACustomSample" } };
+        var data = (IEnumerable<object>)[new { Value = "ACustomSample" }];
         return Task.FromResult(data);
     }
 }
