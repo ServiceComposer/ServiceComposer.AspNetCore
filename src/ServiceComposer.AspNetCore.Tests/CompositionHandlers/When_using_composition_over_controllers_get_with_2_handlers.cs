@@ -236,10 +236,14 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                     services.AddViewModelComposition(options =>
                     {
                         options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<TestGetStringCompositionHandler>();
+                        options.RegisterCompositionHandler<CaseSensitiveRouteTestGetIntegerCompositionHandler>();
+                        options.RegisterCompositionHandler<CaseInsensitiveRouteTestGetIntegerCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_TestGetStringCompositionHandler_Handle>();
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_CaseInsensitiveRouteTestGetIntegerCompositionHandler_Handle_ServiceComposer_AspNetCore_Tests_CompositionHandlers_When_using_composition_over_controllers_get_with_2_handlers_Model_model>();
                     });
                     services.AddRouting();
+                    services.AddHttpContextAccessor();
                     services.AddControllers()
                         .AddNewtonsoftJson();
                 },
