@@ -4,7 +4,6 @@ using System;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Primitives;
 
 namespace ServiceComposer.AspNetCore
 {
