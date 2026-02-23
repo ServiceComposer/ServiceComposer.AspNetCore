@@ -7,7 +7,20 @@ namespace ServiceComposer.AspNetCore;
 
 public class ScatterGatherOptions
 {
-    public Type CustomAggregator { get; set; }
+    public Type CustomAggregator
+    {
+        get;
+        set
+        {
+            if (value != null && !typeof(IAggregator).IsAssignableFrom(value))
+            {
+                throw new InvalidOperationException(
+                    $"CustomAggregator type '{value.FullName}' does not implement {nameof(IAggregator)}.");
+            }
+
+            field = value;
+        }
+    }
 
     /// <summary>
     /// Configures scatter/gather to use the MVC defined output formatters for content negotiation.
