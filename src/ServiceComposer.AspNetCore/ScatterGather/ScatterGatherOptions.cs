@@ -30,5 +30,5 @@ public class ScatterGatherOptions
         return UseOutputFormatters ? new DefaultObjectAggregator() : new DefaultAggregator();
     }
 
-    public IList<IGatherer> Gatherers { get; set; }
+    public IList<IGatherer> Gatherers { get; set; } = [];
 }
