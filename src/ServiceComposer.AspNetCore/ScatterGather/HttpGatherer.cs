@@ -77,20 +77,19 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
             gathererResponses.Remove(nodeAtIndex);
             nodes[i] = nodeAtIndex;
         }
-            
-        return nodes;
 
+        return nodes;
     }
 
     public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
     {
         var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient(Key);
-        
+
         var destination = MapDestinationUrl(context.Request, DestinationUrl);
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, destination);
         MapHeaders(context.Request, requestMessage);
-        
+
         var response = await client.SendAsync(requestMessage);
         
         return await TransformResponse(response);
