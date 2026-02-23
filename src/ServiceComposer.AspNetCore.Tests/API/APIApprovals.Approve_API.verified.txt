@@ -103,12 +103,6 @@ namespace ServiceComposer.AspNetCore
         protected virtual void MapHeaders(Microsoft.AspNetCore.Http.HttpRequest request, System.Net.Http.HttpRequestMessage requestMessage) { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
-    public class HttpGathererConfiguration
-    {
-        public HttpGathererConfiguration() { }
-        public string DestinationUrl { get; set; }
-        public string Key { get; set; }
-    }
     public static class HttpRequestExtensions
     {
         public static dynamic GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
@@ -215,10 +209,15 @@ namespace ServiceComposer.AspNetCore
         public bool UseOutputFormatters { get; set; }
         public void UseCustomJsonSerializerSettings(System.Func<Microsoft.AspNetCore.Http.HttpRequest, System.Text.Json.JsonSerializerOptions> jsonSerializerSettingsConfig) { }
     }
+    public class ScatterGatherConfiguration
+    {
+        public ScatterGatherConfiguration() { }
+        public void AddGathererFactory(string type, System.Func<Microsoft.Extensions.Configuration.IConfigurationSection, System.IServiceProvider, ServiceComposer.AspNetCore.IGatherer> factory) { }
+    }
     public static class ScatterGatherEndpointBuilderExtensions
     {
+        public static System.Collections.Generic.IReadOnlyList<Microsoft.AspNetCore.Builder.IEndpointConventionBuilder> MapScatterGather(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<string, ServiceComposer.AspNetCore.ScatterGatherOptions> customize = null) { }
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapScatterGather(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string template, ServiceComposer.AspNetCore.ScatterGatherOptions options) { }
-        public static System.Collections.Generic.IReadOnlyList<Microsoft.AspNetCore.Builder.IEndpointConventionBuilder> MapScatterGatherFromConfiguration(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<string, ServiceComposer.AspNetCore.ScatterGatherOptions> customize = null) { }
     }
     public class ScatterGatherOptions
     {
@@ -227,12 +226,9 @@ namespace ServiceComposer.AspNetCore
         public System.Collections.Generic.IList<ServiceComposer.AspNetCore.IGatherer> Gatherers { get; set; }
         public bool UseOutputFormatters { get; set; }
     }
-    public class ScatterGatherRouteConfiguration
+    public static class ScatterGatherServiceCollectionExtensions
     {
-        public ScatterGatherRouteConfiguration() { }
-        public System.Collections.Generic.IList<ServiceComposer.AspNetCore.HttpGathererConfiguration> Gatherers { get; set; }
-        public string Template { get; set; }
-        public bool UseOutputFormatters { get; set; }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddScatterGatherer(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<ServiceComposer.AspNetCore.ScatterGatherConfiguration> configure = null) { }
     }
     public static class ServiceCollectionExtensions
     {

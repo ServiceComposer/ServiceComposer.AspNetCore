@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -48,6 +49,70 @@ public class When_configuring_from_configuration
         return new ConfigurationBuilder().AddInMemoryCollection(dict).Build();
     }
 
+    static IConfiguration BuildConfigurationWithType(params (string template, (string key, string type, string dest)[] gatherers)[] routes)
+    {
+        var dict = new Dictionary<string, string>();
+        for (var ri = 0; ri < routes.Length; ri++)
+        {
+            dict[$"Routes:{ri}:Template"] = routes[ri].template;
+            for (var gi = 0; gi < routes[ri].gatherers.Length; gi++)
+            {
+                dict[$"Routes:{ri}:Gatherers:{gi}:Key"] = routes[ri].gatherers[gi].key;
+                dict[$"Routes:{ri}:Gatherers:{gi}:Type"] = routes[ri].gatherers[gi].type;
+                if (routes[ri].gatherers[gi].dest != null)
+                    dict[$"Routes:{ri}:Gatherers:{gi}:DestinationUrl"] = routes[ri].gatherers[gi].dest;
+            }
+        }
+        return new ConfigurationBuilder().AddInMemoryCollection(dict).Build();
+    }
+
+    class StaticDataGatherer(string key) : IGatherer
+    {
+        public string Key { get; } = key;
+
+        public Task<IEnumerable<object>> Gather(HttpContext context)
+        {
+            var data = (IEnumerable<object>)new[] { new { Value = "FromStaticData" } };
+            return Task.FromResult(data);
+        }
+    }
+
+    [Fact]
+    public async Task Custom_gatherer_type_can_be_configured()
+    {
+        // Arrange
+        var config = BuildConfigurationWithType(
+            (template: "/items", gatherers: [("StaticSource", "StaticData", null)]));
+
+        var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services =>
+            {
+                services.AddRouting();
+                services.AddControllers();
+                services.AddScatterGatherer(config=> config.AddGathererFactory("StaticData", (section, _) => new StaticDataGatherer(section["Key"])));
+            },
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    builder.MapScatterGather(config.GetSection("Routes"));
+                });
+            }
+        ).CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/items");
+
+        // Assert
+        Assert.True(response.IsSuccessStatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        var array = JsonNode.Parse(body)!.AsArray();
+        Assert.Single(array);
+        Assert.Equal("FromStaticData", array[0]!["Value"]!.GetValue<string>());
+    }
+
     [Fact]
     public async Task Routes_defined_in_configuration_are_mapped()
     {
@@ -63,6 +128,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
+                services.AddScatterGatherer();
                 services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
                     new DelegateHttpClientFactory(_ => downstreamClient)));
             },
@@ -71,7 +137,7 @@ public class When_configuring_from_configuration
                 app.UseRouting();
                 app.UseEndpoints(builder =>
                 {
-                    builder.MapScatterGatherFromConfiguration(config.GetSection("Routes"));
+                    builder.MapScatterGather(config.GetSection("Routes"));
                 });
             }
         ).CreateClient();
@@ -102,6 +168,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
+                services.AddScatterGatherer();
                 HttpClient ClientProvider(string name) => name switch
                 {
                     "ConfigSource" => configSourceClient,
@@ -117,7 +184,7 @@ public class When_configuring_from_configuration
                 app.UseEndpoints(builder =>
                 {
                     // Routes from external configuration
-                    builder.MapScatterGatherFromConfiguration(config.GetSection("Routes"));
+                    builder.MapScatterGather(config.GetSection("Routes"));
 
                     // Additional route defined purely in code
                     builder.MapScatterGather("/items/programmatic", new ScatterGatherOptions
@@ -161,6 +228,7 @@ public class When_configuring_from_configuration
             {
                 services.AddRouting();
                 services.AddControllers();
+                services.AddScatterGatherer();
                 HttpClient ClientProvider(string name) => name switch
                 {
                     "ConfigSource" => configSourceClient,
@@ -175,7 +243,7 @@ public class When_configuring_from_configuration
                 app.UseRouting();
                 app.UseEndpoints(builder =>
                 {
-                    builder.MapScatterGatherFromConfiguration(
+                    builder.MapScatterGather(
                         ctx.Configuration.GetSection("Routes"),
                         customize: (template, options) =>
                         {

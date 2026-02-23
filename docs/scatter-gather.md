@@ -332,19 +332,19 @@ Routes and their gatherers can be defined in an external configuration source su
     {
       "Template": "api/products",
       "Gatherers": [
-        { "Key": "ProductDetails", "DestinationUrl": "https://products.web.server/api/details" },
-        { "Key": "ProductPricing", "DestinationUrl": "https://pricing.web.server/api/prices" }
+        { "Key": "AProductsSource", "DestinationUrl": "https://one.web.server/api/a-source" },
+        { "Key": "AnotherProductSource", "DestinationUrl": "https://two.web.server/api/another-source" }
       ]
     }
   ]
 }
 ```
 
-Each entry in the array is a `ScatterGatherRouteConfiguration`. It maps directly to the same options available when calling `MapScatterGather` in code, including `UseOutputFormatters`.
+Each entry in the array supports the same options available when calling `MapScatterGather` in code, including `UseOutputFormatters`.
 
 ### Mapping from configuration
 
-Call `MapScatterGatherFromConfiguration`, passing the configuration section that contains the route list:
+Register scatter/gather services and call `MapScatterGather` (the `IConfiguration` overload), passing the configuration section that contains the route list:
 
 <!-- snippet: scatter-gather-from-configuration -->
 <a id='snippet-scatter-gather-from-configuration'></a>
@@ -353,6 +353,7 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddRouting();
     services.AddHttpClient();
+    services.AddScatterGatherer();
 }
 
 public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
@@ -360,16 +361,16 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, ICo
     app.UseRouting();
     app.UseEndpoints(builder =>
     {
-        builder.MapScatterGatherFromConfiguration(configuration.GetSection("ScatterGather"));
+        builder.MapScatterGather(configuration.GetSection("ScatterGather"));
     });
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L13-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L14-L30' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Adding extra routes alongside configuration-defined routes
 
-Calling `MapScatterGatherFromConfiguration` and `MapScatterGather` in the same `UseEndpoints` block is fully supported. Routes defined in code are registered in addition to those loaded from configuration:
+Calling `MapScatterGather` (the `IConfiguration` overload) and `MapScatterGather` (the template overload) in the same `UseEndpoints` block is fully supported. Routes defined in code are registered in addition to those loaded from configuration:
 
 <!-- snippet: scatter-gather-from-configuration-with-extra-route -->
 <a id='snippet-scatter-gather-from-configuration-with-extra-route'></a>
@@ -379,7 +380,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, ICo
     app.UseEndpoints(builder =>
     {
         // Routes loaded from appsettings.json (or any IConfiguration source)
-        builder.MapScatterGatherFromConfiguration(configuration.GetSection("ScatterGather"));
+        builder.MapScatterGather(configuration.GetSection("ScatterGather"));
 
         // Additional route defined purely in code
         builder.MapScatterGather("api/other", new ScatterGatherOptions
@@ -392,7 +393,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, ICo
     });
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L33-L49' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-extra-route' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L35-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-extra-route' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Customizing configuration-defined routes
@@ -406,7 +407,7 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, ICo
 {
     app.UseEndpoints(builder =>
     {
-        builder.MapScatterGatherFromConfiguration(
+        builder.MapScatterGather(
             configuration.GetSection("ScatterGather"),
             customize: (template, options) =>
             {
@@ -419,7 +420,155 @@ public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, ICo
     });
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L56-L71' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-customization' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L58-L75' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-customization' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The `customize` callback receives the route template string, making it easy to apply different changes to different routes from the same call.
+
+### Custom gatherer types
+
+By default, every gatherer entry in configuration creates an `HttpGatherer`. To plug in a different implementation — such as an in-memory source, a database reader, or a third-party gatherer — add a `Type` field to the gatherer entry and register a factory for that type.
+
+#### JSON configuration shape with a custom type
+
+```json
+{
+  "ScatterGather": [
+    {
+      "Template": "api/products",
+      "Gatherers": [
+        { "Key": "ProductDetails", "DestinationUrl": "https://products.web.server/api/details" },
+        { "Key": "StaticProductDetails", "Type": "StaticProductDetails" }
+      ]
+    }
+  ]
+}
+```
+
+When `Type` is omitted the entry behaves exactly as before (backward-compatible). When `Type` is present, the factory registered under that name is called with the raw `IConfigurationSection` for the entry, allowing access to any additional fields.
+
+#### Implementing and registering the gatherer
+
+Define the custom gatherer:
+
+<!-- snippet: scatter-gather-custom-gatherer-type -->
+<a id='snippet-scatter-gather-custom-gatherer-type'></a>
+```cs
+class StaticProductDetails(string key) : IGatherer
+{
+    public string Key { get; } = key;
+
+    public Task<IEnumerable<object>> Gather(HttpContext context)
+    {
+        var data = (IEnumerable<object>)[new { Value = "InStockItem" }];
+        return Task.FromResult(data);
+    }
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L78-L89' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Register the factory alongside the scatter/gather services in `ConfigureServices`:
+
+<!-- snippet: scatter-gather-from-configuration-with-custom-type-services -->
+<a id='snippet-scatter-gather-from-configuration-with-custom-type-services'></a>
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddRouting();
+    services.AddHttpClient();
+    services.AddScatterGatherer(config =>
+    {
+        config.AddGathererFactory(
+            "StaticProductDetails",
+            (section, _) => new StaticProductDetails(section["Key"]));
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L107-L119' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-services' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The factory receives:
+- `IConfigurationSection` — the raw section for the gatherer entry (access any field via `section["FieldName"]`)
+- `IServiceProvider` — the application's service provider, useful when the gatherer depends on registered services
+
+Then map as usual:
+
+<!-- snippet: scatter-gather-from-configuration-with-custom-type-configure -->
+<a id='snippet-scatter-gather-from-configuration-with-custom-type-configure'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+{
+    app.UseRouting();
+    app.UseEndpoints(builder =>
+    {
+        builder.MapScatterGather(configuration.GetSection("ScatterGather"));
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L121-L130' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-configure' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If a `Type` value is encountered in configuration but no matching factory has been registered, a descriptive `InvalidOperationException` is thrown at startup listing the missing type and how to register it.
+
+#### Gatherers with extra configuration properties
+
+Because the factory receives the raw `IConfigurationSection`, any additional fields present in the entry are available alongside `Key` and `Type`. Use `section["FieldName"]` for strings and `section.GetValue<T>("FieldName")` for typed values.
+
+Given this configuration:
+
+```json
+{
+  "ScatterGather": [
+    {
+      "Template": "api/products",
+      "Gatherers": [
+        { "Key": "Inventory", "Type": "FilteredInventory", "Category": "Electronics", "MaxItems": 10 }
+      ]
+    }
+  ]
+}
+```
+
+The gatherer reads those extra fields from its constructor:
+
+<!-- snippet: scatter-gather-custom-gatherer-type-extra-properties -->
+<a id='snippet-scatter-gather-custom-gatherer-type-extra-properties'></a>
+```cs
+class GathererWithProperties(string key, string category, int maxItems) : IGatherer
+{
+    public string Key { get; } = key;
+
+    public Task<IEnumerable<object>> Gather(HttpContext context)
+    {
+        // use category and maxItems to filter/limit results from a data source
+        var data = (IEnumerable<object>)[new { Category = category, MaxItems = maxItems }];
+        return Task.FromResult(data);
+    }
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L91-L103' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type-extra-properties' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And the factory passes those values through at registration time:
+
+<!-- snippet: scatter-gather-from-configuration-with-custom-type-extra-properties -->
+<a id='snippet-scatter-gather-from-configuration-with-custom-type-extra-properties'></a>
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddRouting();
+    services.AddHttpClient();
+    services.AddScatterGatherer(config =>
+    {
+        config.AddGathererFactory(
+            "WithProperties",
+            (section, _) => new GathererWithProperties(
+                section["Key"],
+                section["Category"],
+                section.GetValue<int>("MaxItems")));
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L135-L150' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-extra-properties' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->

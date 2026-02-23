@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceComposer.AspNetCore;
 
@@ -44,8 +45,7 @@ public static class ScatterGatherEndpointBuilderExtensions
 
     /// <summary>
     /// Reads scatter/gather route definitions from <paramref name="configuration"/> and registers
-    /// a GET endpoint for each one. The <paramref name="configuration"/> value is expected to be
-    /// (or bind as) a list of <see cref="ScatterGatherRouteConfiguration"/> entries — pass
+    /// a GET endpoint for each one. Pass
     /// <c>configuration.GetSection("ScatterGather")</c> when the definitions are nested under a
     /// named key.
     /// </summary>
@@ -63,31 +63,56 @@ public static class ScatterGatherEndpointBuilderExtensions
     /// A read-only list of <see cref="IEndpointConventionBuilder"/> instances — one per route
     /// defined in <paramref name="configuration"/>.
     /// </returns>
-    public static IReadOnlyList<IEndpointConventionBuilder> MapScatterGatherFromConfiguration(
-        this IEndpointRouteBuilder builder,
-        IConfiguration configuration,
-        Action<string, ScatterGatherOptions> customize = null)
+    public static IReadOnlyList<IEndpointConventionBuilder> MapScatterGather(this IEndpointRouteBuilder builder, IConfiguration configuration, Action<string, ScatterGatherOptions> customize = null)
     {
-        var routes = configuration.Get<IList<ScatterGatherRouteConfiguration>>();
-        if (routes is null or { Count: 0 })
+        var routeSections = configuration.GetChildren().ToList();
+        if (routeSections.Count == 0)
         {
             return [];
         }
 
-        var result = new List<IEndpointConventionBuilder>(routes.Count);
-        foreach (var route in routes)
+        var scatterGatherConfiguration = builder.ServiceProvider.GetRequiredService<ScatterGatherConfiguration>();
+        var sp = builder.ServiceProvider;
+
+        var result = new List<IEndpointConventionBuilder>(routeSections.Count);
+        foreach (var routeSection in routeSections)
         {
+            var template = routeSection["Template"];
+            var useOutputFormatters = routeSection.GetValue<bool>("UseOutputFormatters");
+
+            var gatherers = routeSection
+                .GetSection("Gatherers")
+                .GetChildren()
+                .Select(gs => CreateGatherer(gs, scatterGatherConfiguration.Registry, sp))
+                .ToList();
+
             var options = new ScatterGatherOptions
             {
-                UseOutputFormatters = route.UseOutputFormatters,
-                Gatherers = route.Gatherers
-                    .Select(g => (IGatherer)new HttpGatherer(g.Key, g.DestinationUrl))
-                    .ToList()
+                UseOutputFormatters = useOutputFormatters,
+                Gatherers = gatherers
             };
-            customize?.Invoke(route.Template, options);
-            result.Add(builder.MapScatterGather(route.Template, options));
+            customize?.Invoke(template, options);
+            result.Add(builder.MapScatterGather(template, options));
         }
 
         return result;
+    }
+
+    static IGatherer CreateGatherer(IConfigurationSection section, GathererFactoryRegistry registry, IServiceProvider sp)
+    {
+        var type = section["Type"];
+        if (string.IsNullOrEmpty(type))
+        {
+            return new HttpGatherer(section["Key"], section["DestinationUrl"]);
+        }
+
+        if (registry?.TryGet(type, out var factory) == true)
+        {
+            return factory(section, sp);
+        }
+
+        throw new InvalidOperationException(
+            $"No gatherer factory registered for type '{type}'. " +
+            $"Register one with services.AddScatterGather(config => config.AddGathererFactory(\"{type}\", ...)).");
     }
 }
