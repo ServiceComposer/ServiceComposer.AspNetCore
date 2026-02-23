@@ -1,0 +1,204 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using ServiceComposer.AspNetCore.Testing;
+using ServiceComposer.AspNetCore.Tests.Utils;
+using Xunit;
+
+namespace ServiceComposer.AspNetCore.Tests.ScatterGather;
+
+public class When_configuring_from_configuration
+{
+    static HttpClient BuildDownstreamClient(string routeTemplate, object[] responseItems)
+    {
+        return new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services => services.AddRouting(),
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    builder.MapGet(routeTemplate, () => responseItems);
+                });
+            }
+        ).CreateClient();
+    }
+
+    static IConfiguration BuildConfiguration(params (string template, (string key, string dest)[] gatherers)[] routes)
+    {
+        var dict = new Dictionary<string, string>();
+        for (var ri = 0; ri < routes.Length; ri++)
+        {
+            dict[$"Routes:{ri}:Template"] = routes[ri].template;
+            for (var gi = 0; gi < routes[ri].gatherers.Length; gi++)
+            {
+                dict[$"Routes:{ri}:Gatherers:{gi}:Key"] = routes[ri].gatherers[gi].key;
+                dict[$"Routes:{ri}:Gatherers:{gi}:DestinationUrl"] = routes[ri].gatherers[gi].dest;
+            }
+        }
+        return new ConfigurationBuilder().AddInMemoryCollection(dict).Build();
+    }
+
+    [Fact]
+    public async Task Routes_defined_in_configuration_are_mapped()
+    {
+        // Arrange
+        var downstreamClient = BuildDownstreamClient("/upstream/source", new[] { new { Value = "FromConfig" } });
+
+        var config = BuildConfiguration(
+            (template: "/items", gatherers: [("Source", "/upstream/source")]));
+
+        var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services =>
+            {
+                services.AddRouting();
+                services.AddControllers();
+                services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
+                    new DelegateHttpClientFactory(_ => downstreamClient)));
+            },
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    builder.MapScatterGatherFromConfiguration(config.GetSection("Routes"));
+                });
+            }
+        ).CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/items");
+
+        // Assert
+        Assert.True(response.IsSuccessStatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        var array = JsonNode.Parse(body)!.AsArray();
+        Assert.Equal("FromConfig", array[0]!["value"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task Programmatic_routes_coexist_with_configuration_routes()
+    {
+        // Arrange
+        var configSourceClient = BuildDownstreamClient("/upstream/config-source", new[] { new { Value = "FromConfig" } });
+        var programmaticSourceClient = BuildDownstreamClient("/upstream/programmatic-source", new[] { new { Value = "FromCode" } });
+
+        var config = BuildConfiguration(
+            (template: "/items/config", gatherers: [("ConfigSource", "/upstream/config-source")]));
+
+        var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services =>
+            {
+                services.AddRouting();
+                services.AddControllers();
+                HttpClient ClientProvider(string name) => name switch
+                {
+                    "ConfigSource" => configSourceClient,
+                    "ProgrammaticSource" => programmaticSourceClient,
+                    _ => throw new NotSupportedException($"No HTTP client registered for '{name}'")
+                };
+                services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
+                    new DelegateHttpClientFactory(ClientProvider)));
+            },
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    // Routes from external configuration
+                    builder.MapScatterGatherFromConfiguration(config.GetSection("Routes"));
+
+                    // Additional route defined purely in code
+                    builder.MapScatterGather("/items/programmatic", new ScatterGatherOptions
+                    {
+                        Gatherers = new List<IGatherer>
+                        {
+                            new HttpGatherer("ProgrammaticSource", "/upstream/programmatic-source")
+                        }
+                    });
+                });
+            }
+        ).CreateClient();
+
+        // Act
+        var configResponse = await client.GetAsync("/items/config");
+        var programmaticResponse = await client.GetAsync("/items/programmatic");
+
+        // Assert
+        Assert.True(configResponse.IsSuccessStatusCode);
+        var configBody = await configResponse.Content.ReadAsStringAsync();
+        var configArray = JsonNode.Parse(configBody)!.AsArray();
+        Assert.Equal("FromConfig", configArray[0]!["value"]!.GetValue<string>());
+
+        Assert.True(programmaticResponse.IsSuccessStatusCode);
+        var programmaticBody = await programmaticResponse.Content.ReadAsStringAsync();
+        var programmaticArray = JsonNode.Parse(programmaticBody)!.AsArray();
+        Assert.Equal("FromCode", programmaticArray[0]!["value"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task Configuration_routes_can_be_customized()
+    {
+        // Arrange - two downstream services; the config only knows about the first one,
+        // the second is injected via the customize callback.
+        var configSourceClient = BuildDownstreamClient("/upstream/config-source", new[] { new { Value = "FromConfig" } });
+        var extraSourceClient = BuildDownstreamClient("/upstream/extra-source", new[] { new { Value = "FromCustomization" } });
+
+        var config = BuildConfiguration(
+            (template: "/items", gatherers: [("ConfigSource", "/upstream/config-source")]));
+
+        var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+        (
+            configureServices: services =>
+            {
+                services.AddRouting();
+                services.AddControllers();
+                HttpClient ClientProvider(string name) => name switch
+                {
+                    "ConfigSource" => configSourceClient,
+                    "ExtraSource" => extraSourceClient,
+                    _ => throw new NotSupportedException($"No HTTP client registered for '{name}'")
+                };
+                services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
+                    new DelegateHttpClientFactory(ClientProvider)));
+            },
+            configure: app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(builder =>
+                {
+                    builder.MapScatterGatherFromConfiguration(
+                        config.GetSection("Routes"),
+                        customize: (template, options) =>
+                        {
+                            // Add an extra gatherer that is not in the config file
+                            options.Gatherers.Add(new HttpGatherer("ExtraSource", "/upstream/extra-source"));
+                        });
+                });
+            }
+        ).CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/items");
+
+        // Assert
+        Assert.True(response.IsSuccessStatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        var array = JsonNode.Parse(body)!.AsArray();
+        var values = new HashSet<string>(array.Select(n => n!["value"]!.GetValue<string>()));
+        Assert.Contains("FromConfig", values);
+        Assert.Contains("FromCustomization", values);
+        Assert.Equal(2, array.Count);
+    }
+}

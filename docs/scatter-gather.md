@@ -319,3 +319,107 @@ class CustomGatherer : IGatherer
 ```
 <sup><a href='/src/Snippets/ScatterGather/CustomGatherer.cs#L8-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+## Configuration-based setup
+
+Routes and their gatherers can be defined in an external configuration source such as `appsettings.json`, environment variables, or any other `IConfiguration`-compatible provider. This allows changes to be made without recompiling the application.
+
+### JSON configuration shape
+
+```json
+{
+  "ScatterGather": [
+    {
+      "Template": "api/products",
+      "Gatherers": [
+        { "Key": "ProductDetails", "DestinationUrl": "https://products.web.server/api/details" },
+        { "Key": "ProductPricing", "DestinationUrl": "https://pricing.web.server/api/prices" }
+      ]
+    }
+  ]
+}
+```
+
+Each entry in the array is a `ScatterGatherRouteConfiguration`. It maps directly to the same options available when calling `MapScatterGather` in code, including `UseOutputFormatters`.
+
+### Mapping from configuration
+
+Call `MapScatterGatherFromConfiguration`, passing the configuration section that contains the route list:
+
+<!-- snippet: scatter-gather-from-configuration -->
+<a id='snippet-scatter-gather-from-configuration'></a>
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddRouting();
+    services.AddHttpClient();
+}
+
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+{
+    app.UseRouting();
+    app.UseEndpoints(builder =>
+    {
+        builder.MapScatterGatherFromConfiguration(configuration.GetSection("ScatterGather"));
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L13-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Adding extra routes alongside configuration-defined routes
+
+Calling `MapScatterGatherFromConfiguration` and `MapScatterGather` in the same `UseEndpoints` block is fully supported. Routes defined in code are registered in addition to those loaded from configuration:
+
+<!-- snippet: scatter-gather-from-configuration-with-extra-route -->
+<a id='snippet-scatter-gather-from-configuration-with-extra-route'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+{
+    app.UseEndpoints(builder =>
+    {
+        // Routes loaded from appsettings.json (or any IConfiguration source)
+        builder.MapScatterGatherFromConfiguration(configuration.GetSection("ScatterGather"));
+
+        // Additional route defined purely in code
+        builder.MapScatterGather("api/other", new ScatterGatherOptions
+        {
+            Gatherers = new List<IGatherer>
+            {
+                new HttpGatherer("OtherSource", "https://other.web.server/api/items")
+            }
+        });
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L33-L49' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-extra-route' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Customizing configuration-defined routes
+
+The optional `customize` callback is invoked for every route after its `ScatterGatherOptions` has been built from configuration but before the endpoint is registered. Use it to add gatherers, override `UseOutputFormatters`, set a `CustomAggregator`, or apply any other per-route change:
+
+<!-- snippet: scatter-gather-from-configuration-with-customization -->
+<a id='snippet-scatter-gather-from-configuration-with-customization'></a>
+```cs
+public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+{
+    app.UseEndpoints(builder =>
+    {
+        builder.MapScatterGatherFromConfiguration(
+            configuration.GetSection("ScatterGather"),
+            customize: (template, options) =>
+            {
+                if (template == "api/products")
+                {
+                    // Inject an additional gatherer not present in the configuration file
+                    options.Gatherers.Add(new HttpGatherer("Reviews", "https://reviews.web.server/api/reviews"));
+                }
+            });
+    });
+}
+```
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L56-L71' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-customization' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The `customize` callback receives the route template string, making it easy to apply different changes to different routes from the same call.

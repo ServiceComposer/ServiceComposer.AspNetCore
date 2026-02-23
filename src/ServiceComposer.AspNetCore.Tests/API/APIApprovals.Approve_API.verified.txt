@@ -103,6 +103,12 @@ namespace ServiceComposer.AspNetCore
         protected virtual void MapHeaders(Microsoft.AspNetCore.Http.HttpRequest request, System.Net.Http.HttpRequestMessage requestMessage) { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.Text.Json.Nodes.JsonNode>> TransformResponse(System.Net.Http.HttpResponseMessage responseMessage) { }
     }
+    public class HttpGathererConfiguration
+    {
+        public HttpGathererConfiguration() { }
+        public string DestinationUrl { get; set; }
+        public string Key { get; set; }
+    }
     public static class HttpRequestExtensions
     {
         public static dynamic GetComposedResponseModel(this Microsoft.AspNetCore.Http.HttpRequest request) { }
@@ -212,12 +218,20 @@ namespace ServiceComposer.AspNetCore
     public static class ScatterGatherEndpointBuilderExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapScatterGather(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string template, ServiceComposer.AspNetCore.ScatterGatherOptions options) { }
+        public static System.Collections.Generic.IReadOnlyList<Microsoft.AspNetCore.Builder.IEndpointConventionBuilder> MapScatterGatherFromConfiguration(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<string, ServiceComposer.AspNetCore.ScatterGatherOptions> customize = null) { }
     }
     public class ScatterGatherOptions
     {
         public ScatterGatherOptions() { }
         public System.Type CustomAggregator { get; set; }
         public System.Collections.Generic.IList<ServiceComposer.AspNetCore.IGatherer> Gatherers { get; set; }
+        public bool UseOutputFormatters { get; set; }
+    }
+    public class ScatterGatherRouteConfiguration
+    {
+        public ScatterGatherRouteConfiguration() { }
+        public System.Collections.Generic.IList<ServiceComposer.AspNetCore.HttpGathererConfiguration> Gatherers { get; set; }
+        public string Template { get; set; }
         public bool UseOutputFormatters { get; set; }
     }
     public static class ServiceCollectionExtensions
