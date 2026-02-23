@@ -18,7 +18,7 @@ public class CustomizingDownstreamURLs
                 {
                     DestinationUrlMapper = (request, destination) => destination.Replace(
                         "{this-is-contextual}",
-                        request.HttpContext.Request.Query["this-is-contextual"])
+                        request.Query["this-is-contextual"])
                 }
             }
         }));
