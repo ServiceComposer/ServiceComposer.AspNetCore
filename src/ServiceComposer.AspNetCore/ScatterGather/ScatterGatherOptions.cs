@@ -37,7 +37,8 @@ public class ScatterGatherOptions
     {
         if (CustomAggregator != null)
         {
-            return (IAggregator)httpContext.RequestServices.GetRequiredService(CustomAggregator);
+            return (IAggregator)httpContext.RequestServices.GetService(CustomAggregator)
+                   ?? throw new InvalidOperationException($"The requested custom aggregator {CustomAggregator} cannot be resolved. Is it registered in the ServiceCollection?.");
         }
 
         return UseOutputFormatters ? new DefaultObjectAggregator() : new DefaultAggregator();
