@@ -104,7 +104,7 @@ public static class ScatterGatherEndpointBuilderExtensions
     static IGatherer CreateGatherer(IConfigurationSection section, GathererFactoryRegistry registry, IServiceProvider sp)
     {
         var type = section["Type"];
-        if (string.IsNullOrEmpty(type))
+        if (string.IsNullOrWhiteSpace(type))
         {
             return new HttpGatherer(section["Key"], section["DestinationUrl"]);
         }
