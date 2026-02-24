@@ -40,12 +40,15 @@ namespace ServiceComposer.AspNetCore
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
 
+            var logger = endpoints.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(EndpointsExtensions));
+
             MapGetComponents(
                 compositionMetadataRegistry,
                 endpoints.DataSources,
                 options.CompositionOverControllersOptions,
                 options.ResponseSerialization.DefaultResponseCasing,
-                options.ResponseSerialization.UseOutputFormatters);
+                options.ResponseSerialization.UseOutputFormatters,
+                logger);
             if (options.IsWriteSupportEnabled)
             {
                 MapPostComponents(
@@ -53,7 +56,8 @@ namespace ServiceComposer.AspNetCore
                     endpoints.DataSources,
                     options.CompositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing,
-                    options.ResponseSerialization.UseOutputFormatters);
+                    options.ResponseSerialization.UseOutputFormatters,
+                    logger);
                 MapPutComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
@@ -81,7 +85,7 @@ namespace ServiceComposer.AspNetCore
         static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters, ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -92,6 +96,8 @@ namespace ServiceComposer.AspNetCore
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
+                    logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at GET {Template}.",
+                        componentsGroup.Count(), componentsGroup.Key);
                     compositionOverControllerGetComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
                 }
                 else
@@ -106,7 +112,7 @@ namespace ServiceComposer.AspNetCore
         static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters, ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -117,6 +123,8 @@ namespace ServiceComposer.AspNetCore
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
                 {
+                    logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at POST {Template}.",
+                        componentsGroup.Count(), componentsGroup.Key);
                     compositionOverControllerPostComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
                 }
                 else
