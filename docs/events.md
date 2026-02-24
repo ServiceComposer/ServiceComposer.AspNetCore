@@ -82,7 +82,7 @@ public class RouteBasedEventHandler : ICompositionEventsSubscriber
     }
 }
 ```
-<sup><a href='/src/Snippets/Events/RouteBasedEventHandler.cs#L8-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-route-based-event-handler' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Events/RouteBasedEventHandler.cs#L7-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-route-based-event-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > [!NOTE]

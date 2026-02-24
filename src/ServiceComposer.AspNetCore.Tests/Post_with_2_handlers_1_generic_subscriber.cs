@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Mime;

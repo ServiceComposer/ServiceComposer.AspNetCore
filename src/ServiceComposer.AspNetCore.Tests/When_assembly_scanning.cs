@@ -44,6 +44,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         };
                     });
                     services.AddRouting();
+                    // TestContractLessCompositionHandler (in TestClassLibraryWithHandlers) uses IHttpContextAccessor via
+                    // constructor injection. Host.CreateDefaultBuilder (used by the testing library) enables ValidateOnBuild
+                    // in Development, which catches unresolvable dependencies at startup even when not exercised by the test.
+                    services.AddHttpContextAccessor();
                 },
                 configure: app =>
                 {
@@ -123,6 +127,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         };
                     });
                     services.AddRouting();
+                    // TestContractLessCompositionHandler (in TestClassLibraryWithHandlers) uses IHttpContextAccessor via
+                    // constructor injection. Host.CreateDefaultBuilder (used by the testing library) enables ValidateOnBuild
+                    // in Development, which catches unresolvable dependencies at startup even when not exercised by the test.
+                    services.AddHttpContextAccessor();
                 },
                 configure: app =>
                 {
@@ -165,6 +173,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         };
                     });
                     services.AddRouting();
+                    // TestContractLessCompositionHandler (in TestClassLibraryWithHandlers) uses IHttpContextAccessor via
+                    // constructor injection. Host.CreateDefaultBuilder (used by the testing library) enables ValidateOnBuild
+                    // in Development, which catches unresolvable dependencies at startup even when not exercised by the test.
+                    services.AddHttpContextAccessor();
                 },
                 configure: app =>
                 {

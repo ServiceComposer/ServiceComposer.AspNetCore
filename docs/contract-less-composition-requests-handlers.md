@@ -17,7 +17,7 @@ class SampleCompositionHandler
     }
 }
 ```
-<sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L4-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Contractless.CompositionHandlers/SampleCompositionHandler.cs#L7-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-contract-less-handler-sample' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Compared to what is available today, when using classes that implement `ICompositionRequestsHandler`, contract-less composition request handlers allow grouping handlers belonging to the same logical context, rather than being forced to artificially split them into multiple classes due to the need to implement an interface.
