@@ -27,6 +27,8 @@ namespace ServiceComposer.AspNetCore.Tests
 
             var log = Assert.Single(loggerFactory.Sink.LogEntries);
             Assert.Equal(LogLevel.Warning, log.LogLevel);
+            Assert.Equal("ResponseSerialization {UseOutputFormatters} is set to true, and it's also configured to use either a custom response casing or custom json serializer settings. When using output formatters, custom settings are ignored", log.OriginalFormat);
+            Assert.Contains(log.Properties, p => p.Key == "UseOutputFormatters" && (string)p.Value == nameof(ResponseSerializationOptions.UseOutputFormatters));
             
             await Verifier.Verify(log.Message);
         }
