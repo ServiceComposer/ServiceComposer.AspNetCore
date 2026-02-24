@@ -1,0 +1,5 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ServiceComposer.AspNetCore.SourceGeneration -> /home/runner/work/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore/src/ServiceComposer.AspNetCore.SourceGeneration/bin/Debug/netstandard2.0/ServiceComposer.AspNetCore.SourceGeneration.dll
+/home/runner/work/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore/src/ServiceComposer.AspNetCore/ScatterGather/HttpGatherer.cs(20,109): error CS8625: Cannot convert null literal to non-nullable reference type. [/home/runner/work/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore/src/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore.csproj]
+/home/runner/work/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore/src/ServiceComposer.AspNetCore/ScatterGather/HttpGatherer.cs(99,24): error CS8601: Possible null reference assignment. [/home/runner/work/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore/src/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore.csproj]

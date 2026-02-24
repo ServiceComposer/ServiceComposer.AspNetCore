@@ -1,6 +1,9 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
@@ -13,7 +16,9 @@ namespace ServiceComposer.AspNetCore;
 
 public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode>(key)
 {
-    static string ValidateDestination(string value, [CallerArgumentExpression(nameof(value))] string name = null)
+    ILogger<HttpGatherer>? _logger;
+
+    static string ValidateDestination(string value, [CallerArgumentExpression(nameof(value))] string? name = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value, name);
         return value;
@@ -87,7 +92,7 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         // Remove() before storing it in the output array is required; adding an already-parented
         // node to another structure (e.g. the aggregator's collection) would throw. Iterating in
         // reverse avoids index-shifting issues while removing.
-        var nodes = new JsonNode[gathererResponses.Count];
+        var nodes = new JsonNode?[gathererResponses.Count];
         for (var i = gathererResponses.Count - 1; i >= 0; i--)
         {
             var nodeAtIndex = gathererResponses[i];
@@ -95,7 +100,7 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
             nodes[i] = nodeAtIndex;
         }
 
-        return nodes;
+        return nodes.Where(n => n is not null)!;
     }
 
     public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
@@ -116,9 +121,8 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         }
         catch(HttpRequestException ex) when (IgnoreDownstreamRequestErrors)
         {
-            context.RequestServices.GetService<ILoggerFactory>()?
-                .CreateLogger<HttpGatherer>()
-                .LogWarning(ex, "Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", Key, destination);
+            _logger ??= context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger<HttpGatherer>();
+            _logger?.LogWarning(ex, "Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", Key, destination);
             return [];
         }
     }

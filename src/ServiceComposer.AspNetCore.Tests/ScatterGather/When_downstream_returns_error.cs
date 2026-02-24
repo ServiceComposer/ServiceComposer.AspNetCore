@@ -179,7 +179,9 @@ public class When_downstream_returns_error
         var log = Assert.Single(loggerFactory.Sink.LogEntries);
         Assert.Equal("Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", log.OriginalFormat);
         Assert.Equal(LogLevel.Warning, log.LogLevel);
-        Assert.Contains(log.Properties, p => p.Key == "GathererKey" && (string)p.Value == "Source");
-        Assert.Contains(log.Properties, p => p.Key == "DestinationUrl" && (string)p.Value == "/upstream/source");
+        var gathererKey = Assert.Single(log.Properties, p => p.Key == "GathererKey").Value;
+        var destinationUrl = Assert.Single(log.Properties, p => p.Key == "DestinationUrl").Value;
+        Assert.Equal("Source", gathererKey);
+        Assert.Equal("/upstream/source", destinationUrl);
     }
 }
