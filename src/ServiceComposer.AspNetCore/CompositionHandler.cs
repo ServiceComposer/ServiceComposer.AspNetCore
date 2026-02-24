@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Dynamic;
 using System.Linq;
@@ -40,7 +41,14 @@ namespace ServiceComposer.AspNetCore
                     {
                         // TODO: apply composition filter here not before
                         // invoking the whole composition process
-                        return handler.Handle(request);
+                        try
+                        {
+                            return handler.Handle(request);
+                        }
+                        catch (Exception ex)
+                        {
+                            return Task.FromException(ex);
+                        }
                     })
                     .ToList();
 
@@ -57,6 +65,9 @@ namespace ServiceComposer.AspNetCore
                     }
                     catch (Exception ex)
                     {
+                        var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(CompositionHandler));
+                        logger?.LogError(ex, "Composition failed for request {RequestId}.", compositionContext.RequestId);
+
                         //TODO: refactor to Task.WhenAll
                         var errorHandlers = handlers.OfType<ICompositionErrorsHandler>();
                         foreach (var handler in errorHandlers)
