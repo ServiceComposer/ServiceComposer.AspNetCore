@@ -85,7 +85,8 @@ namespace ServiceComposer.AspNetCore
         static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters, ILogger logger)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -112,7 +113,8 @@ namespace ServiceComposer.AspNetCore
         static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters, ILogger logger)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
