@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore;
 
@@ -18,6 +19,9 @@ public static class ScatterGatherEndpointBuilderExtensions
     {
         return builder.MapGet(template, async context =>
         {
+            var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ScatterGatherEndpointBuilderExtensions));
+            logger?.LogDebug("Executing scatter-gather for {Template} with {GathererCount} gatherer(s).", template, options.Gatherers.Count);
+
             var aggregator = options.GetAggregator(context);
 
             async Task GatherAndAdd(IGatherer gatherer)
@@ -68,6 +72,8 @@ public static class ScatterGatherEndpointBuilderExtensions
         var routeSections = configuration.GetChildren().ToList();
         if (routeSections.Count == 0)
         {
+            var logger = builder.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ScatterGatherEndpointBuilderExtensions));
+            logger?.LogWarning("No scatter-gather route sections found in configuration. No endpoints will be registered.");
             return [];
         }
 
