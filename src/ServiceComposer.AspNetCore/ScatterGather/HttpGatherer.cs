@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
@@ -100,7 +99,7 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
             nodes[i] = nodeAtIndex;
         }
 
-        return nodes.Where(n => n is not null)!;
+        return nodes!;
     }
 
     public override async Task<IEnumerable<JsonNode>> Gather(HttpContext context)
