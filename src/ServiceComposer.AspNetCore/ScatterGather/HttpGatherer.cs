@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore;
 
@@ -113,8 +114,11 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
 
             return await TransformResponse(response);
         }
-        catch(HttpRequestException) when (IgnoreDownstreamRequestErrors)
+        catch(HttpRequestException ex) when (IgnoreDownstreamRequestErrors)
         {
+            context.RequestServices.GetService<ILoggerFactory>()?
+                .CreateLogger<HttpGatherer>()
+                .LogWarning(ex, "Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", Key, destination);
             return [];
         }
     }
