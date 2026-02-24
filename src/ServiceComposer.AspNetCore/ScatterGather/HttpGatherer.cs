@@ -120,7 +120,7 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
         }
         catch(HttpRequestException ex) when (IgnoreDownstreamRequestErrors)
         {
-            _logger ??= context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger<HttpGatherer>();
+            _logger ??= context.RequestServices.GetService<ILogger<HttpGatherer>>();
             _logger?.LogWarning(ex, "Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", Key, destination);
             return [];
         }
