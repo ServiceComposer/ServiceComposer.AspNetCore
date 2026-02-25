@@ -16,9 +16,8 @@ namespace ServiceComposer.AspNetCore
         {
             if (UseOutputFormatters && (DefaultResponseCasing != defaultCasing || usingCustomJsonSerializerSettings))
             {
-                logger.LogWarning($"ResponseSerialization {nameof(UseOutputFormatters)} is set to true, and it's also configured to use " +
-                                  "either a custom response casing or custom json serializer settings. When using output formatters, custom " +
-                                  "settings are ignored");
+                logger.LogWarning("ResponseSerialization {UseOutputFormatters} is set to true, and it's also configured to use either a custom response casing or custom json serializer settings. When using output formatters, custom settings are ignored",
+                    nameof(UseOutputFormatters));
             }
         }
 

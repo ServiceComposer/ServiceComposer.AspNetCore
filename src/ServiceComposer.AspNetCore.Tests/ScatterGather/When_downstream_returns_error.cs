@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using MELT;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore.Testing;
 using ServiceComposer.AspNetCore.Tests.Utils;
 using Xunit;
@@ -138,12 +140,14 @@ public class When_downstream_returns_error
     {
         // Arrange
         var failingClient = BuildDownstreamClientReturning(HttpStatusCode.InternalServerError);
+        var loggerFactory = TestLoggerFactory.Create(options => options.FilterByTypeName<HttpGatherer>());
 
         var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
         (
             configureServices: services =>
             {
                 services.AddRouting();
+                services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(loggerFactory));
                 services.Replace(new ServiceDescriptor(typeof(IHttpClientFactory),
                     new DelegateHttpClientFactory(_ => failingClient)));
             },
@@ -171,5 +175,13 @@ public class When_downstream_returns_error
         var body = await response.Content.ReadAsStringAsync();
         var array = System.Text.Json.Nodes.JsonNode.Parse(body)!.AsArray();
         Assert.Empty(array);
+
+        var log = Assert.Single(loggerFactory.Sink.LogEntries);
+        Assert.Equal("Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", log.OriginalFormat);
+        Assert.Equal(LogLevel.Warning, log.LogLevel);
+        var gathererKey = Assert.Single(log.Properties, p => p.Key == "GathererKey").Value;
+        var destinationUrl = Assert.Single(log.Properties, p => p.Key == "DestinationUrl").Value;
+        Assert.Equal("Source", gathererKey);
+        Assert.Equal("/upstream/source", destinationUrl);
     }
 }

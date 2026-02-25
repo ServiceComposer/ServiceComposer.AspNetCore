@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -13,11 +14,13 @@ namespace ServiceComposer.AspNetCore
     {
         readonly CompositionOverControllersRoutes _compositionOverControllersRoutes;
         readonly CompositionOverControllersOptions _compositionOverControllersOptions;
+        readonly ILogger<CompositionOverControllersActionFilter> _logger;
 
-        public CompositionOverControllersActionFilter(CompositionOverControllersRoutes compositionOverControllersRoutes, ViewModelCompositionOptions viewModelCompositionOptions)
+        public CompositionOverControllersActionFilter(CompositionOverControllersRoutes compositionOverControllersRoutes, ViewModelCompositionOptions viewModelCompositionOptions, ILogger<CompositionOverControllersActionFilter> logger)
         {
             _compositionOverControllersRoutes = compositionOverControllersRoutes;
             _compositionOverControllersOptions = viewModelCompositionOptions.CompositionOverControllersOptions;
+            _logger = logger;
         }
 
         public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
@@ -49,6 +52,8 @@ namespace ServiceComposer.AspNetCore
                     );
 
                     var handlerTypes = handlers.Select(h => h.ComponentType).ToArray();
+                    _logger.LogDebug("Composing over controller action at {Method} {Template} with {HandlerCount} handler(s).",
+                        context.HttpContext.Request.Method, rawTemplate, handlerTypes.Length);
                     var viewModel = await CompositionHandler.HandleComposableRequest(context.HttpContext, compositionContext, handlerTypes);
                     switch (context.Result)
                     {

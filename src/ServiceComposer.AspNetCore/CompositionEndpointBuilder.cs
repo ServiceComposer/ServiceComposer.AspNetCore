@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -66,6 +67,8 @@ namespace ServiceComposer.AspNetCore
                         casing = ResponseCasing.CamelCase;
                         break;
                     default:
+                        var logger = context.RequestServices.GetService<ILogger<CompositionEndpointBuilder>>();
+                        logger?.LogWarning("Unsupported Accept-Casing header value {RequestedCasing}. Supported values are 'casing/pascal' and 'casing/camel'.", (string)requestedCasing);
                         throw new NotSupportedException(
                             $"Requested casing ({requestedCasing}) is not supported, " +
                             $"supported values are: 'casing/pascal' or 'casing/camel'.");
@@ -114,6 +117,9 @@ namespace ServiceComposer.AspNetCore
                         composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
                         argumentsByComponent
                     );
+                    var logger = composerHttpContext.RequestServices.GetService<ILogger<CompositionEndpointBuilder>>();
+                    logger?.LogDebug("Handling composition request at {Method} {Template} with {HandlerCount} handler(s).",
+                        composerHttpContext.Request.Method, routePattern.RawText, componentsTypes.Length);
                     await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
                 };
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
