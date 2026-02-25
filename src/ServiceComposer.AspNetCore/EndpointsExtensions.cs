@@ -42,6 +42,8 @@ namespace ServiceComposer.AspNetCore
 
             var logger = endpoints.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(EndpointsExtensions));
 
+            logger?.LogDebug("{ComponentCount} composition component(s) registered.", compositionMetadataRegistry.Components.Count);
+
             MapGetComponents(
                 compositionMetadataRegistry,
                 endpoints.DataSources,
