@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -43,7 +44,10 @@ namespace ServiceComposer.AspNetCore
             {
                 handlers.AddRange(compositionHandlers.Cast<CompositionEventHandler<TEvent>>());
             }
-            
+
+            var logger = httpRequest.HttpContext.RequestServices.GetService<ILogger<CompositionContext>>();
+            logger?.LogDebug("Raising event {EventType} to {HandlerCount} handler(s).", typeof(TEvent).Name, handlers.Count);
+
             var tasks = handlers.Select(handler => handler(@event, httpRequest)).ToList();
             return Task.WhenAll(tasks);
         }
