@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -35,7 +36,7 @@ namespace ServiceComposer.AspNetCore
 
         readonly List<Func<string, FilterResults>> assemblyFilters = [];
 
-        internal IEnumerable<Assembly> Scan()
+        internal IEnumerable<Assembly> Scan(ILogger logger = null)
         {
             var assemblies = new Dictionary<string, Assembly>();
 
@@ -60,7 +61,7 @@ namespace ServiceComposer.AspNetCore
 
                 foreach (var assemblyFullPath in assembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out _);
+                    AssemblyValidator.ValidateAssemblyFile(assemblyFullPath, out var shouldLoad, out var reason);
                     if (shouldLoad)
                     {
                         try
@@ -70,8 +71,12 @@ namespace ServiceComposer.AspNetCore
                         }
                         catch (FileLoadException)
                         {
-                            // NOP — FileLoadException happens for already loaded assemblies
+                            logger?.LogDebug("Skipping {AssemblyPath}: already loaded in the current AppDomain.", assemblyFullPath);
                         }
+                    }
+                    else
+                    {
+                        logger?.LogDebug("Skipping {AssemblyPath}: {Reason}.", assemblyFullPath, reason);
                     }
                 }
             }
@@ -85,7 +90,7 @@ namespace ServiceComposer.AspNetCore
 
                 foreach (var platformAssemblyFullPath in platformAssembliesFullPaths)
                 {
-                    AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out _);
+                    AssemblyValidator.ValidateAssemblyFile(platformAssemblyFullPath, out var shouldLoad, out var reason);
                     if (shouldLoad)
                     {
                         try
@@ -95,8 +100,12 @@ namespace ServiceComposer.AspNetCore
                         }
                         catch (FileLoadException)
                         {
-                            // NOP — FileLoadException happens for already loaded assemblies
+                            logger?.LogDebug("Skipping {AssemblyPath}: already loaded in the current AppDomain.", platformAssemblyFullPath);
                         }
+                    }
+                    else
+                    {
+                        logger?.LogDebug("Skipping {AssemblyPath}: {Reason}.", platformAssemblyFullPath, reason);
                     }
                 }
             }
