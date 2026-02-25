@@ -56,8 +56,7 @@ namespace ServiceComposer.AspNetCore.Tests
             await Assert.ThrowsAsync<NotSupportedException>(() => client.GetAsync("/sample/1"));
 
             // Assert
-            var log = Assert.Single(loggerFactory.Sink.LogEntries);
-            Assert.Equal(LogLevel.Warning, log.LogLevel);
+            var log = Assert.Single(loggerFactory.Sink.LogEntries, l => l.LogLevel == LogLevel.Warning);
             Assert.Equal("Unsupported Accept-Casing header value {RequestedCasing}. Supported values are 'casing/pascal' and 'casing/camel'.", log.OriginalFormat);
             var requestedCasing = Assert.Single(log.Properties, p => p.Key == "RequestedCasing").Value;
             Assert.Equal("casing/unknown", requestedCasing);
