@@ -117,6 +117,9 @@ namespace ServiceComposer.AspNetCore
                         composerHttpContext.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
                         argumentsByComponent
                     );
+                    var logger = composerHttpContext.RequestServices.GetService<ILogger<CompositionEndpointBuilder>>();
+                    logger?.LogDebug("Handling composition request at {Method} {Template} with {HandlerCount} handler(s).",
+                        composerHttpContext.Request.Method, routePattern.RawText, componentsTypes.Length);
                     await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
                 };
                 var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
