@@ -73,5 +73,52 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal(1, log.Properties.Single(p => p.Key == "ComponentCount").Value);
             Assert.Equal("api/logscontroller/{id}", log.Properties.Single(p => p.Key == "Template").Value);
         }
+
+        [Fact]
+        public async Task Logs_debug_when_action_filter_composes_over_controller()
+        {
+            // Arrange
+            var loggerFactory = TestLoggerFactory.Create(options => options.SetMinimumLevel(LogLevel.Debug));
+
+            var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
+            (
+                configureServices: services =>
+                {
+                    services.AddViewModelComposition(options =>
+                    {
+                        options.AssemblyScanner.Disable();
+                        options.RegisterCompositionHandler<TestGetHandler>();
+                        options.EnableCompositionOverControllers();
+                    });
+                    services.AddRouting();
+                    services.AddControllers();
+                    services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(loggerFactory));
+                },
+                configure: app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapControllers();
+                        builder.MapCompositionHandlers();
+                    });
+                }
+            ).CreateClient();
+
+            // Act
+            await client.GetAsync("/api/LogsController/1");
+
+            // Assert
+            var log = loggerFactory.Sink.LogEntries
+                .Single(l =>
+                {
+                    try { return l.OriginalFormat == "Composing over controller action at {Method} {Template} with {HandlerCount} handler(s)."; }
+                    catch { return false; }
+                });
+            Assert.Equal(LogLevel.Debug, log.LogLevel);
+            Assert.Equal("GET", log.Properties.Single(p => p.Key == "Method").Value);
+            Assert.Equal("api/logscontroller/{id}", log.Properties.Single(p => p.Key == "Template").Value);
+            Assert.Equal(1, log.Properties.Single(p => p.Key == "HandlerCount").Value);
+        }
     }
 }
