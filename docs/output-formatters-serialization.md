@@ -7,16 +7,13 @@ Enabling output formatters support is a matter of:
 <!-- snippet: use-output-formatters -->
 <a id='snippet-use-output-formatters'></a>
 ```cs
-public void ConfigureServices(IServiceCollection services)
+builder.Services.AddViewModelComposition(options =>
 {
-    services.AddViewModelComposition(options =>
-    {
-        options.ResponseSerialization.UseOutputFormatters = true;
-    });
-    services.AddControllers();
-}
+    options.ResponseSerialization.UseOutputFormatters = true;
+});
+builder.Services.AddControllers();
 ```
-<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L8-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L13-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The required steps are:
@@ -25,7 +22,7 @@ The required steps are:
 - Set up the MVC components by calling one of the following:
   - `AddControllers()`
   - `AddControllersAndViews()`
-  - `AddMvc`
+  - `AddMvc()`
   - `AddRazorPages()`
 
 The above configuration uses the new `System.Text.Json` serializer as the default json serializer to format json responses. It's possible to plug-in the Newtonsoft Json.Net serializer output formatter by adding a package reference to the `Microsoft.AspNetCore.Mvc.NewtonsoftJson` package, and using the following configuration:
@@ -33,15 +30,12 @@ The above configuration uses the new `System.Text.Json` serializer as the defaul
 <!-- snippet: use-newtonsoft-output-formatters -->
 <a id='snippet-use-newtonsoft-output-formatters'></a>
 ```cs
-public void ConfigureServices(IServiceCollection services)
+builder.Services.AddViewModelComposition(options =>
 {
-    services.AddViewModelComposition(options =>
-    {
-        options.ResponseSerialization.UseOutputFormatters = true;
-    });
-    services.AddControllers()
-        .AddNewtonsoftJson();
-}
+    options.ResponseSerialization.UseOutputFormatters = true;
+});
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 ```
-<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L22-L32' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L26-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
