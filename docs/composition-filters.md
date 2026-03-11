@@ -68,4 +68,22 @@ public class SampleCompositionFilter : ICompositionRequestFilter<SampleHandler>
 The above snippet defines a filter intercepting requests to the `SampleHandler` composition handler.
 
 > [!NOTE]
-> Filters defined as classes implementing the `ICompositionRequestFilter<T>` interface will be automatically registered in DI as transiten, and can use DI to resolve dependencies.
+> Filters defined as classes implementing the `ICompositionRequestFilter<T>` interface will be automatically registered in DI as transient, and can use DI to resolve dependencies.
+
+## When to use composition filters vs endpoint filters
+
+ServiceComposer provides two filter extension points. Choosing the right one depends on the scope of interception needed.
+
+**Use [endpoint filters](endpoint-filters.md) when:**
+
+- The logic applies to the entire composed request regardless of which handlers are involved (e.g. request logging, timing, global validation).
+- You want to short-circuit the whole composition before any handler runs.
+- The logic is independent of specific handler types.
+
+**Use composition filters when:**
+
+- The logic is specific to one particular composition handler type.
+- Different handlers on the same route need different pre/post processing (e.g. handler-specific authorization checks, handler-specific input validation).
+- You want to use the attribute form (`[SampleCompositionFilter]`) to keep the filter declaration co-located with the handler method.
+
+In short: endpoint filters are coarse-grained (the whole endpoint), composition filters are fine-grained (a specific handler).
