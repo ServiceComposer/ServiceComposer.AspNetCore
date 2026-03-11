@@ -26,7 +26,7 @@ Imagine an elementary e-commerce web page where it's needed to display details a
 To start using ServiceComposer, follow the outlined steps:
 
 - Create a .NET 10 empty web application project named `CompositionGateway` in an empty or existing solution.
-- Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure the `Startup` class as follows:
+- Add a package reference to the `ServiceComposer.AspNetCore` NuGet package and configure `Program.cs` as follows:
 
 <!-- snippet: sample-startup -->
 <a id='snippet-sample-startup'></a>
@@ -107,6 +107,7 @@ In this brief sample, the view model instance returned by `GetComposedResponseMo
 ServiceComposer is available for the following platforms:
 
 - ASP.NET Core on .NET 10: [documentation is available in the docs folder](docs)
+  * New to ServiceComposer? Start with the [getting started guide](docs/getting-started.md).
 
 ## Philosophy
 
