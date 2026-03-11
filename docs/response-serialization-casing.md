@@ -17,7 +17,7 @@ builder.Services.AddViewModelComposition(options =>
     options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
 });
 ```
-<sup><a href='/src/Snippets/DefaultCasing/Startup.cs#L13-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-default-casing' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/DefaultCasing/Startup.cs#L13-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-default-casing' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Requests containing the `Accept-Casing` custom HTTP header will still be honored.

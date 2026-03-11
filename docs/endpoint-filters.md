@@ -38,7 +38,7 @@ For an endpoint filter to be included in the invocation pipeline, it must be reg
 app.MapCompositionHandlers()
     .AddEndpointFilter(new SampleEndpointFilter());
 ```
-<sup><a href='/src/Snippets/EndpointFilters/Startup.cs#L13-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-endpoint-filter-registration' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/EndpointFilters/Startup.cs#L14-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-endpoint-filter-registration' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Accessing arguments

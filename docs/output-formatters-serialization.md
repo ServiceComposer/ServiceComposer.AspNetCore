@@ -13,7 +13,7 @@ builder.Services.AddViewModelComposition(options =>
 });
 builder.Services.AddControllers();
 ```
-<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L13-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L13-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The required steps are:
@@ -37,5 +37,5 @@ builder.Services.AddViewModelComposition(options =>
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
 ```
-<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L26-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/UseOutputFormatters.cs#L26-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-use-newtonsoft-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->

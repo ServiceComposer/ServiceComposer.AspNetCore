@@ -45,7 +45,7 @@ builder.Services.AddViewModelComposition(options =>
     });
 });
 ```
-<sup><a href='/src/Snippets/Serialization/Startup.cs#L14-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/Startup.cs#L14-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Each time ServiceComposer needs to serialize a response it'll invoke the supplied function.

@@ -39,7 +39,7 @@ builder.Services.AddViewModelComposition(options =>
     options.ResponseSerialization.UseOutputFormatters = true;
 });
 ```
-<sup><a href='/src/Snippets/ActionResult/UseSetActionResultHandler.cs#L39-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-action-results-required-config' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ActionResult/UseSetActionResultHandler.cs#L39-L44' title='Snippet source file'>snippet source</a> | <a href='#snippet-action-results-required-config' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > [!NOTE]

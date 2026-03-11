@@ -10,7 +10,7 @@ builder.Services.AddViewModelComposition(options =>
     options.EnableCompositionOverControllers();
 });
 ```
-<sup><a href='/src/Snippets/CompositionOverController.cs#L12-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-enable-composition-over-controllers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionOverController.cs#L12-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-enable-composition-over-controllers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Once composition over controllers is enabled, ServiceComposer will inject a MVC filter to intercept all controllers invocations. If a route matches a regular controller and a set of composition handlers ServiceComposer will invoke the matching handlers after the controller and before the view is rendered.

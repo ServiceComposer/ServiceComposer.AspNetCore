@@ -16,7 +16,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L14-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L14-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-basic-usage' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The above configuration snippet configures ServiceComposer to handle HTTP requests matching the template. Each time a matching request is dealt with, ServiceComposer invokes each configured gatherer and merges responses from each one into a response returned to the original issuer.
@@ -43,7 +43,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L14-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/CustomizingDownstreamURLs.cs#L14-L27' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-customizing-downstream-urls' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The same approach can be used to customize the downstream URL before invocation.
@@ -74,7 +74,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L15-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L15-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-disable-header-forwarding' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Filtering headers
@@ -103,7 +103,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L36-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L36-L55' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-filter-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Adding headers
@@ -128,7 +128,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L63-L75' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ForwardingHeaders.cs#L65-L80' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-add-headers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Data format
@@ -152,7 +152,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/UseOutputFormatters.cs#L14-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-use-output-formatters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/UseOutputFormatters.cs#L14-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-use-output-formatters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 To use output formatters, MVC services must be registered (e.g., `builder.Services.AddControllers()`).
@@ -211,7 +211,7 @@ public class TypedAggregator : IAggregator
     public Task<object> Aggregate() => Task.FromResult<object>(allItems.ToArray());
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L13-L52' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L12-L51' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-gatherers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Register the aggregator and XML formatter, then configure the endpoint:
@@ -236,7 +236,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
 });
 app.Run();
 ```
-<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L54-L70' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/MixedFormatScatterGather.cs#L57-L74' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-mixed-format-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 A client sending `Accept: application/xml` now receives XML; a client sending `Accept: application/json` receives JSON — with the same gatherers and aggregator.
@@ -304,7 +304,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L33-L43' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-ignore-errors' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/Startup.cs#L33-L45' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-ignore-errors' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 `IgnoreDownstreamRequestErrors` applies to all error conditions for that gatherer: HTTP error status codes, network timeouts, and any other exception thrown by the downstream call. It does not affect other gatherers in the same route.
@@ -384,7 +384,7 @@ var app = builder.Build();
 app.MapScatterGather(builder.Configuration.GetSection("ScatterGather"));
 app.Run();
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L15-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L15-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Adding extra routes alongside configuration-defined routes
@@ -406,7 +406,7 @@ app.MapScatterGather("api/other", new ScatterGatherOptions
     }
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L32-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-extra-route' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L32-L44' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-extra-route' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ### Customizing configuration-defined routes
@@ -427,7 +427,7 @@ app.MapScatterGather(
         }
     });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L52-L61' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-customization' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L54-L65' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-customization' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The `customize` callback receives the route template string, making it easy to apply different changes to different routes from the same call.
@@ -472,7 +472,7 @@ class StaticProductDetails(string key) : IGatherer
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L78-L89' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L71-L82' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Register the factory alongside the scatter/gather services:
@@ -490,7 +490,7 @@ builder.Services.AddScatterGather(config =>
         (section, _) => new StaticProductDetails(section["Key"]));
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L97-L105' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-services' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L102-L112' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-services' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The factory receives:
@@ -509,7 +509,7 @@ var app = builder.Build();
 app.MapScatterGather(builder.Configuration.GetSection("ScatterGather"));
 app.Run();
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L108-L111' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-configure' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L117-L122' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-configure' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 If a `Type` value is encountered in configuration but no matching factory has been registered, a descriptive `InvalidOperationException` is thrown at startup listing the missing type and how to register it.
@@ -550,7 +550,7 @@ class GathererWithProperties(string key, string category, int maxItems) : IGathe
     }
 }
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L91-L103' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type-extra-properties' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L84-L96' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-custom-gatherer-type-extra-properties' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 And the factory passes those values through at registration time:
@@ -571,5 +571,5 @@ builder.Services.AddScatterGather(config =>
             section.GetValue<int>("MaxItems")));
 });
 ```
-<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L116-L127' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-extra-properties' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ScatterGather/ConfigurationBasedSetup.cs#L127-L140' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-from-configuration-with-custom-type-extra-properties' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
