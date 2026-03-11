@@ -1,20 +1,21 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.EndpointFilters
+namespace Snippets.EndpointFilters;
+
+static class EndpointFiltersSnippets
 {
-    public class Startup
+    static void ShowRegistration()
     {
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
         // begin-snippet: sample-endpoint-filter-registration
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseEndpoints(builder =>
-            {
-                builder.MapCompositionHandlers()
-                    .AddEndpointFilter(new SampleEndpointFilter());
-            });
-        }
+        app.MapCompositionHandlers()
+            .AddEndpointFilter(new SampleEndpointFilter());
         // end-snippet
+
+        app.Run();
     }
 }

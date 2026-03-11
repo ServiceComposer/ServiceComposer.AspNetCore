@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.ScatterGather;
 
-public class DisableHeaderForwarding
+static class ForwardingHeadersSnippets
 {
-    // begin-snippet: scatter-gather-disable-header-forwarding
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+    static void ShowDisableHeaderForwarding()
     {
-        app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
+        // begin-snippet: scatter-gather-disable-header-forwarding
+        app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
             Gatherers = new List<IGatherer>
             {
@@ -20,17 +22,19 @@ public class DisableHeaderForwarding
                     ForwardHeaders = false
                 }
             }
-        }));
-    }
-    // end-snippet
-}
+        });
+        // end-snippet
 
-public class FilterHeaders
-{
-    // begin-snippet: scatter-gather-filter-headers
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        app.Run();
+    }
+
+    static void ShowFilterHeaders()
     {
-        app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
+        // begin-snippet: scatter-gather-filter-headers
+        app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
             Gatherers = new List<IGatherer>
             {
@@ -47,17 +51,19 @@ public class FilterHeaders
                     }
                 }
             }
-        }));
-    }
-    // end-snippet
-}
+        });
+        // end-snippet
 
-public class AddHeaders
-{
-    // begin-snippet: scatter-gather-add-headers
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        app.Run();
+    }
+
+    static void ShowAddHeaders()
     {
-        app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
+        // begin-snippet: scatter-gather-add-headers
+        app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
             Gatherers = new List<IGatherer>
             {
@@ -70,7 +76,9 @@ public class AddHeaders
                     }
                 }
             }
-        }));
+        });
+        // end-snippet
+
+        app.Run();
     }
-    // end-snippet
 }

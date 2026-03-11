@@ -1,16 +1,18 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.ModelBinding
+namespace Snippets.ModelBinding;
+
+static class ModelBindingConfigSnippets
 {
-    public class ConfigureAppForModelBinding
+    static void ShowConfiguration()
     {
+        var builder = WebApplication.CreateBuilder();
+
         // begin-snippet: model-binding-add-controllers
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddViewModelComposition();
-            services.AddControllers();
-        }
+        builder.Services.AddViewModelComposition();
+        builder.Services.AddControllers();
         // end-snippet
     }
 }

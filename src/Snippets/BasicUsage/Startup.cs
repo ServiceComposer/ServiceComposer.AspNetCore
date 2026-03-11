@@ -1,24 +1,21 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.BasicUsage
-{
-    // begin-snippet: sample-startup
-    public class Startup
-    {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddRouting();
-            services.AddViewModelComposition();
-        }
+namespace Snippets.BasicUsage;
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-        {
-            app.UseRouting();
-            app.UseEndpoints(builder => builder.MapCompositionHandlers());
-        }
+static class BasicUsageSnippets
+{
+    static void Run()
+    {
+        // begin-snippet: sample-startup
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddRouting();
+        builder.Services.AddViewModelComposition();
+
+        var app = builder.Build();
+        app.MapCompositionHandlers();
+        app.Run();
+        // end-snippet
     }
-    // end-snippet
 }

@@ -1,34 +1,35 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.Serialization
+namespace Snippets.Serialization;
+
+static class UseOutputFormattersSnippets
 {
-    public class UseOutputFormatters
+    static void ShowOutputFormatters()
     {
+        var builder = WebApplication.CreateBuilder();
+
         // begin-snippet: use-output-formatters
-        public void ConfigureServices(IServiceCollection services)
+        builder.Services.AddViewModelComposition(options =>
         {
-            services.AddViewModelComposition(options =>
-            {
-                options.ResponseSerialization.UseOutputFormatters = true;
-            });
-            services.AddControllers();
-        }
+            options.ResponseSerialization.UseOutputFormatters = true;
+        });
+        builder.Services.AddControllers();
         // end-snippet
     }
 
-    public class UseNewtonsoftOutputFormatter
+    static void ShowNewtonsoftOutputFormatters()
     {
+        var builder = WebApplication.CreateBuilder();
+
         // begin-snippet: use-newtonsoft-output-formatters
-        public void ConfigureServices(IServiceCollection services)
+        builder.Services.AddViewModelComposition(options =>
         {
-            services.AddViewModelComposition(options =>
-            {
-                options.ResponseSerialization.UseOutputFormatters = true;
-            });
-            services.AddControllers()
-                .AddNewtonsoftJson();
-        }
+            options.ResponseSerialization.UseOutputFormatters = true;
+        });
+        builder.Services.AddControllers()
+            .AddNewtonsoftJson();
         // end-snippet
     }
 }

@@ -1,19 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.DefaultCasing
+namespace Snippets.DefaultCasing;
+
+static class DefaultCasingSnippets
 {
-    public class Startup
+    static void ShowConfiguration()
     {
+        var builder = WebApplication.CreateBuilder();
+
         // begin-snippet: default-casing
-        public void ConfigureServices(IServiceCollection services)
+        builder.Services.AddRouting();
+        builder.Services.AddViewModelComposition(options =>
         {
-            services.AddRouting();
-            services.AddViewModelComposition(options =>
-            {
-                options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
-            });
-        }
+            options.ResponseSerialization.DefaultResponseCasing = ResponseCasing.PascalCase;
+        });
         // end-snippet
     }
 }
