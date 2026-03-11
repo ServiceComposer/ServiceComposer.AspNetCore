@@ -31,22 +31,15 @@ To start using ServiceComposer, follow the outlined steps:
 <!-- snippet: sample-startup -->
 <a id='snippet-sample-startup'></a>
 ```cs
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddRouting();
-        services.AddViewModelComposition();
-    }
+var builder = WebApplication.CreateBuilder();
+builder.Services.AddRouting();
+builder.Services.AddViewModelComposition();
 
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-    {
-        app.UseRouting();
-        app.UseEndpoints(builder => builder.MapCompositionHandlers());
-    }
-}
+var app = builder.Build();
+app.MapCompositionHandlers();
+app.Run();
 ```
-<sup><a href='/src/Snippets/BasicUsage/Startup.cs#L8-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-startup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/BasicUsage/Startup.cs#L12-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-startup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 - Add a new .NET 10 class library project named `Sales.ViewModelComposition`.
