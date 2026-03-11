@@ -10,7 +10,7 @@ Composition requests filter can be defined as attributes or as classes.
 
 ### Defining composition requests filters as attributes
 
-Create an attribute that inherites from `CompositionRequestFilterAttribute` like in the following snippet:
+Create an attribute that inherits from `CompositionRequestFilterAttribute` like in the following snippet:
 
 <!-- snippet: composition-filter-attribute -->
 <a id='snippet-composition-filter-attribute'></a>
@@ -49,7 +49,7 @@ public class SampleHandler : ICompositionRequestsHandler
 
 ### Defining composition requests filters as classes
 
-Create a class te implements the `ICompositionRequestFilter<T>` interface, where the generic `T` parameter is the composition handler type to intercept:
+Create a class that implements the `ICompositionRequestFilter<T>` interface, where the generic `T` parameter is the composition handler type to intercept:
 
 <!-- snippet: composition-filter-class -->
 <a id='snippet-composition-filter-class'></a>
