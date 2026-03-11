@@ -2,7 +2,7 @@
 
 _Available starting with v1.8.0_
 
-By default, each response is serialized using [Json.Net](https://www.newtonsoft.com/json/help/html/Introduction.htm) and serialization settings (`JsonSerializerSettings`) are determined by the [requested response casing](response-serialization-casing.source.md). If the requested casing is camel casing, the default, the folowing serialization settings are applied to the response:
+By default, each response is serialized using `System.Text.Json` and serialization settings (`JsonSerializerOptions`) are determined by the [requested response casing](response-serialization-casing.md). If the requested casing is camel casing, the default, the following serialization settings are applied to the response:
 
 <!-- snippet: camel-serialization-settings -->
 <a id='snippet-camel-serialization-settings'></a>
@@ -33,22 +33,19 @@ It's possible to customize the response serialization settings on a case-by-case
 <!-- snippet: custom-serialization-settings -->
 <a id='snippet-custom-serialization-settings'></a>
 ```cs
-public void ConfigureServices(IServiceCollection services)
+builder.Services.AddRouting();
+builder.Services.AddViewModelComposition(options =>
 {
-    services.AddRouting();
-    services.AddViewModelComposition(options =>
+    options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
     {
-        options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
+        return new JsonSerializerOptions()
         {
-            return new JsonSerializerOptions()
-            {
-                // customize options as needed
-            };
-        });
+            // customize options as needed
+        };
     });
-}
+});
 ```
-<sup><a href='/src/Snippets/Serialization/Startup.cs#L9-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Serialization/Startup.cs#L14-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-custom-serialization-settings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Each time ServiceComposer needs to serialize a response it'll invoke the supplied function.
