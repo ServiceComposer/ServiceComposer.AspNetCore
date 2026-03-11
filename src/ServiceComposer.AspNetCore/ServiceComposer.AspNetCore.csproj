@@ -9,6 +9,7 @@
     <Description>Services ViewModel Composition</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>ServiceComposer.png</PackageIcon>
+    <PackageReadmeFile>NuGet.README.md</PackageReadmeFile>
     <PackageTags>Services ViewModel Composition</PackageTags>
     <PackageOutputPath>../../nugets</PackageOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -37,6 +38,7 @@
 
    <ItemGroup>
     <None Include="..\..\assets\ServiceComposer.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\NuGet.README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

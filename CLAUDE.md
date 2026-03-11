@@ -26,6 +26,14 @@ Never write fenced code blocks directly in `.md` files for code that could be a 
 - **Docs location**: `docs/` — managed by MarkdownSnippets (`run-markdownsnippets.yml` workflow)
 - **Key interfaces**: `ICompositionRequestsHandler`, `ICompositionEventsSubscriber`, `ICompositionEventsHandler<T>`, `IViewModelFactory`, `IEndpointScopedViewModelFactory`
 
+## NuGet package README
+
+`NuGet.README.md` at the repo root is the package listing README shown on NuGet.org. It is **not** managed by mdsnippets — it uses plain fenced code blocks (no snippet markers) because the `<sup>` source link boilerplate injected by mdsnippets looks wrong on the package listing page.
+
+When the Getting Started code examples change, update `NuGet.README.md` manually to keep it in sync with the root `README.md` and `docs/getting-started.md`.
+
+The file is wired into the package via `<PackageReadmeFile>NuGet.README.md</PackageReadmeFile>` in `src/ServiceComposer.AspNetCore/ServiceComposer.AspNetCore.csproj`.
+
 ## Architecture reference
 
 For detailed architecture, interfaces, pipeline flow, and source file map see [`context/context.md`](context/context.md).
