@@ -57,13 +57,10 @@ To start using model binding, configure the ASP.Net application to add MVC compo
 <!-- snippet: model-binding-add-controllers -->
 <a id='snippet-model-binding-add-controllers'></a>
 ```cs
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddViewModelComposition();
-    services.AddControllers();
-}
+builder.Services.AddViewModelComposition();
+builder.Services.AddControllers();
 ```
-<sup><a href='/src/Snippets/ModelBinding/ConfigureAppForModelBinding.cs#L8-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-add-controllers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ModelBinding/ConfigureAppForModelBinding.cs#L13-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-model-binding-add-controllers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > If, for reasons outside the scope of composing responses, there is the need to use MVC, Razor Pages, or just controllers and views, any MVC configuration options will add support for model binding.

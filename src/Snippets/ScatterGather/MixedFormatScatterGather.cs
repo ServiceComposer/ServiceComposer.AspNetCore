@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.ScatterGather;
@@ -51,18 +50,17 @@ public class TypedAggregator : IAggregator
 }
 // end-snippet
 
-public class MixedFormatStartup
+static class MixedFormatStartupSnippets
 {
-    // begin-snippet: scatter-gather-mixed-format-startup
-    public void ConfigureServices(IServiceCollection services)
+    static void ShowMixedFormatSetup()
     {
-        services.AddControllers().AddXmlSerializerFormatters();
-        services.AddTransient<TypedAggregator>();
-    }
+        // begin-snippet: scatter-gather-mixed-format-startup
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddControllers().AddXmlSerializerFormatters();
+        builder.Services.AddTransient<TypedAggregator>();
 
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-    {
-        app.UseEndpoints(builder => builder.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
+        var app = builder.Build();
+        app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
         {
             UseOutputFormatters = true,
             CustomAggregator = typeof(TypedAggregator),
@@ -71,7 +69,8 @@ public class MixedFormatStartup
                 new JsonSourceGatherer(),
                 new XmlSourceGatherer()
             }
-        }));
+        });
+        app.Run();
+        // end-snippet
     }
-    // end-snippet
 }

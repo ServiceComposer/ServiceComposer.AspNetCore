@@ -73,7 +73,26 @@ public class SalesProductInfo : ICompositionRequestsHandler
 
 ## Global view model factories
 
-As already mentioned the default ServiceComposer behavior if no endpoint scoped factories are registered is to create a `dynamic` object instance. It's possible to replace this behavior by defining a class the implements the `IViewModelFactory` interface. If an `IViewModelFactory` type is defined it'll be used to create all view models not handled by endpoint scoped factories.
+As already mentioned the default ServiceComposer behavior if no endpoint scoped factories are registered is to create a `dynamic` object instance. It's possible to replace this behavior by defining a class that implements the `IViewModelFactory` interface. If an `IViewModelFactory` type is defined it'll be used to create all view models not handled by endpoint scoped factories.
+
+A global factory is useful when all routes in an application share a common base view model, or when a single factory can determine the correct type from the request:
+
+<!-- snippet: global-view-model-factory -->
+<a id='snippet-global-view-model-factory'></a>
+```cs
+public class DefaultViewModelFactory : IViewModelFactory
+{
+    public object CreateViewModel(HttpContext httpContext, ICompositionContext compositionContext)
+    {
+        // Return a shared base type, or inspect the route to determine the right type
+        return new ExpandoObject();
+    }
+}
+```
+<sup><a href='/src/Snippets/ViewModelFactory/DefaultViewModelFactory.cs#L7-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-global-view-model-factory' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Like endpoint-scoped factories, global factories are auto-discovered by assembly scanning and registered in DI automatically.
 
 ## Resolution order
 

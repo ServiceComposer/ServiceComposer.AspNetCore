@@ -1,18 +1,19 @@
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets
+namespace Snippets;
+
+static class CompositionOverControllersSnippets
 {
-    public class CompositionOverControllers
+    static void ShowConfiguration()
     {
-        public CompositionOverControllers(IServiceCollection services)
+        var builder = WebApplication.CreateBuilder();
+
+        // begin-snippet: enable-composition-over-controllers
+        builder.Services.AddViewModelComposition(options =>
         {
-            // begin-snippet: enable-composition-over-controllers
-            services.AddViewModelComposition(options =>
-            {
-                options.EnableCompositionOverControllers();
-            });
-            // end-snippet
-        }
+            options.EnableCompositionOverControllers();
+        });
+        // end-snippet
     }
 }

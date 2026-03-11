@@ -1,26 +1,28 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
-namespace Snippets.Serialization
+namespace Snippets.Serialization;
+
+static class SerializationStartupSnippets
 {
-    public class Startup
+    static void ShowConfiguration()
     {
+        var builder = WebApplication.CreateBuilder();
+
         // begin-snippet: custom-serialization-settings
-        public void ConfigureServices(IServiceCollection services)
+        builder.Services.AddRouting();
+        builder.Services.AddViewModelComposition(options =>
         {
-            services.AddRouting();
-            services.AddViewModelComposition(options =>
+            options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
             {
-                options.ResponseSerialization.UseCustomJsonSerializerSettings(_ =>
+                return new JsonSerializerOptions()
                 {
-                    return new JsonSerializerOptions()
-                    {
-                        // customize options as needed
-                    };
-                });
+                    // customize options as needed
+                };
             });
-        }
+        });
         // end-snippet
     }
 }

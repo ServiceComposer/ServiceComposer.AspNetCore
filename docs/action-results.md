@@ -34,12 +34,12 @@ Using MVC action results require enabling output formatters support:
 <!-- snippet: action-results-required-config -->
 <a id='snippet-action-results-required-config'></a>
 ```cs
-services.AddViewModelComposition(options =>
+builder.Services.AddViewModelComposition(options =>
 {
     options.ResponseSerialization.UseOutputFormatters = true;
 });
 ```
-<sup><a href='/src/Snippets/ActionResult/UseSetActionResultHandler.cs#L37-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-action-results-required-config' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/ActionResult/UseSetActionResultHandler.cs#L39-L44' title='Snippet source file'>snippet source</a> | <a href='#snippet-action-results-required-config' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > [!NOTE]

@@ -4,75 +4,68 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets.ScatterGather;
 
-public class ConfigurationBasedSetupBasic
+static class ConfigurationBasedSetupSnippets
 {
-    // begin-snippet: scatter-gather-from-configuration
-    public void ConfigureServices(IServiceCollection services)
+    static void ShowBasicConfigurationSetup()
     {
-        services.AddRouting();
-        services.AddHttpClient();
-        services.AddScatterGather();
+        // begin-snippet: scatter-gather-from-configuration
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddRouting();
+        builder.Services.AddHttpClient();
+        builder.Services.AddScatterGather();
+
+        var app = builder.Build();
+        app.MapScatterGather(builder.Configuration.GetSection("ScatterGather"));
+        app.Run();
+        // end-snippet
     }
 
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+    static void ShowConfigurationWithExtraRoute(IConfiguration configuration)
     {
-        app.UseRouting();
-        app.UseEndpoints(builder =>
-        {
-            builder.MapScatterGather(configuration.GetSection("ScatterGather"));
-        });
-    }
-    // end-snippet
-}
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
 
-public class ConfigurationBasedSetupWithProgrammaticRoute
-{
-    // begin-snippet: scatter-gather-from-configuration-with-extra-route
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
-    {
-        app.UseEndpoints(builder =>
-        {
-            // Routes loaded from appsettings.json (or any IConfiguration source)
-            builder.MapScatterGather(configuration.GetSection("ScatterGather"));
+        // begin-snippet: scatter-gather-from-configuration-with-extra-route
+        // Routes loaded from appsettings.json (or any IConfiguration source)
+        app.MapScatterGather(configuration.GetSection("ScatterGather"));
 
-            // Additional route defined purely in code
-            builder.MapScatterGather("api/other", new ScatterGatherOptions
+        // Additional route defined purely in code
+        app.MapScatterGather("api/other", new ScatterGatherOptions
+        {
+            Gatherers = new List<IGatherer>
             {
-                Gatherers = new List<IGatherer>
+                new HttpGatherer("OtherSource", "https://other.web.server/api/items")
+            }
+        });
+        // end-snippet
+
+        app.Run();
+    }
+
+    static void ShowConfigurationWithCustomization(IConfiguration configuration)
+    {
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
+        // begin-snippet: scatter-gather-from-configuration-with-customization
+        app.MapScatterGather(
+            configuration.GetSection("ScatterGather"),
+            customize: (template, options) =>
+            {
+                if (template == "api/products")
                 {
-                    new HttpGatherer("OtherSource", "https://other.web.server/api/items")
+                    // Inject an additional gatherer not present in the configuration file
+                    options.Gatherers.Add(new HttpGatherer("Reviews", "https://reviews.web.server/api/reviews"));
                 }
             });
-        });
-    }
-    // end-snippet
-}
+        // end-snippet
 
-public class ConfigurationBasedSetupWithCustomization
-{
-    // begin-snippet: scatter-gather-from-configuration-with-customization
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
-    {
-        app.UseEndpoints(builder =>
-        {
-            builder.MapScatterGather(
-                configuration.GetSection("ScatterGather"),
-                customize: (template, options) =>
-                {
-                    if (template == "api/products")
-                    {
-                        // Inject an additional gatherer not present in the configuration file
-                        options.Gatherers.Add(new HttpGatherer("Reviews", "https://reviews.web.server/api/reviews"));
-                    }
-                });
-        });
+        app.Run();
     }
-    // end-snippet
 }
 
 // begin-snippet: scatter-gather-custom-gatherer-type
@@ -102,42 +95,40 @@ class GathererWithProperties(string key, string category, int maxItems) : IGathe
 }
 // end-snippet
 
-public class ConfigurationBasedSetupWithCustomGathererType
+static class ConfigurationBasedSetupWithCustomGathererSnippets
 {
-    // begin-snippet: scatter-gather-from-configuration-with-custom-type-services
-    public void ConfigureServices(IServiceCollection services)
+    static void ShowCustomGathererTypeServices()
     {
-        services.AddRouting();
-        services.AddHttpClient();
-        services.AddScatterGather(config =>
+        // begin-snippet: scatter-gather-from-configuration-with-custom-type-services
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddRouting();
+        builder.Services.AddHttpClient();
+        builder.Services.AddScatterGather(config =>
         {
             config.AddGathererFactory(
                 "StaticProductDetails",
                 (section, _) => new StaticProductDetails(section["Key"]));
         });
+        // end-snippet
     }
-    // end-snippet
 
-    // begin-snippet: scatter-gather-from-configuration-with-custom-type-configure
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IConfiguration configuration)
+    static void ShowCustomGathererTypeConfigure()
     {
-        app.UseRouting();
-        app.UseEndpoints(builder =>
-        {
-            builder.MapScatterGather(configuration.GetSection("ScatterGather"));
-        });
+        // begin-snippet: scatter-gather-from-configuration-with-custom-type-configure
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+        app.MapScatterGather(builder.Configuration.GetSection("ScatterGather"));
+        app.Run();
+        // end-snippet
     }
-    // end-snippet
-}
 
-public class ConfigurationBasedSetupWithCustomGathererTypeAndExtraProperties
-{
-    // begin-snippet: scatter-gather-from-configuration-with-custom-type-extra-properties
-    public void ConfigureServices(IServiceCollection services)
+    static void ShowCustomGathererTypeExtraProperties()
     {
-        services.AddRouting();
-        services.AddHttpClient();
-        services.AddScatterGather(config =>
+        // begin-snippet: scatter-gather-from-configuration-with-custom-type-extra-properties
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddRouting();
+        builder.Services.AddHttpClient();
+        builder.Services.AddScatterGather(config =>
         {
             config.AddGathererFactory(
                 "WithProperties",
@@ -146,6 +137,6 @@ public class ConfigurationBasedSetupWithCustomGathererTypeAndExtraProperties
                     section["Category"],
                     section.GetValue<int>("MaxItems")));
         });
+        // end-snippet
     }
-    // end-snippet
 }
