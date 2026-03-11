@@ -6,6 +6,10 @@ ServiceComposer leverages the Endpoints support to plug into the request handlin
 
 Starting with version 5.0, ServiceComposer targets .NET 10 only.
 
+## Getting started
+
+New to ServiceComposer and ViewModel Composition? Start with the [getting started guide](getting-started.md).
+
 ## ViewModel Composition
 
 > [!NOTE]
