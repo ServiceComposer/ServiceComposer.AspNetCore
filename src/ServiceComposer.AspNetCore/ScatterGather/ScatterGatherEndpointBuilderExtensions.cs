@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,8 +27,19 @@ public static class ScatterGatherEndpointBuilderExtensions
 
             async Task GatherAndAdd(IGatherer gatherer)
             {
-                var result = await gatherer.Gather(context);
-                aggregator.Add(result);
+                using var activity = CompositionTelemetry.ScatterGatherActivitySource.StartActivity(
+                    $"scatter-gather.gatherer {gatherer.Key}");
+                activity?.SetTag("scatter-gather.gatherer.key", gatherer.Key);
+                try
+                {
+                    var result = await gatherer.Gather(context);
+                    aggregator.Add(result);
+                }
+                catch (Exception ex)
+                {
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                    throw;
+                }
             }
 
             await Task.WhenAll(options.Gatherers.Select(GatherAndAdd));
