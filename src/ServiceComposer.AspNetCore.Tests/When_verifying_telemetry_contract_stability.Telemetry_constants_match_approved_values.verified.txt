@@ -1,0 +1,12 @@
+﻿{
+  ScatterGatherSourceName: ServiceComposer.AspNetCore.ScatterGather,
+  Spans.Event: composition.event,
+  Spans.Gatherer: scatter-gather.gatherer,
+  Spans.Handler: composition.handler,
+  Tags.EventNamespace: composition.event.namespace,
+  Tags.EventType: composition.event.type,
+  Tags.GathererKey: scatter_gather.gatherer.key,
+  Tags.HandlerNamespace: composition.handler.namespace,
+  Tags.HandlerType: composition.handler.type,
+  ViewModelCompositionSourceName: ServiceComposer.AspNetCore.ViewModelComposition
+}
