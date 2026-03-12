@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,24 @@ namespace ServiceComposer.AspNetCore
 {
     public static partial class CompositionHandler
     {
+        static async Task RunHandlerWithSpan(ICompositionRequestsHandler handler, HttpRequest request)
+        {
+            var handlerType = handler.GetType();
+            using var activity = CompositionTelemetry.ActivitySource.StartActivity(
+                $"composition.handler {handlerType.FullName ?? handlerType.Name}");
+            activity?.SetTag("composition.handler.type", handlerType.FullName ?? handlerType.Name);
+            activity?.SetTag("composition.handler.namespace", handlerType.Namespace);
+            try
+            {
+                await handler.Handle(request);
+            }
+            catch (Exception ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                throw;
+            }
+        }
+
         internal static async Task<object> HandleComposableRequest(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes)
         {
             var request = context.Request;
@@ -41,14 +60,7 @@ namespace ServiceComposer.AspNetCore
                     {
                         // TODO: apply composition filter here not before
                         // invoking the whole composition process
-                        try
-                        {
-                            return handler.Handle(request);
-                        }
-                        catch (Exception ex)
-                        {
-                            return Task.FromException(ex);
-                        }
+                        return RunHandlerWithSpan(handler, request);
                     })
                     .ToList();
 
