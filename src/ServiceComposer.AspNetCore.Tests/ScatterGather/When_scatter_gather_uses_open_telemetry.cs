@@ -64,7 +64,7 @@ public class When_scatter_gather_uses_open_telemetry
 
         // Assert
         Assert.True(response.IsSuccessStatusCode);
-        var gathererActivity = Assert.Single(capturedActivities, a => a.DisplayName == "scatter-gather.gatherer OTelTestGatherer");
+        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == "scatter-gather.gatherer" && a.DisplayName == "OTelTestGatherer");
         Assert.Equal("OTelTestGatherer", gathererActivity.GetTagItem("scatter-gather.gatherer.key"));
     }
 
@@ -103,8 +103,9 @@ public class When_scatter_gather_uses_open_telemetry
         await Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync("/samples"));
 
         // Assert
-        var gathererActivity = Assert.Single(capturedActivities, a => a.DisplayName == "scatter-gather.gatherer OTelFailingGatherer");
+        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == "scatter-gather.gatherer" && a.DisplayName == "OTelFailingGatherer");
         Assert.Equal(ActivityStatusCode.Error, gathererActivity.Status);
-        Assert.Equal("Gatherer failed", gathererActivity.StatusDescription);
+        Assert.Equal("error", gathererActivity.GetTagItem("otel.status_code"));
+        Assert.Equal("Gatherer failed", gathererActivity.GetTagItem("otel.status_description"));
     }
 }

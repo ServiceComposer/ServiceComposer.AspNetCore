@@ -39,15 +39,16 @@ builder.Services.AddOpenTelemetry()
 
 ### Both features
 
+`AddSource` supports `*` as a wildcard, so both sources can be registered in one call:
+
 <!-- snippet: open-telemetry-combined-setup -->
 <a id='snippet-open-telemetry-combined-setup'></a>
 ```cs
 builder.Services.AddOpenTelemetry()
     .WithTracing(b => b
-        .AddSource("ServiceComposer.AspNetCore.ViewModelComposition")
-        .AddSource("ServiceComposer.AspNetCore.ScatterGather"));
+        .AddSource("ServiceComposer.AspNetCore.*"));
 ```
-<sup><a href='/src/Snippets/OpenTelemetry/OpenTelemetrySetup.cs#L36-L41' title='Snippet source file'>snippet source</a> | <a href='#snippet-open-telemetry-combined-setup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/OpenTelemetry/OpenTelemetrySetup.cs#L36-L40' title='Snippet source file'>snippet source</a> | <a href='#snippet-open-telemetry-combined-setup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## What gets traced
@@ -56,29 +57,37 @@ builder.Services.AddOpenTelemetry()
 
 Each `ICompositionRequestsHandler` execution produces a child span of the ASP.NET Core HTTP server span.
 
-| Attribute | Value |
+| | Value |
 |---|---|
-| Span name | `composition.handler {FullyQualifiedTypeName}` |
+| Operation name | `composition.handler` |
+| Display name | Fully qualified handler type name |
 | `composition.handler.type` | Fully qualified handler type name |
 | `composition.handler.namespace` | Handler namespace |
 
 When a handler raises an event via `context.RaiseEvent<TEvent>()`, the event handling produces a child span of the raising handler's span.
 
-| Attribute | Value |
+| | Value |
 |---|---|
-| Span name | `composition.event {FullyQualifiedEventTypeName}` |
+| Operation name | `composition.event` |
+| Display name | Fully qualified event type name |
 | `composition.event.type` | Fully qualified event type name |
 | `composition.event.namespace` | Event namespace |
 
-Any span whose handler or event handler throws sets `ActivityStatusCode.Error` with the exception message as the status description.
+When a handler or event handler throws, the span sets `ActivityStatusCode.Error` and adds the following tags and an `exception` span event following the [OTel exception conventions](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/exceptions/).
+
+| Tag | Value |
+|---|---|
+| `otel.status_code` | `"error"` |
+| `otel.status_description` | Exception message |
 
 ### Scatter/Gather
 
 Each `IGatherer` execution produces a child span of the ASP.NET Core HTTP server span.
 
-| Attribute | Value |
+| | Value |
 |---|---|
-| Span name | `scatter-gather.gatherer {Key}` |
+| Operation name | `scatter-gather.gatherer` |
+| Display name | Gatherer key |
 | `scatter-gather.gatherer.key` | The gatherer key |
 
-A gatherer that throws sets `ActivityStatusCode.Error` with the exception message as the status description.
+When a gatherer throws, the span sets `ActivityStatusCode.Error` with the same `otel.status_code`, `otel.status_description` tags and `exception` span event as described above.

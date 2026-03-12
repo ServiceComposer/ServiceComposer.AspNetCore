@@ -14,18 +14,46 @@ namespace ServiceComposer.AspNetCore
         static async Task RunHandlerWithSpan(ICompositionRequestsHandler handler, HttpRequest request)
         {
             var handlerType = handler.GetType();
-            using var activity = CompositionTelemetry.ActivitySource.StartActivity(
-                $"composition.handler {handlerType.FullName ?? handlerType.Name}");
-            activity?.SetTag("composition.handler.type", handlerType.FullName ?? handlerType.Name);
-            activity?.SetTag("composition.handler.namespace", handlerType.Namespace);
+            Activity activity = null;
+
+            if (CompositionTelemetry.ActivitySource.HasListeners())
+            {
+                activity = CompositionTelemetry.ActivitySource.StartActivity("composition.handler");
+                if (activity != null)
+                {
+                    activity.DisplayName = handlerType.FullName ?? handlerType.Name;
+                    if (activity.IsAllDataRequested)
+                    {
+                        activity.SetTag("composition.handler.type", handlerType.FullName ?? handlerType.Name);
+                        activity.SetTag("composition.handler.namespace", handlerType.Namespace);
+                    }
+                }
+            }
+
             try
             {
                 await handler.Handle(request);
+                activity?.SetStatus(ActivityStatusCode.Ok);
             }
             catch (Exception ex)
             {
-                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                if (activity != null)
+                {
+                    activity.SetStatus(ActivityStatusCode.Error);
+                    activity.SetTag("otel.status_code", "error");
+                    activity.SetTag("otel.status_description", ex.Message);
+                    activity.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
+                    {
+                        ["exception.type"] = ex.GetType().FullName ?? ex.GetType().Name,
+                        ["exception.message"] = ex.Message,
+                        ["exception.stacktrace"] = ex.ToString()
+                    }));
+                }
                 throw;
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
 

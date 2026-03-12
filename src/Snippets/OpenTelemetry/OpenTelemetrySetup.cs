@@ -36,8 +36,7 @@ static class OpenTelemetrySetupSnippets
         // begin-snippet: open-telemetry-combined-setup
         builder.Services.AddOpenTelemetry()
             .WithTracing(b => b
-                .AddSource("ServiceComposer.AspNetCore.ViewModelComposition")
-                .AddSource("ServiceComposer.AspNetCore.ScatterGather"));
+                .AddSource("ServiceComposer.AspNetCore.*"));
         // end-snippet
     }
 }
