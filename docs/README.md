@@ -71,6 +71,10 @@ It's possible to access and [customize ViewModel Composition options](options-cu
 
 ServiceComposer natively supports scatter/gather scenarios through a fanout approach. For more information, refer to the [Scatter/Gather](scatter-gather.md) section.
 
+## OpenTelemetry
+
+ServiceComposer emits OpenTelemetry traces for ViewModel Composition and Scatter/Gather. For more information, refer to the [OpenTelemetry](open-telemetry.md) section.
+
 ## Upgrade guides
 
 [Upgrade guides](upgrade-guides) are available to ease the migration from one version to another.
