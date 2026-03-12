@@ -1,16 +1,5 @@
 # ServiceComposer.AspNetCore — Claude Instructions
 
-## Documentation code snippets workflow
-
-**Every code block added to a doc file MUST go through the Snippets project + mdsnippets.**
-
-1. Create a `.cs` file under `src/Snippets/<Topic>/` with `// begin-snippet: name` / `// end-snippet` markers
-2. Verify it compiles: `dotnet build src/Snippets/Snippets.csproj`
-3. Place a `<!-- snippet: name -->` / `<!-- endSnippet -->` marker pair in the `.md` file (empty — no content between them)
-4. Run `mdsnippets . -c InPlaceOverwrite` from the repo root to inject content and source links
-
-Never write fenced code blocks directly in `.md` files for code that could be a compiled snippet.
-
 ## Snippets project notes
 
 - Project: `src/Snippets/Snippets.csproj` — targets `net10.0`, `TreatWarningsAsErrors=true`
@@ -36,4 +25,4 @@ The file is wired into the package via `<PackageReadmeFile>NuGet.README.md</Pack
 
 ## Architecture reference
 
-For detailed architecture, interfaces, pipeline flow, and source file map see [`context/context.md`](context/context.md).
+For detailed architecture, retrieve mnemonic memory
