@@ -17,7 +17,7 @@ namespace ServiceComposer.AspNetCore.Tests
         {
             var listener = new ActivityListener
             {
-                ShouldListenTo = source => source.Name == "ServiceComposer.AspNetCore.ViewModelComposition",
+                ShouldListenTo = source => source.Name == CompositionTelemetry.ViewModelCompositionSourceName,
                 Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStopped = activity => capturedActivities.Add(activity)
             };
@@ -69,9 +69,9 @@ namespace ServiceComposer.AspNetCore.Tests
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             var handlerType = typeof(SingleTestHandler);
-            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == "composition.handler" && a.DisplayName == handlerType.FullName);
-            Assert.Equal(handlerType.FullName, handlerActivity.GetTagItem("composition.handler.type"));
-            Assert.Equal(handlerType.Namespace, handlerActivity.GetTagItem("composition.handler.namespace"));
+            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Handler && a.DisplayName == handlerType.FullName);
+            Assert.Equal(handlerType.FullName, handlerActivity.GetTagItem(CompositionTelemetry.Tags.HandlerType));
+            Assert.Equal(handlerType.Namespace, handlerActivity.GetTagItem(CompositionTelemetry.Tags.HandlerNamespace));
         }
 
         class FirstOfTwoTestHandlers : ICompositionRequestsHandler
@@ -125,8 +125,8 @@ namespace ServiceComposer.AspNetCore.Tests
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Single(capturedActivities, a => a.OperationName == "composition.handler" && a.DisplayName == typeof(FirstOfTwoTestHandlers).FullName);
-            Assert.Single(capturedActivities, a => a.OperationName == "composition.handler" && a.DisplayName == typeof(SecondOfTwoTestHandlers).FullName);
+            Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Handler && a.DisplayName == typeof(FirstOfTwoTestHandlers).FullName);
+            Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Handler && a.DisplayName == typeof(SecondOfTwoTestHandlers).FullName);
         }
 
         class TestEventRaisedByHandler { }
@@ -183,8 +183,8 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(response.IsSuccessStatusCode);
             var handlerType = typeof(HandlerThatRaisesTestEvent);
             var eventType = typeof(TestEventRaisedByHandler);
-            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == "composition.handler" && a.DisplayName == handlerType.FullName);
-            var eventActivity = Assert.Single(capturedActivities, a => a.OperationName == "composition.event" && a.DisplayName == eventType.FullName);
+            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Handler && a.DisplayName == handlerType.FullName);
+            var eventActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Event && a.DisplayName == eventType.FullName);
             Assert.Equal(handlerActivity.Id, eventActivity.ParentId);
         }
 
@@ -227,7 +227,7 @@ namespace ServiceComposer.AspNetCore.Tests
 
             // Assert
             var handlerType = typeof(HandlerThatThrowsForOTelTest);
-            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == "composition.handler" && a.DisplayName == handlerType.FullName);
+            var handlerActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Handler && a.DisplayName == handlerType.FullName);
             Assert.Equal(ActivityStatusCode.Error, handlerActivity.Status);
             Assert.Equal("error", handlerActivity.GetTagItem("otel.status_code"));
             Assert.Equal("Something went wrong", handlerActivity.GetTagItem("otel.status_description"));

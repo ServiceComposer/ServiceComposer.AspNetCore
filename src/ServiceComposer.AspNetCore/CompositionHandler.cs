@@ -18,14 +18,15 @@ namespace ServiceComposer.AspNetCore
 
             if (CompositionTelemetry.ActivitySource.HasListeners())
             {
-                activity = CompositionTelemetry.ActivitySource.StartActivity("composition.handler");
+                activity = CompositionTelemetry.ActivitySource.StartActivity(CompositionTelemetry.Spans.Handler, ActivityKind.Internal);
                 if (activity != null)
                 {
                     activity.DisplayName = handlerType.FullName ?? handlerType.Name;
                     if (activity.IsAllDataRequested)
                     {
-                        activity.SetTag("composition.handler.type", handlerType.FullName ?? handlerType.Name);
-                        activity.SetTag("composition.handler.namespace", handlerType.Namespace);
+                        activity.SetTag(CompositionTelemetry.Tags.HandlerType, handlerType.FullName ?? handlerType.Name);
+                        if (handlerType.Namespace != null)
+                            activity.SetTag(CompositionTelemetry.Tags.HandlerNamespace, handlerType.Namespace);
                     }
                 }
             }

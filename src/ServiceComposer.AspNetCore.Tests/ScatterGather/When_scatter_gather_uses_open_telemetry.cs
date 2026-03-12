@@ -17,7 +17,7 @@ public class When_scatter_gather_uses_open_telemetry
     {
         var listener = new ActivityListener
         {
-            ShouldListenTo = source => source.Name == "ServiceComposer.AspNetCore.ScatterGather",
+            ShouldListenTo = source => source.Name == CompositionTelemetry.ScatterGatherSourceName,
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStopped = activity => capturedActivities.Add(activity)
         };
@@ -64,8 +64,8 @@ public class When_scatter_gather_uses_open_telemetry
 
         // Assert
         Assert.True(response.IsSuccessStatusCode);
-        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == "scatter-gather.gatherer" && a.DisplayName == "OTelTestGatherer");
-        Assert.Equal("OTelTestGatherer", gathererActivity.GetTagItem("scatter-gather.gatherer.key"));
+        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Gatherer && a.DisplayName == "OTelTestGatherer");
+        Assert.Equal("OTelTestGatherer", gathererActivity.GetTagItem(CompositionTelemetry.Tags.GathererKey));
     }
 
     class OTelFailingGatherer : IGatherer
@@ -103,7 +103,7 @@ public class When_scatter_gather_uses_open_telemetry
         await Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync("/samples"));
 
         // Assert
-        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == "scatter-gather.gatherer" && a.DisplayName == "OTelFailingGatherer");
+        var gathererActivity = Assert.Single(capturedActivities, a => a.OperationName == CompositionTelemetry.Spans.Gatherer && a.DisplayName == "OTelFailingGatherer");
         Assert.Equal(ActivityStatusCode.Error, gathererActivity.Status);
         Assert.Equal("error", gathererActivity.GetTagItem("otel.status_code"));
         Assert.Equal("Gatherer failed", gathererActivity.GetTagItem("otel.status_description"));

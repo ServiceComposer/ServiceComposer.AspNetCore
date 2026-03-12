@@ -54,14 +54,15 @@ namespace ServiceComposer.AspNetCore
 
             if (CompositionTelemetry.ActivitySource.HasListeners())
             {
-                activity = CompositionTelemetry.ActivitySource.StartActivity("composition.event");
+                activity = CompositionTelemetry.ActivitySource.StartActivity(CompositionTelemetry.Spans.Event, ActivityKind.Internal);
                 if (activity != null)
                 {
                     activity.DisplayName = eventType.FullName ?? eventType.Name;
                     if (activity.IsAllDataRequested)
                     {
-                        activity.SetTag("composition.event.type", eventType.FullName ?? eventType.Name);
-                        activity.SetTag("composition.event.namespace", eventType.Namespace);
+                        activity.SetTag(CompositionTelemetry.Tags.EventType, eventType.FullName ?? eventType.Name);
+                        if (eventType.Namespace != null)
+                            activity.SetTag(CompositionTelemetry.Tags.EventNamespace, eventType.Namespace);
                     }
                 }
             }

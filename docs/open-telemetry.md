@@ -88,6 +88,6 @@ Each `IGatherer` execution produces a child span of the ASP.NET Core HTTP server
 |---|---|
 | Operation name | `scatter-gather.gatherer` |
 | Display name | Gatherer key |
-| `scatter-gather.gatherer.key` | The gatherer key |
+| `scatter_gather.gatherer.key` | The gatherer key |
 
 When a gatherer throws, the span sets `ActivityStatusCode.Error` with the same `otel.status_code`, `otel.status_description` tags and `exception` span event as described above.

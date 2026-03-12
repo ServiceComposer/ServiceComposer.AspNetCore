@@ -31,13 +31,13 @@ public static class ScatterGatherEndpointBuilderExtensions
 
                 if (CompositionTelemetry.ScatterGatherActivitySource.HasListeners())
                 {
-                    activity = CompositionTelemetry.ScatterGatherActivitySource.StartActivity("scatter-gather.gatherer");
+                    activity = CompositionTelemetry.ScatterGatherActivitySource.StartActivity(CompositionTelemetry.Spans.Gatherer, ActivityKind.Internal);
                     if (activity != null)
                     {
                         activity.DisplayName = gatherer.Key;
                         if (activity.IsAllDataRequested)
                         {
-                            activity.SetTag("scatter-gather.gatherer.key", gatherer.Key);
+                            activity.SetTag(CompositionTelemetry.Tags.GathererKey, gatherer.Key);
                         }
                     }
                 }
