@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +22,7 @@ namespace ServiceComposer.AspNetCore
 
         public string RequestId { get; } = requestId;
 
-        public Task RaiseEvent<TEvent>(TEvent @event)
+        public async Task RaiseEvent<TEvent>(TEvent @event)
         {
             var handlers = new List<CompositionEventHandler<TEvent>>();
             if (metadataRegistry.EventHandlers.TryGetValue(typeof(TEvent), out var handlerTypes))
@@ -48,8 +49,22 @@ namespace ServiceComposer.AspNetCore
             var logger = httpRequest.HttpContext.RequestServices.GetService<ILogger<CompositionContext>>();
             logger?.LogDebug("Raising event {EventType} to {HandlerCount} handler(s).", typeof(TEvent).Name, handlers.Count);
 
+            var eventType = typeof(TEvent);
+            using var activity = CompositionTelemetry.ActivitySource.StartActivity(
+                $"composition.event {eventType.FullName ?? eventType.Name}");
+            activity?.SetTag("composition.event.type", eventType.FullName ?? eventType.Name);
+            activity?.SetTag("composition.event.namespace", eventType.Namespace);
+
             var tasks = handlers.Select(handler => handler(@event, httpRequest)).ToList();
-            return Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                throw;
+            }
         }
 
         public IList<ModelBindingArgument>? GetArguments(ICompositionRequestsHandler owner) => GetArguments(owner.GetType());
