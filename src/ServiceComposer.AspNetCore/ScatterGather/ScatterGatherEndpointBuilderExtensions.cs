@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,8 +27,47 @@ public static class ScatterGatherEndpointBuilderExtensions
 
             async Task GatherAndAdd(IGatherer gatherer)
             {
-                var result = await gatherer.Gather(context);
-                aggregator.Add(result);
+                Activity activity = null;
+
+                if (CompositionTelemetry.ScatterGatherActivitySource.HasListeners())
+                {
+                    activity = CompositionTelemetry.ScatterGatherActivitySource.StartActivity(CompositionTelemetry.Spans.Gatherer, ActivityKind.Internal);
+                    if (activity != null)
+                    {
+                        activity.DisplayName = gatherer.Key;
+                        if (activity.IsAllDataRequested)
+                        {
+                            activity.SetTag(CompositionTelemetry.Tags.GathererKey, gatherer.Key);
+                        }
+                    }
+                }
+
+                try
+                {
+                    var result = await gatherer.Gather(context);
+                    aggregator.Add(result);
+                    activity?.SetStatus(ActivityStatusCode.Ok);
+                }
+                catch (Exception ex)
+                {
+                    if (activity != null)
+                    {
+                        activity.SetStatus(ActivityStatusCode.Error);
+                        activity.SetTag("otel.status_code", "error");
+                        activity.SetTag("otel.status_description", ex.Message);
+                        activity.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
+                        {
+                            ["exception.type"] = ex.GetType().FullName ?? ex.GetType().Name,
+                            ["exception.message"] = ex.Message,
+                            ["exception.stacktrace"] = ex.ToString()
+                        }));
+                    }
+                    throw;
+                }
+                finally
+                {
+                    activity?.Dispose();
+                }
             }
 
             await Task.WhenAll(options.Gatherers.Select(GatherAndAdd));

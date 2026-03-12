@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +22,7 @@ namespace ServiceComposer.AspNetCore
 
         public string RequestId { get; } = requestId;
 
-        public Task RaiseEvent<TEvent>(TEvent @event)
+        public async Task RaiseEvent<TEvent>(TEvent @event)
         {
             var handlers = new List<CompositionEventHandler<TEvent>>();
             if (metadataRegistry.EventHandlers.TryGetValue(typeof(TEvent), out var handlerTypes))
@@ -48,8 +49,50 @@ namespace ServiceComposer.AspNetCore
             var logger = httpRequest.HttpContext.RequestServices.GetService<ILogger<CompositionContext>>();
             logger?.LogDebug("Raising event {EventType} to {HandlerCount} handler(s).", typeof(TEvent).Name, handlers.Count);
 
+            var eventType = typeof(TEvent);
+            Activity? activity = null;
+
+            if (CompositionTelemetry.ActivitySource.HasListeners())
+            {
+                activity = CompositionTelemetry.ActivitySource.StartActivity(CompositionTelemetry.Spans.Event, ActivityKind.Internal);
+                if (activity != null)
+                {
+                    activity.DisplayName = eventType.FullName ?? eventType.Name;
+                    if (activity.IsAllDataRequested)
+                    {
+                        activity.SetTag(CompositionTelemetry.Tags.EventType, eventType.FullName ?? eventType.Name);
+                        if (eventType.Namespace != null)
+                            activity.SetTag(CompositionTelemetry.Tags.EventNamespace, eventType.Namespace);
+                    }
+                }
+            }
+
             var tasks = handlers.Select(handler => handler(@event, httpRequest)).ToList();
-            return Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
+                activity?.SetStatus(ActivityStatusCode.Ok);
+            }
+            catch (Exception ex)
+            {
+                if (activity != null)
+                {
+                    activity.SetStatus(ActivityStatusCode.Error);
+                    activity.SetTag("otel.status_code", "error");
+                    activity.SetTag("otel.status_description", ex.Message);
+                    activity.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
+                    {
+                        ["exception.type"] = ex.GetType().FullName ?? ex.GetType().Name,
+                        ["exception.message"] = ex.Message,
+                        ["exception.stacktrace"] = ex.ToString()
+                    }));
+                }
+                throw;
+            }
+            finally
+            {
+                activity?.Dispose();
+            }
         }
 
         public IList<ModelBindingArgument>? GetArguments(ICompositionRequestsHandler owner) => GetArguments(owner.GetType());

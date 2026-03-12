@@ -74,6 +74,25 @@ namespace ServiceComposer.AspNetCore
         public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; }
     }
     public delegate System.Threading.Tasks.ValueTask<object> CompositionRequestFilterDelegate(ServiceComposer.AspNetCore.CompositionRequestFilterContext context);
+    public static class CompositionTelemetry
+    {
+        public const string ScatterGatherSourceName = "ServiceComposer.AspNetCore.ScatterGather";
+        public const string ViewModelCompositionSourceName = "ServiceComposer.AspNetCore.ViewModelComposition";
+        public static class Spans
+        {
+            public const string Event = "composition.event";
+            public const string Gatherer = "scatter-gather.gatherer";
+            public const string Handler = "composition.handler";
+        }
+        public static class Tags
+        {
+            public const string EventNamespace = "composition.event.namespace";
+            public const string EventType = "composition.event.type";
+            public const string GathererKey = "scatter_gather.gatherer.key";
+            public const string HandlerNamespace = "composition.handler.namespace";
+            public const string HandlerType = "composition.handler.type";
+        }
+    }
     public static class EndpointsExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
