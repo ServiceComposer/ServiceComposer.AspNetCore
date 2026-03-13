@@ -14,7 +14,7 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.4" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.5" />
       <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
     </ItemGroup>
 
