@@ -1,0 +1,24 @@
+{
+  "noteId": "changelog-strategy-brainstorming-27d7687f",
+  "title": "CHANGELOG strategy brainstorming",
+  "summary": "ServiceComposer.AspNetCore maintains multiple major versions in parallel. Features are not backported but patches are (and occasionally features). Release branches are always cut from master, unless master is already targeting the next major (in which case the new minor branch is",
+  "headings": [
+    "CHANGELOG strategy brainstorming",
+    "Context",
+    "Structure decision: separate files per major (agreed)",
+    "Where do the changelog files live? (undecided)",
+    "Option A: changelogs on master, version-suffixed files (recommended given branching model)",
+    "Option B: changelogs on release branches, master is index (original preference, but problematic)",
+    "Option C: scoped per-minor changelogs on release branches + master index",
+    "Branching model (key constraint)"
+  ],
+  "tags": [
+    "changelog",
+    "release-flow",
+    "brainstorming"
+  ],
+  "lifecycle": "permanent",
+  "updatedAt": "2026-03-31T13:40:45.857Z",
+  "projectionText": "Title: CHANGELOG strategy brainstorming\nLifecycle: permanent\nTags: changelog, release-flow, brainstorming\nSummary: ServiceComposer.AspNetCore maintains multiple major versions in parallel. Features are not backported but patches are (and occasionally features). Release branches are always cut from master, unless master is already targeting the next major (in which case the new minor branch is\nHeadings: CHANGELOG strategy brainstorming | Context | Structure decision: separate files per major (agreed) | Where do the changelog files live? (undecided) | Option A: changelogs on master, version-suffixed files (recommended given branching model) | Option B: changelogs on release branches, master is index (original preference, but problematic) | Option C: scoped per-minor changelogs on release branches + master index | Branching model (key constraint)",
+  "generatedAt": "2026-03-31T13:40:45.861Z"
+}
