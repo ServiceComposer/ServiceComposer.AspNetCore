@@ -8,7 +8,7 @@ tags:
   - source-generator
 lifecycle: permanent
 createdAt: '2026-03-12T19:42:55.766Z'
-updatedAt: '2026-03-12T19:42:55.766Z'
+updatedAt: '2026-05-12T17:14:07.953Z'
 project: https-github-com-servicecomposer-servicecomposer-aspnetcore
 projectName: ServiceComposer.AspNetCore
 memoryVersion: 1
@@ -43,7 +43,10 @@ public Task Handle(HttpRequest request)
 
 ### 3. Source-Generated (contract-less handlers)
 
-Convention: class in `*.CompositionHandlers` namespace, name ends with `CompositionHandler`, method decorated with `[Http*]` attribute, returns `Task`. The source generator creates a wrapper implementing `ICompositionRequestsHandler` with appropriate `BindModel` attributes.
+Discovery is **attribute-based**, not namespace/suffix-based. The class must carry `[CompositionHandler]` — that is the sole discovery signal for both the source generator and the runtime assembly scanner. Namespace and class name suffixes (e.g. `*.CompositionHandlers`, `*CompositionHandler`) are a recommended naming convention only; they play no role in detection.
+
+Source generator check (syntax level): class has `[CompositionHandler]` or `[CompositionHandlerAttribute]`.
+Runtime check (`IsContractlessCompositionHandler`): class is not interface/abstract AND has `CompositionHandlerAttribute` via reflection.
 
 Source generator binding heuristics for method parameters (evaluated in order):
 
