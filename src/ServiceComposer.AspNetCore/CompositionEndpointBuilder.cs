@@ -13,6 +13,14 @@ namespace ServiceComposer.AspNetCore
 {
     partial class CompositionEndpointBuilder : EndpointBuilder
     {
+        // The cached endpoint filter pipeline is built once per endpoint. The
+        // composer that runs at the bottom of the pipeline is per-request, so
+        // we cannot capture it in the cached delegate's closure (the cached
+        // delegate would replay the first request's bound arguments forever).
+        // Stash the per-request composer in HttpContext.Items under this key
+        // and have the innermost pipeline delegate read it back from there.
+        internal const string CurrentComposerKey = "__ServiceComposer.CurrentComposer";
+
         readonly Dictionary<ResponseCasing, JsonSerializerOptions> casingToSettingsMappings = new();
         readonly RoutePattern routePattern;
         readonly ResponseCasing defaultResponseCasing;
@@ -116,7 +124,11 @@ namespace ServiceComposer.AspNetCore
                     );
                     await CompositionHandler.HandleComposableRequest(composerHttpContext, compositionContext, componentsTypes);
                 };
-                var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(composer, context.RequestServices);
+                // The cached pipeline reads the composer back from HttpContext.Items, so the
+                // per-request composer (and its captured argumentsByComponent) is the one
+                // that runs - not whichever composer happened to be the first one built.
+                context.Items[CurrentComposerKey] = composer;
+                var pipeline = cachedPipeline ?? BuildAndCacheEndpointFilterDelegatePipeline(context.RequestServices);
                 
                 // TODO use source generators
                 //   When we'll have convention-based handlers this could be

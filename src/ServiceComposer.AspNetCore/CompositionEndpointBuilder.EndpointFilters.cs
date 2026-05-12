@@ -8,11 +8,11 @@ namespace ServiceComposer.AspNetCore;
 partial class CompositionEndpointBuilder
 {
     static readonly object buildAndCacheEndpointFilterDelegatePipelineSyncLock = new ();
-    EndpointFilterDelegate BuildAndCacheEndpointFilterDelegatePipeline(RequestDelegate composer, IServiceProvider serviceProvider)
+    EndpointFilterDelegate BuildAndCacheEndpointFilterDelegatePipeline(IServiceProvider serviceProvider)
     {
         lock (buildAndCacheEndpointFilterDelegatePipelineSyncLock)
         {
-            var compositionFiltersPipeline = BuildCompositionRequestFilterDelegatePipeline(composer, serviceProvider);
+            var compositionFiltersPipeline = BuildCompositionRequestFilterDelegatePipeline(serviceProvider);
             
             var factoryContext = new EndpointFilterFactoryContext
             {

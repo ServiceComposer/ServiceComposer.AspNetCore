@@ -109,12 +109,15 @@ The HTTP response should be a JSON result containing the properties and values d
 
 In this brief sample, the view model instance returned by `GetComposedResponseModel()` is a C# `dynamic` object. `dynamic` objects are handy because they allow request handlers to be entirely independent of each other; they share nothing. ServiceComposer supports using strongly typed view models if they are preferred. They have the advantages of strong typing and compiler checks and the disadvantages of a bit of coupling. Refer to the [view model factory documentation](docs/view-model-factory) for more information.
 
-## Documentation and supported platforms
+## Documentation, supported platforms, and supported versions
 
 ServiceComposer is available for the following platforms:
 
 - ASP.NET Core on .NET 8: [documentation is available in the docs folder](docs)
 
+> [!IMPORTANT]
+> Only the last two major releases are supported. Only the latest minor of every supported major is supported. That implies that bugfixes will be backported only to the most recent minor of every affected support major version.
+ 
 ## Philosophy
 
 ### Service Boundaries

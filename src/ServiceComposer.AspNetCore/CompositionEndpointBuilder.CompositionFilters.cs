@@ -9,7 +9,7 @@ namespace ServiceComposer.AspNetCore;
 
 partial class CompositionEndpointBuilder
 {
-   CompositionRequestFilterDelegate BuildCompositionRequestFilterDelegatePipeline(RequestDelegate composer, IServiceProvider serviceProvider)
+   CompositionRequestFilterDelegate BuildCompositionRequestFilterDelegatePipeline(IServiceProvider serviceProvider)
     {
         List<Func<CompositionRequestFilterFactoryContext, CompositionRequestFilterDelegate, CompositionRequestFilterDelegate>> compositionRequestFilterFactories = [];
         var compositionRequestFilters = Metadata
@@ -24,14 +24,17 @@ partial class CompositionEndpointBuilder
                 compositionRequestFilters.Add(typeBasedCompositionFilter);
             }
         }
-        
+
         compositionRequestFilters.ForEach(filter =>
         {
             compositionRequestFilterFactories.Add((factoryContext, next) => (context) => filter.InvokeAsync(context, next));
         });
 
+        // The composer is per-request: read it back from HttpContext.Items
+        // here so the cached pipeline does not close over a stale composer.
         CompositionRequestFilterDelegate filteredInvocation = async context =>
         {
+            var composer = (RequestDelegate)context.HttpContext.Items[CurrentComposerKey]!;
             await composer(context.HttpContext);
             var viewModel = context.HttpContext.Request.GetComposedResponseModel();
 
