@@ -69,13 +69,16 @@ Both handlers target the same route and run in parallel. Neither knows about the
 
 For a complete walkthrough — installation, project structure, and next steps — see the **[getting started guide](docs/getting-started.md)**.
 
-## Documentation and supported platforms
+## Documentation, supported platforms, and supported versions
 
 ServiceComposer is available for the following platforms:
 
 - ASP.NET Core on .NET 10: [documentation is available in the docs folder](docs)
 - New to ServiceComposer? Start with the [getting started guide](docs/getting-started.md).
 
+> [!IMPORTANT]
+> Only the last two major releases are supported. Only the latest minor of every supported major is supported. That implies that bugfixes will be backported only to the most recent minor of every affected support major version.
+ 
 ## Philosophy
 
 ### Service Boundaries
