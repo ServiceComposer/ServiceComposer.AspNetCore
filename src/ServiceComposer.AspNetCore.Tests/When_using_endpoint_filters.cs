@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -196,6 +197,35 @@ namespace ServiceComposer.AspNetCore.Tests
             var contentString = await response.Content.ReadAsStringAsync();
             dynamic responseBody = JObject.Parse(contentString);
             Assert.Equal(expectedComposedRequestId, (string)responseBody.RequestId);
+        }
+
+        // Regression test for https://github.com/ServiceComposer/ServiceComposer.AspNetCore/issues/1063
+        // CompositionEndpointDataSource.Endpoints is a property that ASP.NET Core's routing
+        // infrastructure can, and does, enumerate more than once during startup and routing setup.
+        // AddEndpointFilter(...) is implemented as an endpoint convention that appends a filter
+        // factory, so re-applying conventions on every enumeration stacked the same filter factory
+        // onto the same, reused endpoint builder, resulting in the filter running more than once
+        // per request.
+        [Fact]
+        public void Should_apply_each_convention_only_once_even_when_endpoints_are_enumerated_multiple_times()
+        {
+            var dataSource = new CompositionEndpointDataSource();
+            var builder = new CompositionEndpointBuilder(
+                RoutePatternFactory.Parse("/some-route"),
+                Array.Empty<Type>(),
+                0,
+                ResponseCasing.PascalCase,
+                useOutputFormatters: false);
+            dataSource.AddEndpointBuilder(builder);
+
+            var conventionInvocationCount = 0;
+            dataSource.Add(_ => conventionInvocationCount++);
+
+            _ = dataSource.Endpoints;
+            _ = dataSource.Endpoints;
+            _ = dataSource.Endpoints;
+
+            Assert.Equal(1, conventionInvocationCount);
         }
     }
 }
