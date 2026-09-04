@@ -11,8 +11,10 @@ namespace ServiceComposer.AspNetCore
 {
     class CompositionEndpointDataSource : EndpointDataSource, IEndpointConventionBuilder
     {
+        readonly object endpointsBuildLock = new();
         readonly List<Action<EndpointBuilder>> conventions = [];
         readonly List<CompositionEndpointBuilder> _endpointBuilders = [];
+        IReadOnlyList<Endpoint> cachedEndpoints;
 
         public void AddEndpointBuilder(CompositionEndpointBuilder endpointBuilder)
         {
@@ -24,16 +26,38 @@ namespace ServiceComposer.AspNetCore
             return NullChangeToken.Singleton;
         }
 
-        public override IReadOnlyList<Endpoint> Endpoints => _endpointBuilders
-            .OrderBy(builder => builder.Order)
-            .Select(builder =>
+        // ASP.NET Core's routing infrastructure can, and does, enumerate an
+        // EndpointDataSource's Endpoints more than once during startup and
+        // routing setup. Since GetChangeToken() above never signals a change,
+        // there's never a reason to rebuild: conventions (e.g. AddEndpointFilter)
+        // must be applied to each endpoint builder exactly once, otherwise
+        // conventions that mutate state - like appending an endpoint filter
+        // factory - get re-applied on every enumeration, stacking duplicates
+        // onto the same, reused CompositionEndpointBuilder instances.
+        public override IReadOnlyList<Endpoint> Endpoints
+        {
+            get
             {
-                foreach (var convention in conventions)
+                if (cachedEndpoints == null)
                 {
-                    convention(builder);
+                    lock (endpointsBuildLock)
+                    {
+                        cachedEndpoints ??= _endpointBuilders
+                            .OrderBy(builder => builder.Order)
+                            .Select(builder =>
+                            {
+                                foreach (var convention in conventions)
+                                {
+                                    convention(builder);
+                                }
+                                return builder.Build();
+                            }).ToArray();
+                    }
                 }
-                return builder.Build();
-            }).ToArray();
+
+                return cachedEndpoints;
+            }
+        }
 
         public void Add(Action<EndpointBuilder> convention)
         {
