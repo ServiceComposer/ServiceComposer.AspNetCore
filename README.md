@@ -11,7 +11,7 @@ Designing a UI when the back-end system consists of dozens (or more) of (micro)s
 
   * [Technical introduction](#technical-introduction)
   * [Getting Started](#getting-started)
-  * [Documentation and supported platforms](#documentation-and-supported-platforms)
+  * [Documentation, supported platforms, and supported versions](#documentation-supported-platforms-and-supported-versions)
   * [Philosophy](#philosophy)
     * [Service Boundaries](#service-boundaries)<!-- endToc -->
 
@@ -78,6 +78,8 @@ ServiceComposer is available for the following platforms:
 
 > [!IMPORTANT]
 > Only the last two major releases are supported. Only the latest minor of every supported major is supported. That implies that bugfixes will be backported only to the most recent minor of every affected support major version.
+
+For how releases and backports are made, see [RELEASING.md](RELEASING.md).
  
 ## Philosophy
 
