@@ -49,6 +49,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: checkout code
         uses: actions/checkout@v4.2.2
@@ -76,9 +79,15 @@ jobs:
           echo "Tag is pre-release"
           echo "Pushing package to Feedz.io"
           dotnet nuget push ./nugets/*.nupkg --source https://f.feedz.io/servicecomposer/pre-releases/nuget --api-key ${{ secrets.FEEDZ_API_KEY }}
+      - name: NuGet login
+        id: nuget-login
+        if: steps.check-tag-type.outputs.release-type == 'production'
+        uses: NuGet/login@v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USER }}
       - name: Deploy release to NuGet
         if: steps.check-tag-type.outputs.release-type == 'production'
         run: |
           echo "Tag is production"
           echo "Pushing package to NuGet.org"
-          dotnet nuget push ./nugets/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push ./nugets/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
