@@ -2,8 +2,8 @@ name: CI
 on:
   push:
     tags:
-      - '[0-9].[0-9]+.[0-9]'
-      - '[0-9].[0-9]+.[0-9]+-*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
     branches:
       - master
       - release-*
@@ -68,7 +68,7 @@ jobs:
         id: check-tag-type
         if: github.ref_type == 'tag'
         run: |
-          if [[ ${{ github.ref_name }} =~ [0-9]+.[0-9]+.[0-9]+$ ]]; then
+          if [[ ${{ github.ref_name }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "release-type=production" >> $GITHUB_OUTPUT
           else
             echo "release-type=pre-release" >> $GITHUB_OUTPUT
