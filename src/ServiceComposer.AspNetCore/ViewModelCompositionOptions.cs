@@ -298,7 +298,7 @@ namespace ServiceComposer.AspNetCore
                     // We don't want (yet?) to register contract-less composition handlers
                     // in the metadata registry because they are not a first-class citizen
                     // in the ASP.Net endpoint
-                    _compositionMetadataRegistry.AddComponent(type);
+                    _compositionMetadataRegistry.AddComponent(type, ExtractComponentMetadata(type));
                 }
 
                 if (configurationHandlers.TryGetValue(type, out var handler))
@@ -319,6 +319,31 @@ namespace ServiceComposer.AspNetCore
 
                 throw new NotSupportedException(message);
             }
+        }
+
+        static IReadOnlyList<object> ExtractComponentMetadata(Type componentType)
+        {
+            MethodInfo method;
+            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(componentType))
+            {
+                method = componentType.GetMethod(nameof(ICompositionRequestsHandler.Handle));
+            }
+            else if (typeof(ICompositionEventsSubscriber).IsAssignableFrom(componentType))
+            {
+                method = componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
+            }
+            else if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(componentType))
+            {
+                method = componentType.GetMethod(nameof(IEndpointScopedViewModelFactory.CreateViewModel));
+            }
+            else
+            {
+                var message = $"Component needs to be either {nameof(ICompositionRequestsHandler)}, " +
+                              $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
+                throw new NotSupportedException(message);
+            }
+
+            return method.GetCustomAttributes(inherit: true);
         }
 
         static bool IsContractlessCompositionHandler(Type type)

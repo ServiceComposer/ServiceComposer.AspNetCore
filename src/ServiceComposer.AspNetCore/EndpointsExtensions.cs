@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -205,7 +204,7 @@ namespace ServiceComposer.AspNetCore
         }
 
         static bool ThereIsAlreadyAnEndpointForTheSameTemplate(
-            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
+            IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup,
             ICollection<EndpointDataSource> dataSources,
             bool useCaseInsensitiveRouteMatching, out Endpoint endpoint)
         {
@@ -233,15 +232,15 @@ namespace ServiceComposer.AspNetCore
         }
 
         static (Type ComponentType, IList<object> Metadata)[] ExtractComponentsWithMetadata(
-            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup)
+            IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup)
         {
             return componentsGroup
-                .Select(c => (c.ComponentType, (IList<object>)c.Method.GetCustomAttributes(inherit: true)))
+                .Select(c => (c.ComponentType, (IList<object>)c.Metadata.ToArray()))
                 .ToArray();
         }
 
         static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
-            IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
+            IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup,
             HttpMethodMetadata methodMetadata,
             ResponseCasing defaultCasing,
             bool useOutputFormatters)
@@ -260,7 +259,7 @@ namespace ServiceComposer.AspNetCore
             // builds a list of metadata for each component in this endpoint
             foreach (var component in componentsGroup)
             {
-                builder.ComponentsMetadata.Add((component.ComponentType, component.Method.GetCustomAttributes(inherit: true)));
+                builder.ComponentsMetadata.Add((component.ComponentType, component.Metadata.ToArray()));
             }
             
             // flattens the metadata
@@ -272,20 +271,19 @@ namespace ServiceComposer.AspNetCore
             return builder;
         }
 
-        static IEnumerable<IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)>>
+        static IEnumerable<IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)>>
             SelectComponentsGroupedByTemplate<TAttribute>(
                 CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching)
             where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
-                .SelectMany<Type, (Type ComponentType, MethodInfo Method, string Template)>(componentType =>
+                .SelectMany<KeyValuePair<Type, IReadOnlyList<object>>, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)>(component =>
                 {
-                    var method = ExtractMethod(componentType);
-                    var componentsAndTemplate = method.GetCustomAttributes<TAttribute>()?
+                    var componentsAndTemplate = component.Value.OfType<TAttribute>()
                         .Select(a =>
                         {
                             var template = a.Template.TrimStart('/');
-                            return (componentType, method, useCaseInsensitiveRouteMatching
+                            return (component.Key, component.Value, useCaseInsensitiveRouteMatching
                                 ? template.ToLowerInvariant()
                                 : template);
                         }).ToArray();
@@ -302,26 +300,6 @@ namespace ServiceComposer.AspNetCore
                 .GroupBy(component => component.Template);
 
             return getComponentsGroupedByTemplate;
-        }
-
-        static MethodInfo ExtractMethod(Type componentType)
-        {
-            if (typeof(ICompositionRequestsHandler).IsAssignableFrom(componentType))
-            {
-                return componentType.GetMethod(nameof(ICompositionRequestsHandler.Handle));
-            }
-            else if (typeof(ICompositionEventsSubscriber).IsAssignableFrom(componentType))
-            {
-                return componentType.GetMethod(nameof(ICompositionEventsSubscriber.Subscribe));
-            }
-            else if (typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(componentType))
-            {
-                return componentType.GetMethod(nameof(IEndpointScopedViewModelFactory.CreateViewModel));
-            }
-
-            var message = $"Component needs to be either {nameof(ICompositionRequestsHandler)}, " +
-                          $"{nameof(ICompositionEventsSubscriber)}, or {nameof(IEndpointScopedViewModelFactory)}.";
-            throw new NotSupportedException(message);
         }
     }
 }
