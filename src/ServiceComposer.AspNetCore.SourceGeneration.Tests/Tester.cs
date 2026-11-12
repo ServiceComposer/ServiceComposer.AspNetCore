@@ -26,6 +26,19 @@ public class Tester
         return (framework.Version, targetFrameworkAttribute.FrameworkName);
     }
     
+    static bool IsManagedAssembly(string path)
+    {
+        try
+        {
+            AssemblyName.GetAssemblyName(path);
+            return true;
+        }
+        catch (BadImageFormatException)
+        {
+            return false;
+        }
+    }
+
     static Compilation CreateCompilation(string source)
     {
         var compilation = CSharpCompilation.Create(
@@ -76,7 +89,9 @@ public class Tester
                 "*.dll"
             );
             
-            foreach (var assembly in aspNetCoreAssemblies)
+            // On Windows, the shared framework also contains native libraries,
+            // e.g. aspnetcorev2_inprocess.dll, that can't be referenced.
+            foreach (var assembly in aspNetCoreAssemblies.Where(IsManagedAssembly))
             {
                 references.Add(MetadataReference.CreateFromFile(assembly));
             }
