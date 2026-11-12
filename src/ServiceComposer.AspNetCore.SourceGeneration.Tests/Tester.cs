@@ -39,10 +39,10 @@ public class Tester
         }
     }
 
-    static Compilation CreateCompilation(string source)
+    static Compilation CreateCompilation(string source, string assemblyName = "TestAssembly")
     {
         var compilation = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
+            assemblyName: assemblyName,
             syntaxTrees: [CSharpSyntaxTree.ParseText(source)],
             references:
             [
@@ -136,13 +136,16 @@ public class Tester
         File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.ComponentsProviders", fileName));
 
     static (GeneratorDriverRunResult RunResult, Compilation OutputCompilation, IReadOnlyList<Diagnostic> Diagnostics) RunComponentsProviderGenerator(string source)
+        => RunComponentsProviderGenerator(CreateCompilation(source));
+
+    static (GeneratorDriverRunResult RunResult, Compilation OutputCompilation, IReadOnlyList<Diagnostic> Diagnostics) RunComponentsProviderGenerator(Compilation compilation)
     {
         // The wrapper generator runs too: the provider must reference the
         // wrappers it generates for contract-less composition handlers.
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             new CompositionHandlerWrapperGenerator(),
             new CompositionComponentsProviderGenerator());
-        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(source),
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation,
             out var outputCompilation,
             out var diagnostics);
 
@@ -184,5 +187,58 @@ public class Tester
     public void Provider_namespace_is_a_valid_identifier(string assemblyName, string expectedNamespace)
     {
         Assert.Equal(expectedNamespace, CompositionComponentsProviderGenerator.ToNamespace(assemblyName));
+    }
+    [Fact]
+    public async Task TestReferencedComponentsRegistration()
+    {
+        // A service assembly, compiled with the generators, that gets a components provider
+        var (_, serviceCompilation, serviceDiagnostics) = RunComponentsProviderGenerator(
+            CreateCompilation(ReadComponentsProvidersTestFile("AllComponentKinds.cs"), "Sales.ViewModelComposition"));
+        Assert.Empty(serviceDiagnostics);
+
+        using var serviceAssembly = new MemoryStream();
+        var emitResult = serviceCompilation.Emit(serviceAssembly);
+        Assert.True(emitResult.Success, string.Join(Environment.NewLine, emitResult.Diagnostics));
+
+        // A host that references the service assembly, and has components of its own
+        const string hostSource = """
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            using Microsoft.AspNetCore.Mvc;
+            using Microsoft.Extensions.DependencyInjection;
+            using ServiceComposer.AspNetCore;
+
+            namespace Host;
+
+            class HostRequestsHandler : ICompositionRequestsHandler
+            {
+                [HttpGet("/host/{id}")]
+                public Task Handle(HttpRequest request) => Task.CompletedTask;
+            }
+
+            static class Startup
+            {
+                static void Configure(IServiceCollection services)
+                {
+                    services.AddViewModelComposition(options => options.RegisterReferencedComponents());
+                }
+            }
+            """;
+        var hostCompilation = CreateCompilation(hostSource, "Host")
+            .AddReferences(MetadataReference.CreateFromImage(serviceAssembly.ToArray()));
+
+        var (runResult, outputCompilation, diagnostics) = RunComponentsProviderGenerator(hostCompilation);
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(outputCompilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error));
+
+        var generatedSource = runResult.GeneratedTrees
+            .Single(t => t.FilePath.EndsWith("GeneratedReferencedComponentsRegistration.g.cs"))
+            .ToString();
+
+        var nugetFramework = NuGetFramework.Parse(GetTargetFramework().Name);
+        await Verify(generatedSource.NormalizeLineEndings())
+            .UseDirectory("ApprovedFiles")
+            .UseFileName($"ComponentsProviders.ReferencedComponentsRegistration.{nugetFramework.GetShortFolderName()}");
     }
 }

@@ -241,6 +241,7 @@ namespace ServiceComposer.AspNetCore
         }
 
         readonly List<ICompositionComponentsProvider> componentsProviders = [];
+        internal IReadOnlyList<ICompositionComponentsProvider> ComponentsProviders => componentsProviders;
         bool isInitializing;
 
         /// <summary>
