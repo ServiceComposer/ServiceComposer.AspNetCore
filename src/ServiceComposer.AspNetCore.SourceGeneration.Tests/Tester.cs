@@ -117,4 +117,57 @@ public class Tester
                 .UseFileName($"{Path.GetFileName(testFile)}.{shortFolderName}");
         }
     }
+    static string ReadComponentsProvidersTestFile(string fileName) =>
+        File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.ComponentsProviders", fileName));
+
+    static (GeneratorDriverRunResult RunResult, Compilation OutputCompilation, IReadOnlyList<Diagnostic> Diagnostics) RunComponentsProviderGenerator(string source)
+    {
+        // The wrapper generator runs too: the provider must reference the
+        // wrappers it generates for contract-less composition handlers.
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            new CompositionHandlerWrapperGenerator(),
+            new CompositionComponentsProviderGenerator());
+        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(source),
+            out var outputCompilation,
+            out var diagnostics);
+
+        return (driver.GetRunResult(), outputCompilation, diagnostics);
+    }
+
+    [Fact]
+    public async Task TestComponentsProviderGenerator()
+    {
+        var (runResult, outputCompilation, diagnostics) = RunComponentsProviderGenerator(ReadComponentsProvidersTestFile("AllComponentKinds.cs"));
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(outputCompilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error));
+
+        var generatedSource = runResult.GeneratedTrees
+            .Single(t => t.FilePath.EndsWith("GeneratedCompositionComponentsProvider.g.cs"))
+            .ToString();
+
+        var nugetFramework = NuGetFramework.Parse(GetTargetFramework().Name);
+        await Verify(generatedSource.NormalizeLineEndings())
+            .UseDirectory("ApprovedFiles")
+            .UseFileName($"ComponentsProviders.AllComponentKinds.cs.{nugetFramework.GetShortFolderName()}");
+    }
+
+    [Fact]
+    public void No_components_provider_is_generated_for_assemblies_without_components()
+    {
+        var (runResult, _, diagnostics) = RunComponentsProviderGenerator(ReadComponentsProvidersTestFile("NoComponents.cs"));
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(runResult.GeneratedTrees);
+    }
+
+    [Theory]
+    [InlineData("Sales", "Sales")]
+    [InlineData("Sales.ViewModelComposition", "Sales.ViewModelComposition")]
+    [InlineData("My-Service.1Api", "My_Service._1Api")]
+    [InlineData("Company.class", "Company.@class")]
+    public void Provider_namespace_is_a_valid_identifier(string assemblyName, string expectedNamespace)
+    {
+        Assert.Equal(expectedNamespace, CompositionComponentsProviderGenerator.ToNamespace(assemblyName));
+    }
 }

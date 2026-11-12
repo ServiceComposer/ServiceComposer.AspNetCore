@@ -27,6 +27,8 @@ public class SalesCompositionOptionsCustomization : IViewModelCompositionOptions
 
 When the host application calls `builder.Services.AddViewModelComposition()`, ServiceComposer scans loaded assemblies and automatically discovers and invokes all `IViewModelCompositionOptionsCustomization` implementations.
 
+When assembly scanning is disabled, the [generated components provider](registering-components.md) of each registered assembly invokes the assembly customizations.
+
 ## Accessing configuration
 
 `ViewModelCompositionOptions` offers the ability to access the application `IConfiguration` instance. By default, the `ViewModelCompositionOptions.Configuration` property is null — accessing it throws an `ArgumentException`. To enable configuration support, pass the `IConfiguration` instance when configuring ServiceComposer:

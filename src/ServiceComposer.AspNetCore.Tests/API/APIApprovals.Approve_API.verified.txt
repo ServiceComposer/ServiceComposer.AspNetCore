@@ -56,6 +56,12 @@ namespace ServiceComposer.AspNetCore
     {
         public const string Key = "composed-request-id";
     }
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple=false, Inherited=false)]
+    public sealed class CompositionComponentsProviderAttribute : System.Attribute
+    {
+        public CompositionComponentsProviderAttribute(System.Type providerType) { }
+        public System.Type ProviderType { get; }
+    }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class CompositionHandler { }
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]

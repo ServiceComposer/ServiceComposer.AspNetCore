@@ -32,6 +32,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="ServiceComposer.AspNetCore.SourceGeneration.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="MinVer" Version="8.0.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

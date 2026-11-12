@@ -67,6 +67,10 @@ Composition request filters allow intercepting composition requests before they 
 
 It's possible to access and [customize ViewModel Composition options](options-customizations.md) at application startup by defining types that implement the `IViewModelCompositionOptionsCustomization` interface.
 
+### Registering composition components
+
+By default, composition components are discovered through assembly scanning. As an alternative, the host can register the [components providers](registering-components.md) that ServiceComposer generates at compile time for each assembly containing composition components.
+
 ## Scatter/Gather
 
 ServiceComposer natively supports scatter/gather scenarios through a fanout approach. For more information, refer to the [Scatter/Gather](scatter-gather.md) section.

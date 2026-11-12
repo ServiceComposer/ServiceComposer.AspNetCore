@@ -1,0 +1,3 @@
+namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.ComponentsProviders;
+
+class NotAComponentEither;
