@@ -6,6 +6,18 @@ namespace Snippets.ComponentsProviders;
 
 static class ComponentsProvidersSnippets
 {
+    static void RegisterReferencedComponents()
+    {
+        // begin-snippet: components-providers-register-referenced
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddViewModelComposition(options =>
+        {
+            options.AssemblyScanner.Disable();
+            options.RegisterReferencedComponents();
+        });
+        // end-snippet
+    }
+
     static void RegisterGeneratedProviders()
     {
         // begin-snippet: components-providers-register
