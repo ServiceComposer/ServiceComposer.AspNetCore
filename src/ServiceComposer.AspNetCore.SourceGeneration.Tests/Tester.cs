@@ -26,6 +26,19 @@ public class Tester
         return (framework.Version, targetFrameworkAttribute.FrameworkName);
     }
     
+    static bool IsManagedAssembly(string path)
+    {
+        try
+        {
+            AssemblyName.GetAssemblyName(path);
+            return true;
+        }
+        catch (BadImageFormatException)
+        {
+            return false;
+        }
+    }
+
     static Compilation CreateCompilation(string source)
     {
         var compilation = CSharpCompilation.Create(
@@ -52,44 +65,16 @@ public class Tester
             references.AddRange(frameworkReferences);
         }
         
-        string aspNetCorePath;
-        if (OperatingSystem.IsWindows())
+        // The ASP.NET Core shared framework is installed next to the .NET one the tests
+        // run on, e.g. <dotnet root>/shared/Microsoft.NETCore.App/10.0.x and
+        // <dotnet root>/shared/Microsoft.AspNetCore.App/10.0.x
+        var netCoreAppPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+        var aspNetCorePath = Path.GetFullPath(Path.Combine(netCoreAppPath, "..", "..", "Microsoft.AspNetCore.App"));
+        if (!Directory.Exists(aspNetCorePath))
         {
-            aspNetCorePath = Path.Combine(
-                Environment.GetEnvironmentVariable("ProgramFiles") ?? @"C:\Program Files",
-                "dotnet",
-                "shared",
-                "Microsoft.AspNetCore.App"
-            );
+            throw new DirectoryNotFoundException($"Could not find ASP.NET Core shared framework directory: {aspNetCorePath}");
         }
-        else if (OperatingSystem.IsMacOS())
-        {
-            aspNetCorePath = "/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App";
-            
-            // Check for homebrew installation if default location doesn't exist
-            if (!Directory.Exists(aspNetCorePath))
-            {
-                aspNetCorePath = "/opt/homebrew/share/dotnet/shared/Microsoft.AspNetCore.App";
-            }
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            // Check common Linux installation paths
-            var possiblePaths = new[]
-            {
-                "/usr/share/dotnet/shared/Microsoft.AspNetCore.App",
-                "/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App",
-                "/opt/dotnet/shared/Microsoft.AspNetCore.App"
-            };
-            
-            aspNetCorePath = possiblePaths.FirstOrDefault(Directory.Exists) ?? 
-                             throw new DirectoryNotFoundException("Could not find ASP.NET Core shared framework directory");
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Current operating system is not supported");
-        }
-        
+
         if (Directory.Exists(aspNetCorePath))
         {
             var targetFrameworkVersion = GetTargetFramework();
@@ -104,7 +89,9 @@ public class Tester
                 "*.dll"
             );
             
-            foreach (var assembly in aspNetCoreAssemblies)
+            // On Windows, the shared framework also contains native libraries,
+            // e.g. aspnetcorev2_inprocess.dll, that can't be referenced.
+            foreach (var assembly in aspNetCoreAssemblies.Where(IsManagedAssembly))
             {
                 references.Add(MetadataReference.CreateFromFile(assembly));
             }
@@ -144,5 +131,58 @@ public class Tester
                 .UseDirectory("ApprovedFiles")
                 .UseFileName($"{Path.GetFileName(testFile)}.{shortFolderName}");
         }
+    }
+    static string ReadComponentsProvidersTestFile(string fileName) =>
+        File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.ComponentsProviders", fileName));
+
+    static (GeneratorDriverRunResult RunResult, Compilation OutputCompilation, IReadOnlyList<Diagnostic> Diagnostics) RunComponentsProviderGenerator(string source)
+    {
+        // The wrapper generator runs too: the provider must reference the
+        // wrappers it generates for contract-less composition handlers.
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            new CompositionHandlerWrapperGenerator(),
+            new CompositionComponentsProviderGenerator());
+        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(source),
+            out var outputCompilation,
+            out var diagnostics);
+
+        return (driver.GetRunResult(), outputCompilation, diagnostics);
+    }
+
+    [Fact]
+    public async Task TestComponentsProviderGenerator()
+    {
+        var (runResult, outputCompilation, diagnostics) = RunComponentsProviderGenerator(ReadComponentsProvidersTestFile("AllComponentKinds.cs"));
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(outputCompilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error));
+
+        var generatedSource = runResult.GeneratedTrees
+            .Single(t => t.FilePath.EndsWith("GeneratedCompositionComponentsProvider.g.cs"))
+            .ToString();
+
+        var nugetFramework = NuGetFramework.Parse(GetTargetFramework().Name);
+        await Verify(generatedSource.NormalizeLineEndings())
+            .UseDirectory("ApprovedFiles")
+            .UseFileName($"ComponentsProviders.AllComponentKinds.cs.{nugetFramework.GetShortFolderName()}");
+    }
+
+    [Fact]
+    public void No_components_provider_is_generated_for_assemblies_without_components()
+    {
+        var (runResult, _, diagnostics) = RunComponentsProviderGenerator(ReadComponentsProvidersTestFile("NoComponents.cs"));
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(runResult.GeneratedTrees);
+    }
+
+    [Theory]
+    [InlineData("Sales", "Sales")]
+    [InlineData("Sales.ViewModelComposition", "Sales.ViewModelComposition")]
+    [InlineData("My-Service.1Api", "My_Service._1Api")]
+    [InlineData("Company.class", "Company.@class")]
+    public void Provider_namespace_is_a_valid_identifier(string assemblyName, string expectedNamespace)
+    {
+        Assert.Equal(expectedNamespace, CompositionComponentsProviderGenerator.ToNamespace(assemblyName));
     }
 }

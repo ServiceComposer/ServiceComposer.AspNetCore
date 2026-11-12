@@ -29,6 +29,9 @@
         <Content Include="TestFiles.CompositionHandlers\*.cs">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="TestFiles.ComponentsProviders\*.cs">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
