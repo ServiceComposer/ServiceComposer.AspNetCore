@@ -147,6 +147,11 @@ namespace ServiceComposer.AspNetCore
         void Add(System.Collections.Generic.IEnumerable<object> nodes);
         System.Threading.Tasks.Task<object> Aggregate();
     }
+    public interface ICompositionComponentsProvider
+    {
+        void Customize(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
+        void RegisterComponents(ServiceComposer.AspNetCore.ViewModelCompositionOptions options);
+    }
     public interface ICompositionContext
     {
         string RequestId { get; }
@@ -265,6 +270,8 @@ namespace ServiceComposer.AspNetCore
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void DisableWriteSupport() { }
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true) { }
+        public void RegisterComponentsFrom<TProvider>()
+            where TProvider : ServiceComposer.AspNetCore.ICompositionComponentsProvider, new () { }
         public void RegisterCompositionHandler<T>() { }
         public void RegisterEndpointScopedViewModelFactory<T>()
             where T : ServiceComposer.AspNetCore.IEndpointScopedViewModelFactory { }
