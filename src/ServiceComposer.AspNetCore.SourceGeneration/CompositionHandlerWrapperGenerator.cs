@@ -29,7 +29,7 @@ class CompositionHandlerMethodInfo
 [Generator]
 public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
 {
-    readonly HashSet<string> supportedAttributes = [
+    static readonly HashSet<string> supportedAttributes = [
         "HttpGet", "HttpPost", "HttpPatch", "HttpPut", "HttpDelete",
         "HttpGetAttribute", "HttpPostAttribute", "HttpPatchAttribute", "HttpPutAttribute", "HttpDeleteAttribute"
     ];
@@ -40,7 +40,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var methodProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (node, _) => IsCompositionHandlerMethod(node),
-                transform: (ctx, _) => GetCompositionHandlerMethod(ctx))
+                transform: static (ctx, _) => GetCompositionHandlerMethod(ctx))
             .Where(static m => m is not null)
             .Select(static (m, _) => m!);
 
@@ -52,7 +52,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             (spc, source) => Execute(spc, source.Left, source.Right));
     }
 
-    static bool IsCompositionHandlerMethod(SyntaxNode node)
+    internal static bool IsCompositionHandlerMethod(SyntaxNode node)
     {
         // Fast syntax-only check: method with attributes in a class that has CompositionHandler attribute
         if (node is not MethodDeclarationSyntax { AttributeLists.Count: > 0 } method)
@@ -81,7 +81,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return false;
     }
 
-    CompositionHandlerMethodInfo? GetCompositionHandlerMethod(GeneratorSyntaxContext context)
+    internal static CompositionHandlerMethodInfo? GetCompositionHandlerMethod(GeneratorSyntaxContext context)
     {
         if (context.Node is not MethodDeclarationSyntax methodDeclaration)
             return null;
@@ -257,23 +257,14 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
                 var semanticModel = compilation.GetSemanticModel(method.Method.SyntaxTree);
                 
                 var parameters = method.Method.ParameterList.Parameters;
-                var typeAndName = parameters.Select(p =>
-                {
-                    var symbolInfo = semanticModel.GetSymbolInfo(p.Type!);
-                    var symbol = symbolInfo.Symbol;
-
-                    var fullName = symbol!.ToDisplayString();
-                    return $"{fullName.Replace('.', '_')}_{p.Identifier.Text}";
-                });
 
                 if (!TryGetHttpAttribute(context, method.Method, method.HttpAttributes, out var httpAttribute))
                 {
                     return;
                 }
                 
-                var flattenUserClassesHierarchy = string.Join("_", method.UserClassesHierarchy);
-                var generatedHandlerClassName = $"{flattenUserClassesHierarchy}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
-                var generatedNamespace = $"{method.Namespace}.Generated";
+                var generatedHandlerClassName = GetWrapperClassName(semanticModel, method);
+                var generatedNamespace = GetWrapperNamespace(method);
                 
                 var userClassName = string.Join(".", method.UserClassesHierarchy);
                 var userClassFullTypeName = $"{method.Namespace}.{userClassName}";
@@ -308,6 +299,27 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             );
         }
     }
+
+    /// <summary>
+    /// The name of the wrapper class generated for the given contract-less handler method.
+    /// The components provider generator relies on it to register the wrappers.
+    /// </summary>
+    internal static string GetWrapperClassName(SemanticModel semanticModel, CompositionHandlerMethodInfo method)
+    {
+        var typeAndName = method.Method.ParameterList.Parameters.Select(p =>
+        {
+            var symbolInfo = semanticModel.GetSymbolInfo(p.Type!);
+            var symbol = symbolInfo.Symbol;
+
+            var fullName = symbol!.ToDisplayString();
+            return $"{fullName.Replace('.', '_')}_{p.Identifier.Text}";
+        });
+
+        var flattenUserClassesHierarchy = string.Join("_", method.UserClassesHierarchy);
+        return $"{flattenUserClassesHierarchy}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
+    }
+
+    internal static string GetWrapperNamespace(CompositionHandlerMethodInfo method) => $"{method.Namespace}.Generated";
 
     string GenerateWrapperClass(
         SemanticModel semanticModel,
