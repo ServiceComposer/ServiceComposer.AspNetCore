@@ -93,6 +93,17 @@ namespace ServiceComposer.AspNetCore
                 return new RequestModelBinder(modelBinderFactory, modelMetadataProvider, mvcOptions);
             });
 
+            isInitializing = true;
+
+            // Customizations from all sources run before any component is
+            // registered, so that, for example, services configuration handlers
+            // apply to every component regardless of where it comes from.
+            foreach (var componentsProvider in componentsProviders)
+            {
+                componentsProvider.Customize(this);
+            }
+
+            List<Type> allTypes = null;
             if (AssemblyScanner.IsEnabled)
             {
                 AddTypesRegistrationHandler(
@@ -203,8 +214,14 @@ namespace ServiceComposer.AspNetCore
                         }
                     });
 
+                // Assemblies with a registered components provider are skipped:
+                // the provider already registers their components and customizations.
+                var providersAssemblies = componentsProviders
+                    .Select(provider => provider.GetType().Assembly)
+                    .ToHashSet();
                 var assemblies = AssemblyScanner.Scan();
-                var allTypes = assemblies
+                allTypes = assemblies
+                    .Where(assembly => !providersAssemblies.Contains(assembly))
                     .SelectMany(assembly => assembly.GetTypes())
                     .Where(TypesFilter)
                     .Distinct()
@@ -217,13 +234,50 @@ namespace ServiceComposer.AspNetCore
                     Debug.Assert(oc != null, nameof(oc) + " != null");
                     oc.Customize(this);
                 }
+            }
 
+            foreach (var componentsProvider in componentsProviders)
+            {
+                componentsProvider.RegisterComponents(this);
+            }
+
+            if (allTypes != null)
+            {
                 foreach (var (typesFilter, registrationHandler) in typesRegistrationHandlers)
                 {
                     var filteredTypes = allTypes.Where(typesFilter);
                     registrationHandler(filteredTypes);
                 }
             }
+        }
+
+        readonly List<ICompositionComponentsProvider> componentsProviders = [];
+        bool isInitializing;
+
+        /// <summary>
+        /// Registers the composition components and the options customizations
+        /// that the <typeparamref name="TProvider"/> provider defines.
+        /// </summary>
+        /// <remarks>
+        /// When assembly scanning is enabled, the assembly that defines
+        /// <typeparamref name="TProvider"/> is not scanned. Registering the
+        /// same provider more than once has no effect.
+        /// </remarks>
+        public void RegisterComponentsFrom<TProvider>() where TProvider : ICompositionComponentsProvider, new()
+        {
+            if (isInitializing)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RegisterComponentsFrom)} must be called from the {nameof(ServiceCollectionExtensions.AddViewModelComposition)} " +
+                    $"configuration callback. It cannot be called from options customizations or components providers.");
+            }
+
+            if (componentsProviders.Any(provider => provider.GetType() == typeof(TProvider)))
+            {
+                return;
+            }
+
+            componentsProviders.Add(new TProvider());
         }
 
         internal void RegisterCompositionRequestsFilter(Type type)
