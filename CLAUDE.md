@@ -9,6 +9,10 @@
 - `IServiceProvider` requires `using System;`
 - All snippet `.cs` files use `WebApplication.CreateBuilder()` pattern (not the old `Startup` class pattern)
 
+## Obsoleting public APIs
+
+Follow the "Obsoleting public APIs" section of `RELEASING.md`: warning in a minor, error in the next major, removal in the major after that.
+
 ## Project context
 
 - **What**: ViewModel Composition Gateway for ASP.NET Core — parallel scatter-gather of handler outputs into a shared dynamic view model
