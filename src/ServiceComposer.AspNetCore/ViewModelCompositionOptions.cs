@@ -51,6 +51,10 @@ namespace ServiceComposer.AspNetCore
 
         internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
 
+        /// <summary>
+        /// Enables composition over controllers for all controller endpoints, running
+        /// composition handlers in an MVC result filter after the controller action.
+        /// </summary>
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true)
         {
             CompositionOverControllersOptions.IsEnabled = true;
@@ -69,9 +73,12 @@ namespace ServiceComposer.AspNetCore
             Services.AddSingleton<CompositionEndpointDataSources>();
             Services.AddTransient<IStartupFilter, CompositionEndpointsStartupFilter>();
 
+            // Always available: controller endpoints can opt in to composition
+            // over controllers with WithCompositionOverControllers()
+            Services.AddSingleton(_compositionOverControllersRoutes);
+
             if (CompositionOverControllersOptions.IsEnabled)
             {
-                Services.AddSingleton(_compositionOverControllersRoutes);
                 Services.Configure<MvcOptions>(options =>
                 {
                     options.Filters.Add(typeof(CompositionOverControllersActionFilter));

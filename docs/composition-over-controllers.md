@@ -21,9 +21,9 @@ Composition over controllers can be used as a templating engine leveraging the e
 
 ## Composition and endpoint filters
 
-By default, composition handlers run in an MVC result filter, after the controller action returned. [Endpoint filters](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/min-api-filters) added to controller endpoints wrap only the action, and run before the composition handlers.
+With `EnableCompositionOverControllers()`, composition handlers run in an MVC result filter, after the controller action returned. [Endpoint filters](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/min-api-filters) added to controller endpoints wrap only the action, and run before the composition handlers.
 
-To run composition inside the endpoint filter pipeline, call `WithCompositionOverControllers()` on the controller endpoints:
+To run composition inside the endpoint filter pipeline, call `WithCompositionOverControllers()` on the controller endpoints. It enables composition over controllers only for those endpoints, and doesn't require `EnableCompositionOverControllers()`:
 
 <!-- snippet: composition-over-controllers-endpoint-filters -->
 <a id='snippet-composition-over-controllers-endpoint-filters'></a>
@@ -49,6 +49,8 @@ With `WithCompositionOverControllers()`:
 - An action result set by a composition handler with `SetActionResult` replaces the controller action result, and outer endpoint filters see it. With the default result filter, action results set by composition handlers are ignored.
 
 Endpoint filters added later run inside composition, so `WithCompositionOverControllers()` must be the last endpoint filter added to the endpoints.
+
+`MapCompositionHandlers()` must be called too: it finds the composition handlers matching the routes of the controller endpoints. Composition handlers routes match controller routes ignoring case. To match them case-sensitively, call `WithCompositionOverControllers(useCaseInsensitiveRouteMatching: false)`. All controller endpoints must use the same setting.
 
 > [!NOTE]
 > ASP.NET Core runs endpoint filters on controller endpoints inside MVC action filters. With `WithCompositionOverControllers()`, composition handlers run before the `OnActionExecuted` part of action filters, and don't run if an action filter short-circuits the request, for example with the automatic HTTP 400 response of `[ApiController]` controllers.

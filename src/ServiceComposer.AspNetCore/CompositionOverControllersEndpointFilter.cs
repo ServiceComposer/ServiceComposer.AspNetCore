@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ServiceComposer.AspNetCore
@@ -16,6 +18,14 @@ namespace ServiceComposer.AspNetCore
             }
 
             var httpContext = context.HttpContext;
+            var routes = httpContext.RequestServices.GetRequiredService<CompositionOverControllersRoutes>();
+            if (!routes.IsInitialized)
+            {
+                throw new InvalidOperationException(
+                    $"Composition over controllers requires calling {nameof(EndpointsExtensions.MapCompositionHandlers)}() " +
+                    $"after mapping the controllers.");
+            }
+
             var (composed, viewModel) = await CompositionOverControllersComposer.TryCompose(httpContext, logger);
             if (!composed)
             {
