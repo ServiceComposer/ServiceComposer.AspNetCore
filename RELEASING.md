@@ -50,6 +50,37 @@ Don't change `MinVerMinimumMajorMinor` on `master` to get a release out of it: r
 
 To start a new minor of a major that's already branched, create `release-X.Y` from the previous minor's release branch and push it. Then backport what it should ship, as described above.
 
+## Obsoleting public APIs
+
+Public APIs are removed over two majors, so users get a release in which their code still compiles and tells them what to change:
+
+| Release | The API is |
+|---|---|
+| A minor of major `N` | `[Obsolete]` with a warning. It keeps working. |
+| `N+1.0.0` | `[Obsolete]` with an error. |
+| `N+2.0.0` | Removed. |
+
+The obsolete message says what to use instead and when the API changes stage:
+
+```csharp
+[Obsolete("Use Bar() instead. Will be treated as an error from version 6.0.0 and removed in version 7.0.0.")]
+public void Foo() { }
+```
+
+Since `master` builds the next major (`N+1`), obsoleting an API takes two pull requests:
+
+1. On `master`: the API is obsoleted as an error (`[Obsolete("...", error: true)]`). The replacement is added in the same pull request, or before it.
+2. On the `release-N.Y` branch of the minor that ships the warning: a backport that adds the replacement, if needed, and obsoletes the API as a warning. It isn't a plain cherry-pick, because the attribute differs.
+
+Then:
+
+- Open an issue in the `N+2.0.0` milestone to remove the API, linking the pull requests.
+- Mention the obsoleted API in the release notes of the minor, and in the upgrade guide to `N+1`, in `docs/upgrade-guides`.
+- Update the public API approval file, `src/ServiceComposer.AspNetCore.Tests/API/APIApprovals.Approve_API.verified.txt`.
+- Keep the tests covering the obsolete API until it's removed. Suppress the warning only where it's used, with `#pragma warning disable CS0618` and a comment saying why, not with a project-wide `NoWarn`.
+
+An obsolete warning breaks builds that treat warnings as errors. That's expected in a minor, but call it out in the release notes.
+
 ## Tagging a release
 
 1. Make sure everything that should ship is merged into `release-X.Y`, including backports, and that its CI build is green. A new vulnerability advisory can break a build that used to pass, so if the branch has been quiet, run CI again first:
