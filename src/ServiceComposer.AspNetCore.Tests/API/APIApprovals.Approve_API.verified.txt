@@ -102,6 +102,7 @@ namespace ServiceComposer.AspNetCore
     public static class EndpointsExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder WithCompositionOverControllers(this Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder builder) { }
     }
     public abstract class Gatherer<T> : ServiceComposer.AspNetCore.IGatherer
         where T :  class
