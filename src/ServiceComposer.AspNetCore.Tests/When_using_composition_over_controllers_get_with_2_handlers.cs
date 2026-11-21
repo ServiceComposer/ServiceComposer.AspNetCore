@@ -75,7 +75,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseSensitiveRoute_TestGetIntegerHandler>();
-                        options.EnableCompositionOverControllers();
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -86,7 +85,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapControllers();
+                        builder.MapControllers().WithCompositionOverControllers();
                         builder.MapCompositionHandlers();
                     });
                 }
@@ -118,7 +117,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
-                        options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -129,7 +127,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapControllers();
+                        builder.MapControllers().WithCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
                         builder.MapCompositionHandlers();
                     });
                 }

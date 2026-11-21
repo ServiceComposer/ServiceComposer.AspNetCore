@@ -22,19 +22,6 @@ public class UpgradeGuide
         // end-snippet
     }
     
-    public class CompositionOverControllers
-    {
-        // begin-snippet: composition-over-controllers-case-sensitive
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddViewModelComposition(config =>
-            {
-                config.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: false);
-            });
-        }
-        // end-snippet
-    }
-    
     // begin-snippet: composition-handler-api
     public class SampleHandler : ICompositionRequestsHandler
     {

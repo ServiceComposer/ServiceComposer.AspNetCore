@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -63,7 +64,7 @@ namespace ServiceComposer.AspNetCore.Tests
         static SelfContainedWebApplicationFactoryWithWebHost<Dummy> CreateFactory(
             List<string> log,
             Func<EndpointFilterInvocationContext, EndpointFilterDelegate, ValueTask<object>> outerFilter = null,
-            bool enableCompositionOverControllers = true)
+            bool mapCompositionHandlers = true)
         {
             return new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
@@ -74,10 +75,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<Handler>();
                         options.RegisterCompositionHandler<BadRequestHandler>();
-                        if (enableCompositionOverControllers)
-                        {
-                            options.EnableCompositionOverControllers();
-                        }
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -99,7 +96,10 @@ namespace ServiceComposer.AspNetCore.Tests
                             controllers.AddEndpointFilter(outerFilter);
                         }
                         controllers.WithCompositionOverControllers();
-                        builder.MapCompositionHandlers();
+                        if (mapCompositionHandlers)
+                        {
+                            builder.MapCompositionHandlers();
+                        }
                     });
                 }
             );
@@ -116,7 +116,6 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(response.IsSuccessStatusCode);
             var responseObj = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("sample", responseObj.SelectToken("AString")?.Value<string>());
-            // Composition runs once: the result filter skips composed requests
             Assert.Equal(["action", "handler"], log);
         }
 
@@ -159,15 +158,28 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Fails_if_composition_over_controllers_is_not_enabled()
+        public async Task Fails_if_composition_handlers_are_not_mapped()
         {
             var log = new List<string>();
-            var client = CreateFactory(log, enableCompositionOverControllers: false).CreateClient();
+            var client = CreateFactory(log, mapCompositionHandlers: false).CreateClient();
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 client.GetAsync("/api/composition-over-controllers-endpoint-filters/1"));
 
-            Assert.Contains(nameof(ViewModelCompositionOptions.EnableCompositionOverControllers), exception.Message);
+            Assert.Contains(nameof(EndpointsExtensions.MapCompositionHandlers), exception.Message);
+        }
+
+        [Fact]
+        public void The_obsolete_global_switch_throws()
+        {
+            var options = new ViewModelCompositionOptions(new ServiceCollection());
+
+            // Calling it directly is a compilation error
+            var method = typeof(ViewModelCompositionOptions).GetMethod("EnableCompositionOverControllers");
+            var exception = Assert.Throws<TargetInvocationException>(() => method!.Invoke(options, [true]));
+
+            var notSupported = Assert.IsType<NotSupportedException>(exception.InnerException);
+            Assert.Contains(nameof(EndpointsExtensions.WithCompositionOverControllers), notSupported.Message);
         }
     }
 }

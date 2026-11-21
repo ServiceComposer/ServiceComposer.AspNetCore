@@ -102,7 +102,7 @@ namespace ServiceComposer.AspNetCore
     public static class EndpointsExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
-        public static Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder WithCompositionOverControllers(this Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder WithCompositionOverControllers(this Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder builder, bool useCaseInsensitiveRouteMatching = true) { }
     }
     public abstract class Gatherer<T> : ServiceComposer.AspNetCore.IGatherer
         where T :  class
@@ -276,6 +276,9 @@ namespace ServiceComposer.AspNetCore
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
         public void AddTypesRegistrationHandler(System.Func<System.Type, bool> typesFilter, System.Action<System.Collections.Generic.IEnumerable<System.Type>> registrationHandler) { }
         public void DisableWriteSupport() { }
+        [System.Obsolete("Call WithCompositionOverControllers() on the controller endpoints instead, e.g. a" +
+            "pp.MapControllers().WithCompositionOverControllers(). Will be removed in version" +
+            " 7.0.0.", true)]
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true) { }
         public void RegisterComponentsFrom<TProvider>()
             where TProvider : ServiceComposer.AspNetCore.ICompositionComponentsProvider, new () { }

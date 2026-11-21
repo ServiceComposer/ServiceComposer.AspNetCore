@@ -49,12 +49,18 @@ namespace ServiceComposer.AspNetCore
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
 
-        internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
-
+        /// <summary>
+        /// No longer supported: throws a <see cref="NotSupportedException"/>.
+        /// </summary>
+        [Obsolete("Call WithCompositionOverControllers() on the controller endpoints instead, " +
+                  "e.g. app.MapControllers().WithCompositionOverControllers(). " +
+                  "Will be removed in version 7.0.0.", error: true)]
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true)
         {
-            CompositionOverControllersOptions.IsEnabled = true;
-            CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
+            // Code compiled against 5.x can still call it
+            throw new NotSupportedException(
+                "EnableCompositionOverControllers() is no longer supported. Call WithCompositionOverControllers() " +
+                "on the controller endpoints instead, e.g. app.MapControllers().WithCompositionOverControllers().");
         }
 
         internal bool IsWriteSupportEnabled { get; private set; } = true;
@@ -69,14 +75,7 @@ namespace ServiceComposer.AspNetCore
             Services.AddSingleton<CompositionEndpointDataSources>();
             Services.AddTransient<IStartupFilter, CompositionEndpointsStartupFilter>();
 
-            if (CompositionOverControllersOptions.IsEnabled)
-            {
-                Services.AddSingleton(_compositionOverControllersRoutes);
-                Services.Configure<MvcOptions>(options =>
-                {
-                    options.Filters.Add(typeof(CompositionOverControllersActionFilter));
-                });
-            }
+            Services.AddSingleton(_compositionOverControllersRoutes);
 
             Services.AddSingleton(container =>
             {

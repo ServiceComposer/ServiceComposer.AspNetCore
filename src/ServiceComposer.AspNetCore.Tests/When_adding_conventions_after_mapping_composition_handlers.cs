@@ -67,7 +67,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<ControllerHandler>();
                         options.RegisterCompositionHandler<CompositionOnlyHandler>();
-                        options.EnableCompositionOverControllers();
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -78,7 +77,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        var controllers = builder.MapControllers();
+                        var controllers = builder.MapControllers().WithCompositionOverControllers();
                         var compositionHandlers = builder.MapCompositionHandlers();
 
                         if (filterControllers)

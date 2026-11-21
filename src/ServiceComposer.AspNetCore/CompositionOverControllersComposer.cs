@@ -10,19 +10,10 @@ using Microsoft.Extensions.Logging;
 namespace ServiceComposer.AspNetCore
 {
     /// <summary>
-    /// Runs the composition handlers matching the route of the current controller
-    /// action. Shared by the MVC result filter and the endpoint filter.
+    /// Runs the composition handlers matching the route of the current controller action.
     /// </summary>
     static class CompositionOverControllersComposer
     {
-        static readonly object ComposedKey = new();
-
-        /// <summary>
-        /// Whether the composition already ran for the current request,
-        /// e.g. in the endpoint filter, so that the result filter can skip it.
-        /// </summary>
-        public static bool IsComposed(HttpContext context) => context.Items.ContainsKey(ComposedKey);
-
         public static async Task<(bool Composed, object ViewModel)> TryCompose(HttpContext context, ILogger logger)
         {
             if (context.GetEndpoint() is not RouteEndpoint endpoint)
@@ -30,11 +21,10 @@ namespace ServiceComposer.AspNetCore
                 return (false, null);
             }
 
-            var options = context.RequestServices.GetRequiredService<ViewModelCompositionOptions>().CompositionOverControllersOptions;
             var routes = context.RequestServices.GetRequiredService<CompositionOverControllersRoutes>();
 
             Debug.Assert(endpoint.RoutePattern.RawText != null, "endpoint.RoutePattern.RawText != null");
-            var rawTemplate = options.UseCaseInsensitiveRouteMatching
+            var rawTemplate = routes.UseCaseInsensitiveRouteMatching
                 ? endpoint.RoutePattern.RawText.ToLowerInvariant()
                 : endpoint.RoutePattern.RawText;
             var handlers = routes.HandlersForRoute(rawTemplate, context.Request.Method);
@@ -43,8 +33,6 @@ namespace ServiceComposer.AspNetCore
             {
                 return (false, null);
             }
-
-            context.Items[ComposedKey] = true;
 
             // We need the body to be seekable otherwise if more than one
             // composition handler tries to bind a model to the body
