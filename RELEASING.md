@@ -48,7 +48,11 @@ Don't change `MinVerMinimumMajorMinor` on `master` to get a release out of it: r
 
 ## Starting a new minor
 
-To start a new minor of a major that's already branched, create `release-X.Y` from the previous minor's release branch and push it. Then backport what it should ship, as described above.
+To start a new minor of a major that's already branched:
+
+1. Create `release-X.Y` from the previous minor's release branch and push it.
+2. Open a pull request on `release-X.Y` that sets `MinVerMinimumMajorMinor` to `X.Y`. Until the first `X.Y` tag, the latest tag reachable from the branch belongs to the previous minor, so untagged builds would otherwise be versioned as a patch of it.
+3. Backport what it should ship, as described above.
 
 ## Obsoleting public APIs
 
