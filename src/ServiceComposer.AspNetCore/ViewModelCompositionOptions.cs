@@ -49,26 +49,18 @@ namespace ServiceComposer.AspNetCore
             typesRegistrationHandlers.Add((typesFilter, registrationHandler));
         }
 
-        internal CompositionOverControllersOptions CompositionOverControllersOptions { get; private set; } = new CompositionOverControllersOptions();
-
         /// <summary>
-        /// Enables composition over controllers for all controller endpoints, running
-        /// composition handlers in an MVC result filter after the controller action.
+        /// No longer supported: throws a <see cref="NotSupportedException"/>.
         /// </summary>
         [Obsolete("Call WithCompositionOverControllers() on the controller endpoints instead, " +
                   "e.g. app.MapControllers().WithCompositionOverControllers(). " +
                   "Will be removed in version 7.0.0.", error: true)]
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true)
         {
-            EnableCompositionOverControllersGlobally(useCaseInsensitiveRouteMatching);
-        }
-
-        // Keeps the obsolete EnableCompositionOverControllers() covered by tests
-        // until it's removed: calling it is a compilation error that can't be suppressed
-        internal void EnableCompositionOverControllersGlobally(bool useCaseInsensitiveRouteMatching = true)
-        {
-            CompositionOverControllersOptions.IsEnabled = true;
-            CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
+            // Code compiled against 5.x can still call it
+            throw new NotSupportedException(
+                "EnableCompositionOverControllers() is no longer supported. Call WithCompositionOverControllers() " +
+                "on the controller endpoints instead, e.g. app.MapControllers().WithCompositionOverControllers().");
         }
 
         internal bool IsWriteSupportEnabled { get; private set; } = true;
@@ -83,17 +75,7 @@ namespace ServiceComposer.AspNetCore
             Services.AddSingleton<CompositionEndpointDataSources>();
             Services.AddTransient<IStartupFilter, CompositionEndpointsStartupFilter>();
 
-            // Always available: controller endpoints can opt in to composition
-            // over controllers with WithCompositionOverControllers()
             Services.AddSingleton(_compositionOverControllersRoutes);
-
-            if (CompositionOverControllersOptions.IsEnabled)
-            {
-                Services.Configure<MvcOptions>(options =>
-                {
-                    options.Filters.Add(typeof(CompositionOverControllersActionFilter));
-                });
-            }
 
             Services.AddSingleton(container =>
             {

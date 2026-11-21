@@ -4,17 +4,14 @@ namespace ServiceComposer.AspNetCore
 {
     class CompositionOverControllersOptions
     {
-        public bool IsEnabled { get; set; }
-        public bool UseCaseInsensitiveRouteMatching { get; set; }
+        public bool IsEnabled { get; init; }
+        public bool UseCaseInsensitiveRouteMatching { get; init; }
 
         /// <summary>
-        /// When enabled for endpoints using WithCompositionOverControllers() only,
-        /// composition runs only over the endpoints that opted in.
+        /// Composition runs only over the endpoints that opted in with WithCompositionOverControllers().
         /// </summary>
-        public bool OnlyOptedInEndpoints { get; set; }
-
-        public bool CanComposeOver(Endpoint endpoint) =>
-            !OnlyOptedInEndpoints || endpoint.Metadata.GetMetadata<CompositionOverControllersMetadata>() != null;
+        public static bool CanComposeOver(Endpoint endpoint) =>
+            endpoint.Metadata.GetMetadata<CompositionOverControllersMetadata>() != null;
     }
 
     /// <summary>

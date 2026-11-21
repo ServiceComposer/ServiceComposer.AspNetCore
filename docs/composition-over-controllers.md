@@ -56,4 +56,4 @@ Endpoint filters added later run inside composition, so `WithCompositionOverCont
 
 ## EnableCompositionOverControllers()
 
-`EnableCompositionOverControllers()` is obsolete and will be removed in version 7.0.0. It enabled composition over controllers for all controller endpoints, running composition handlers in an MVC result filter. See the [upgrade guide](upgrade-guides/5.x.x-6.0.0.md).
+`EnableCompositionOverControllers()` is obsolete, throws a `NotSupportedException`, and will be removed in version 7.0.0. It enabled composition over controllers for all controller endpoints, running composition handlers in an MVC result filter. See the [upgrade guide](upgrade-guides/5.x.x-6.0.0.md).

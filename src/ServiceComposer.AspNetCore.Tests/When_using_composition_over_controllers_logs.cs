@@ -49,7 +49,6 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
-                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -60,7 +59,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapControllers();
+                        builder.MapControllers().WithCompositionOverControllers();
                         builder.MapCompositionHandlers();
                     });
                 }
@@ -75,7 +74,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Logs_debug_when_action_filter_composes_over_controller()
+        public async Task Logs_debug_when_composing_over_controller()
         {
             // Arrange
             var loggerFactory = TestLoggerFactory.Create(options => options.SetMinimumLevel(LogLevel.Debug));
@@ -88,7 +87,6 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
-                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -99,7 +97,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     app.UseRouting();
                     app.UseEndpoints(builder =>
                     {
-                        builder.MapControllers();
+                        builder.MapControllers().WithCompositionOverControllers();
                         builder.MapCompositionHandlers();
                     });
                 }
