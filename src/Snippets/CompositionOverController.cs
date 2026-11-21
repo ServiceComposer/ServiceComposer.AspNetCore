@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceComposer.AspNetCore;
 
 namespace Snippets;
@@ -11,10 +12,13 @@ static class CompositionOverControllersSnippets
         var builder = WebApplication.CreateBuilder();
 
         // begin-snippet: enable-composition-over-controllers
-        builder.Services.AddViewModelComposition(options =>
-        {
-            options.EnableCompositionOverControllers();
-        });
+        builder.Services.AddViewModelComposition();
+        builder.Services.AddControllers();
+
+        var app = builder.Build();
+        app.MapControllers()
+            .WithCompositionOverControllers();
+        app.MapCompositionHandlers();
         // end-snippet
     }
 

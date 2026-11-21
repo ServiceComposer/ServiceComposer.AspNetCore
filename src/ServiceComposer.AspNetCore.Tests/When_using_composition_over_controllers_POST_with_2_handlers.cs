@@ -91,7 +91,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestStringHandler>();
                         options.RegisterCompositionHandler<TestIntegerHandler>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddRouting();
                     services.AddControllers()

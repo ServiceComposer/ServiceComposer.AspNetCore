@@ -100,7 +100,10 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_TestGetStringCompositionHandler_Handle>();
                         options.RegisterCompositionHandler<CaseSensitiveRouteTestGetIntegerCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_CaseSensitiveRouteTestGetIntegerCompositionHandler_Handle_ServiceComposer_AspNetCore_Tests_CompositionHandlers_When_using_composition_over_controllers_get_with_2_handlers_Model_model>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddHttpContextAccessor();
                     services.AddRouting();
@@ -147,7 +150,10 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                         options.RegisterCompositionHandler<CaseSensitiveRouteTestGetIntegerCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_CaseSensitiveRouteTestGetIntegerCompositionHandler_Handle_ServiceComposer_AspNetCore_Tests_CompositionHandlers_When_using_composition_over_controllers_get_with_2_handlers_Model_model>();
                         options.RegisterCompositionHandler<AnEventSubscriber>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddHttpContextAccessor();
                     services.AddRouting();
@@ -194,7 +200,10 @@ namespace ServiceComposer.AspNetCore.Tests.CompositionHandlers
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_TestGetStringCompositionHandler_Handle>();
                         options.RegisterCompositionHandler<CaseInsensitiveRouteTestGetIntegerCompositionHandler>();
                         options.RegisterCompositionHandler<Generated.When_using_composition_over_controllers_get_with_2_handlers_CaseInsensitiveRouteTestGetIntegerCompositionHandler_Handle_ServiceComposer_AspNetCore_Tests_CompositionHandlers_When_using_composition_over_controllers_get_with_2_handlers_Model_model>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
+#pragma warning restore CS0618
                     });
                     services.AddHttpContextAccessor();
                     services.AddRouting();

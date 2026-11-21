@@ -78,7 +78,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.RegisterCompositionHandler<BadRequestHandler>();
                         if (enableCompositionOverControllersGlobally)
                         {
+                            // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                             options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                         }
                     });
                     services.AddRouting();
