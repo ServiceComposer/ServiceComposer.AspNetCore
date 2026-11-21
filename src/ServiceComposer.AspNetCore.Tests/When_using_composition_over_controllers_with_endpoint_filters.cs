@@ -63,7 +63,9 @@ namespace ServiceComposer.AspNetCore.Tests
         static SelfContainedWebApplicationFactoryWithWebHost<Dummy> CreateFactory(
             List<string> log,
             Func<EndpointFilterInvocationContext, EndpointFilterDelegate, ValueTask<object>> outerFilter = null,
-            bool enableCompositionOverControllers = true)
+            bool mapCompositionHandlers = true,
+            bool enableCompositionOverControllersGlobally = false,
+            bool useCaseInsensitiveRouteMatching = true)
         {
             return new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
@@ -74,7 +76,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<Handler>();
                         options.RegisterCompositionHandler<BadRequestHandler>();
-                        if (enableCompositionOverControllers)
+                        if (enableCompositionOverControllersGlobally)
                         {
                             options.EnableCompositionOverControllers();
                         }
@@ -98,8 +100,11 @@ namespace ServiceComposer.AspNetCore.Tests
                         {
                             controllers.AddEndpointFilter(outerFilter);
                         }
-                        controllers.WithCompositionOverControllers();
-                        builder.MapCompositionHandlers();
+                        controllers.WithCompositionOverControllers(useCaseInsensitiveRouteMatching);
+                        if (mapCompositionHandlers)
+                        {
+                            builder.MapCompositionHandlers();
+                        }
                     });
                 }
             );
@@ -159,15 +164,39 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Fails_if_composition_over_controllers_is_not_enabled()
+        public async Task Fails_if_composition_handlers_are_not_mapped()
         {
             var log = new List<string>();
-            var client = CreateFactory(log, enableCompositionOverControllers: false).CreateClient();
+            var client = CreateFactory(log, mapCompositionHandlers: false).CreateClient();
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 client.GetAsync("/api/composition-over-controllers-endpoint-filters/1"));
 
-            Assert.Contains(nameof(ViewModelCompositionOptions.EnableCompositionOverControllers), exception.Message);
+            Assert.Contains(nameof(EndpointsExtensions.MapCompositionHandlers), exception.Message);
+        }
+
+        [Fact]
+        public async Task Works_together_with_the_global_switch()
+        {
+            var log = new List<string>();
+            var client = CreateFactory(log, enableCompositionOverControllersGlobally: true).CreateClient();
+
+            var response = await client.GetAsync("/api/composition-over-controllers-endpoint-filters/1");
+
+            Assert.True(response.IsSuccessStatusCode);
+            // Composed once, by the endpoint filter
+            Assert.Equal(["action", "handler"], log);
+        }
+
+        [Fact]
+        public void Fails_if_route_matching_settings_differ_from_the_global_switch()
+        {
+            var log = new List<string>();
+            var factory = CreateFactory(log, enableCompositionOverControllersGlobally: true, useCaseInsensitiveRouteMatching: false);
+
+            var exception = Assert.Throws<InvalidOperationException>(() => factory.CreateClient());
+
+            Assert.Contains("useCaseInsensitiveRouteMatching", exception.Message);
         }
     }
 }
