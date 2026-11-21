@@ -77,7 +77,9 @@ Then:
 - Open an issue in the `N+2.0.0` milestone to remove the API, linking the pull requests.
 - Mention the obsoleted API in the release notes of the minor, and in the upgrade guide to `N+1`, in `docs/upgrade-guides`.
 - Update the public API approval file, `src/ServiceComposer.AspNetCore.Tests/API/APIApprovals.Approve_API.verified.txt`.
-- Keep the tests covering the obsolete API until it's removed. Suppress the warning only where it's used, with `#pragma warning disable CS0618` and a comment saying why, not with a project-wide `NoWarn`.
+- Keep the tests covering the obsolete API until it's removed:
+  - Warning stage (CS0618): suppress the warning only where it's used, with `#pragma warning disable CS0618` and a comment saying why, not with a project-wide `NoWarn`.
+  - Error stage (CS0619): the error can't be suppressed. Move the implementation to an internal method that the obsolete API calls, and make the tests call the internal method. Snippets can't call the obsolete API either: turn them into plain code blocks in the docs, or remove them.
 
 An obsolete warning breaks builds that treat warnings as errors. That's expected in a minor, but call it out in the release notes.
 
