@@ -52,6 +52,11 @@ public class InventoryHandler : ICompositionRequestsHandler
 
 Both `[Authorize]` and `[Authorize(Policy = "WarehouseStaff")]` are collected and applied to the route, so callers must satisfy both requirements.
 
+## Composition over controllers
+
+> [!WARNING]
+> With [composition over controllers](composition-over-controllers.md), authorization metadata declared on composition handlers is ignored on routes that also match a controller: only the controller endpoint's authorization metadata is evaluated. Declare authorization on the controller or the action, or call `RequireAuthorization()` on the controller endpoints. See [composition over controllers authorization](composition-over-controllers.md#authorization).
+
 ## Setup
 
 No special configuration is required beyond the standard ASP.NET Core authentication/authorization setup. Add authentication and authorization middleware before `app.MapCompositionHandlers()`:
