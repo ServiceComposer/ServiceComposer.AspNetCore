@@ -77,11 +77,18 @@ Then:
 - Open an issue in the `N+2.0.0` milestone to remove the API, linking the pull requests.
 - Mention the obsoleted API in the release notes of the minor, and in the upgrade guide to `N+1`, in `docs/upgrade-guides`.
 - Update the public API approval file, `src/ServiceComposer.AspNetCore.Tests/API/APIApprovals.Approve_API.verified.txt`.
-- Keep the tests covering the obsolete API until it's removed:
-  - Warning stage (CS0618): suppress the warning only where it's used, with `#pragma warning disable CS0618` and a comment saying why, not with a project-wide `NoWarn`.
-  - Error stage (CS0619): the error can't be suppressed. Move the implementation to an internal method that the obsolete API calls, and make the tests call the internal method. Snippets can't call the obsolete API either: turn them into plain code blocks in the docs, or remove them.
+- Keep the tests covering the obsolete API while it's a warning. Suppress the warning only where it's used, with `#pragma warning disable CS0618` and a comment saying why, not with a project-wide `NoWarn`.
+- Snippets can't call an API obsoleted as an error: turn them into plain code blocks in the docs, or remove them.
 
 An obsolete warning breaks builds that treat warnings as errors. That's expected in a minor, but call it out in the release notes.
+
+### The error stage
+
+An obsolete error (CS0619) only stops code compiled against `N+1` from calling the API, and it can't be suppressed. Code compiled against `N`, e.g. a library that wasn't rebuilt, can still call it at runtime. In `N+1.0.0`, the API either:
+
+- **Keeps working.** Preferred when that costs nothing, e.g. a renamed method calling its replacement. To keep it covered by tests, move the implementation to an internal method that the obsolete API calls, and make the tests call the internal method.
+- **Throws a `NotSupportedException`** saying what to use instead. Preferred when keeping it working means keeping a feature or a code path that `N+1.0.0` otherwise removes. The code behind it is removed in `N+1.0.0`, and only a test checking that it throws is kept, calling it through reflection. The upgrade guide says so.
+
 
 ## Tagging a release
 
