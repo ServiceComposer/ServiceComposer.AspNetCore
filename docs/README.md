@@ -69,7 +69,7 @@ It's possible to access and [customize ViewModel Composition options](options-cu
 
 ### Registering composition components
 
-By default, composition components are discovered through assembly scanning. As an alternative, the host can register the [components providers](registering-components.md) that ServiceComposer generates at compile time for each assembly containing composition components.
+By default, composition components are discovered through assembly scanning. As an alternative, the host can register with a single call the [components providers](registering-components.md) that ServiceComposer generates at compile time for each referenced assembly containing composition components.
 
 ## Scatter/Gather
 
