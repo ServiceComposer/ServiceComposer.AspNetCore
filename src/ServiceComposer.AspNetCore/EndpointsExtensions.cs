@@ -14,9 +14,6 @@ namespace ServiceComposer.AspNetCore
 {
     public static partial class EndpointsExtensions
     {
-        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents = new();
-        static readonly Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents = new();
-
         public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
             if (endpoints == null)
@@ -28,6 +25,10 @@ namespace ServiceComposer.AspNetCore
             options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider
                 .GetRequiredService<ILogger<ResponseSerializationOptions>>());
 
+            // Composed routes are per application: a static registry would be
+            // shared by every host in the process, e.g. tests running in parallel
+            var compositionOverControllerGetComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
+            var compositionOverControllerPostComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
             if (options.CompositionOverControllersOptions.IsEnabled)
             {
                 var compositionOverControllersRoutes =
@@ -46,6 +47,7 @@ namespace ServiceComposer.AspNetCore
             MapGetComponents(
                 compositionMetadataRegistry,
                 endpoints.DataSources,
+                compositionOverControllerGetComponents,
                 options.CompositionOverControllersOptions,
                 options.ResponseSerialization.DefaultResponseCasing,
                 options.ResponseSerialization.UseOutputFormatters,
@@ -55,6 +57,7 @@ namespace ServiceComposer.AspNetCore
                 MapPostComponents(
                     compositionMetadataRegistry,
                     endpoints.DataSources,
+                    compositionOverControllerPostComponents,
                     options.CompositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing,
                     options.ResponseSerialization.UseOutputFormatters,
@@ -85,6 +88,7 @@ namespace ServiceComposer.AspNetCore
 
         static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
+            Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
             ILogger logger)
@@ -113,6 +117,7 @@ namespace ServiceComposer.AspNetCore
 
         static void MapPostComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             ICollection<EndpointDataSource> dataSources,
+            Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
             ILogger logger)
