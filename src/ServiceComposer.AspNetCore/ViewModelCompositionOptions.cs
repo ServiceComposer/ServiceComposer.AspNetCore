@@ -55,7 +55,17 @@ namespace ServiceComposer.AspNetCore
         /// Enables composition over controllers for all controller endpoints, running
         /// composition handlers in an MVC result filter after the controller action.
         /// </summary>
+        [Obsolete("Call WithCompositionOverControllers() on the controller endpoints instead, " +
+                  "e.g. app.MapControllers().WithCompositionOverControllers(). " +
+                  "Will be removed in version 7.0.0.", error: true)]
         public void EnableCompositionOverControllers(bool useCaseInsensitiveRouteMatching = true)
+        {
+            EnableCompositionOverControllersGlobally(useCaseInsensitiveRouteMatching);
+        }
+
+        // Keeps the obsolete EnableCompositionOverControllers() covered by tests
+        // until it's removed: calling it is a compilation error that can't be suppressed
+        internal void EnableCompositionOverControllersGlobally(bool useCaseInsensitiveRouteMatching = true)
         {
             CompositionOverControllersOptions.IsEnabled = true;
             CompositionOverControllersOptions.UseCaseInsensitiveRouteMatching = useCaseInsensitiveRouteMatching;
