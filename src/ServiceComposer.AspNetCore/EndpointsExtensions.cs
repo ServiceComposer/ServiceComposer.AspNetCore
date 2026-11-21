@@ -49,7 +49,7 @@ namespace ServiceComposer.AspNetCore
                 // Finding the controller endpoints that opted in to composition over
                 // controllers builds them: it must happen after all conventions are added
                 var compositionOverControllersOptions =
-                    ResolveCompositionOverControllersOptions(options.CompositionOverControllersOptions, dataSources);
+                    ResolveCompositionOverControllersOptions(dataSources);
 
                 // Composed routes are per application: a static registry would be
                 // shared by every host in the process, e.g. tests running in parallel
@@ -122,7 +122,7 @@ namespace ServiceComposer.AspNetCore
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
-                    && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
+                    && CompositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at GET {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);
@@ -153,7 +153,7 @@ namespace ServiceComposer.AspNetCore
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
-                    && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
+                    && CompositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at POST {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);

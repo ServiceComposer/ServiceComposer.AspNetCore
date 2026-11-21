@@ -44,11 +44,10 @@ namespace ServiceComposer.AspNetCore
         }
 
         /// <summary>
-        /// Composition over controllers is enabled either globally, with
-        /// EnableCompositionOverControllers(), or per endpoint, with WithCompositionOverControllers().
+        /// Composition over controllers is enabled for the endpoints using WithCompositionOverControllers().
         /// </summary>
         static CompositionOverControllersOptions ResolveCompositionOverControllersOptions(
-            CompositionOverControllersOptions globalOptions, ICollection<EndpointDataSource> dataSources)
+            ICollection<EndpointDataSource> dataSources)
         {
             var optedInEndpointsSettings = dataSources
                 .Where(dataSource => dataSource is not CompositionEndpointDataSource)
@@ -59,26 +58,22 @@ namespace ServiceComposer.AspNetCore
                 .Distinct()
                 .ToList();
 
-            if (optedInEndpointsSettings.Count > 1
-                || (globalOptions.IsEnabled && optedInEndpointsSettings.Count == 1
-                                            && optedInEndpointsSettings[0] != globalOptions.UseCaseInsensitiveRouteMatching))
+            if (optedInEndpointsSettings.Count > 1)
             {
                 throw new InvalidOperationException(
                     "Composition over controllers is configured with different useCaseInsensitiveRouteMatching values. " +
-                    "Use the same value for all WithCompositionOverControllers() calls" +
-                    (globalOptions.IsEnabled ? " and for EnableCompositionOverControllers()." : "."));
+                    "Use the same value for all WithCompositionOverControllers() calls.");
             }
 
-            if (globalOptions.IsEnabled || optedInEndpointsSettings.Count == 0)
+            if (optedInEndpointsSettings.Count == 0)
             {
-                return globalOptions;
+                return new CompositionOverControllersOptions();
             }
 
             return new CompositionOverControllersOptions
             {
                 IsEnabled = true,
-                UseCaseInsensitiveRouteMatching = optedInEndpointsSettings[0],
-                OnlyOptedInEndpoints = true
+                UseCaseInsensitiveRouteMatching = optedInEndpointsSettings[0]
             };
         }
     }

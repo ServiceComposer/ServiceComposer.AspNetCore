@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -63,9 +64,7 @@ namespace ServiceComposer.AspNetCore.Tests
         static SelfContainedWebApplicationFactoryWithWebHost<Dummy> CreateFactory(
             List<string> log,
             Func<EndpointFilterInvocationContext, EndpointFilterDelegate, ValueTask<object>> outerFilter = null,
-            bool mapCompositionHandlers = true,
-            bool enableCompositionOverControllersGlobally = false,
-            bool useCaseInsensitiveRouteMatching = true)
+            bool mapCompositionHandlers = true)
         {
             return new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
             (
@@ -76,10 +75,6 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<Handler>();
                         options.RegisterCompositionHandler<BadRequestHandler>();
-                        if (enableCompositionOverControllersGlobally)
-                        {
-                            options.EnableCompositionOverControllersGlobally();
-                        }
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -100,7 +95,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         {
                             controllers.AddEndpointFilter(outerFilter);
                         }
-                        controllers.WithCompositionOverControllers(useCaseInsensitiveRouteMatching);
+                        controllers.WithCompositionOverControllers();
                         if (mapCompositionHandlers)
                         {
                             builder.MapCompositionHandlers();
@@ -121,7 +116,6 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.True(response.IsSuccessStatusCode);
             var responseObj = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("sample", responseObj.SelectToken("AString")?.Value<string>());
-            // Composition runs once: the result filter skips composed requests
             Assert.Equal(["action", "handler"], log);
         }
 
@@ -176,27 +170,16 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Works_together_with_the_global_switch()
+        public void The_obsolete_global_switch_throws()
         {
-            var log = new List<string>();
-            var client = CreateFactory(log, enableCompositionOverControllersGlobally: true).CreateClient();
+            var options = new ViewModelCompositionOptions(new ServiceCollection());
 
-            var response = await client.GetAsync("/api/composition-over-controllers-endpoint-filters/1");
+            // Calling it directly is a compilation error
+            var method = typeof(ViewModelCompositionOptions).GetMethod("EnableCompositionOverControllers");
+            var exception = Assert.Throws<TargetInvocationException>(() => method!.Invoke(options, [true]));
 
-            Assert.True(response.IsSuccessStatusCode);
-            // Composed once, by the endpoint filter
-            Assert.Equal(["action", "handler"], log);
-        }
-
-        [Fact]
-        public void Fails_if_route_matching_settings_differ_from_the_global_switch()
-        {
-            var log = new List<string>();
-            var factory = CreateFactory(log, enableCompositionOverControllersGlobally: true, useCaseInsensitiveRouteMatching: false);
-
-            var exception = Assert.Throws<InvalidOperationException>(() => factory.CreateClient());
-
-            Assert.Contains("useCaseInsensitiveRouteMatching", exception.Message);
+            var notSupported = Assert.IsType<NotSupportedException>(exception.InnerException);
+            Assert.Contains(nameof(EndpointsExtensions.WithCompositionOverControllers), notSupported.Message);
         }
     }
 }
