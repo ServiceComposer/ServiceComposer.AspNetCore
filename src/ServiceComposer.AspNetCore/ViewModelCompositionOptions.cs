@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
@@ -65,6 +66,9 @@ namespace ServiceComposer.AspNetCore
 
         internal void InitializeServiceCollection()
         {
+            Services.AddSingleton<CompositionEndpointDataSources>();
+            Services.AddTransient<IStartupFilter, CompositionEndpointsStartupFilter>();
+
             if (CompositionOverControllersOptions.IsEnabled)
             {
                 Services.AddSingleton(_compositionOverControllersRoutes);
