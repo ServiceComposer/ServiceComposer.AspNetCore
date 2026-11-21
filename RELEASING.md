@@ -29,6 +29,8 @@ Versions released before this process was adopted were tagged on `master` and ma
    ```
 
    `-x` records the original commit in the message. Include any earlier commits the change depends on.
+
+   Title the pull request after what it changes, not after the backport, since the release notes are generated from pull request titles. For example, "Apply conventions added after MapCompositionHandlers()" rather than "Backport composition over controllers changes to 5.3". Say it's a backport, and link the original pull requests, in the description.
 3. Don't backport:
    - Renovate dependency updates, unless the release needs them: release branches keep their own dependency set.
    - Workflows that only run from the default branch, such as the project board one.
