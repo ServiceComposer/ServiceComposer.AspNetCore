@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- The package targets net10.0 only: net11.0 runs the tests on .NET 11 -->
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
