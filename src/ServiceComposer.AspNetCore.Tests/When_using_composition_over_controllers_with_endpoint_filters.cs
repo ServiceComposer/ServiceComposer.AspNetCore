@@ -78,7 +78,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.RegisterCompositionHandler<BadRequestHandler>();
                         if (enableCompositionOverControllersGlobally)
                         {
-                            options.EnableCompositionOverControllers();
+                            options.EnableCompositionOverControllersGlobally();
                         }
                     });
                     services.AddRouting();

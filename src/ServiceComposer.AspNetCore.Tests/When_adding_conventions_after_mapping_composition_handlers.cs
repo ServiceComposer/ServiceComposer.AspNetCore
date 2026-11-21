@@ -67,7 +67,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<ControllerHandler>();
                         options.RegisterCompositionHandler<CompositionOnlyHandler>();
-                        options.EnableCompositionOverControllers();
+                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers()

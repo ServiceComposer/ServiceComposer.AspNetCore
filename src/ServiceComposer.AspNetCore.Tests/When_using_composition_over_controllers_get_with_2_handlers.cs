@@ -75,7 +75,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseSensitiveRoute_TestGetIntegerHandler>();
-                        options.EnableCompositionOverControllers();
+                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -118,7 +118,7 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
-                        options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
+                        options.EnableCompositionOverControllersGlobally(useCaseInsensitiveRouteMatching: true);
                     });
                     services.AddRouting();
                     services.AddControllers()

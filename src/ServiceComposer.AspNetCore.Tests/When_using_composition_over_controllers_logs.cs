@@ -49,7 +49,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
-                        options.EnableCompositionOverControllers();
+                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -88,7 +88,7 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
-                        options.EnableCompositionOverControllers();
+                        options.EnableCompositionOverControllersGlobally();
                     });
                     services.AddRouting();
                     services.AddControllers();
