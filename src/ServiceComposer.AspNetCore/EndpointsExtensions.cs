@@ -25,18 +25,6 @@ namespace ServiceComposer.AspNetCore
             options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider
                 .GetRequiredService<ILogger<ResponseSerializationOptions>>());
 
-            // Composed routes are per application: a static registry would be
-            // shared by every host in the process, e.g. tests running in parallel
-            var compositionOverControllerGetComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
-            var compositionOverControllerPostComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
-            if (options.CompositionOverControllersOptions.IsEnabled)
-            {
-                var compositionOverControllersRoutes =
-                    endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
-                compositionOverControllersRoutes.AddComponentsSource("get", compositionOverControllerGetComponents);
-                compositionOverControllersRoutes.AddComponentsSource("post", compositionOverControllerPostComponents);
-            }
-
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
 
@@ -54,14 +42,32 @@ namespace ServiceComposer.AspNetCore
             endpoints.ServiceProvider.GetService<CompositionEndpointDataSources>()?.Add(dataSource);
 
             var dataSources = endpoints.DataSources;
+            var compositionOverControllersRoutes =
+                endpoints.ServiceProvider.GetRequiredService<CompositionOverControllersRoutes>();
             dataSource.AddDeferredMapping(() =>
             {
+                // Finding the controller endpoints that opted in to composition over
+                // controllers builds them: it must happen after all conventions are added
+                var compositionOverControllersOptions =
+                    ResolveCompositionOverControllersOptions(options.CompositionOverControllersOptions, dataSources);
+
+                // Composed routes are per application: a static registry would be
+                // shared by every host in the process, e.g. tests running in parallel
+                var compositionOverControllerGetComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
+                var compositionOverControllerPostComponents = new Dictionary<string, (Type ComponentType, IList<object> Metadata)[]>();
+                if (compositionOverControllersOptions.IsEnabled)
+                {
+                    compositionOverControllersRoutes.Initialize(compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                    compositionOverControllersRoutes.AddComponentsSource("get", compositionOverControllerGetComponents);
+                    compositionOverControllersRoutes.AddComponentsSource("post", compositionOverControllerPostComponents);
+                }
+
                 MapGetComponents(
                     compositionMetadataRegistry,
                     dataSources,
                     dataSource,
                     compositionOverControllerGetComponents,
-                    options.CompositionOverControllersOptions,
+                    compositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing,
                     options.ResponseSerialization.UseOutputFormatters,
                     logger);
@@ -72,26 +78,26 @@ namespace ServiceComposer.AspNetCore
                         dataSources,
                         dataSource,
                         compositionOverControllerPostComponents,
-                        options.CompositionOverControllersOptions,
+                        compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
                         logger);
                     MapPutComponents(
                         compositionMetadataRegistry,
                         dataSource,
-                        options.CompositionOverControllersOptions,
+                        compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters);
                     MapPatchComponents(
                         compositionMetadataRegistry,
                         dataSource,
-                        options.CompositionOverControllersOptions,
+                        compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters);
                     MapDeleteComponents(
                         compositionMetadataRegistry,
                         dataSource,
-                        options.CompositionOverControllersOptions,
+                        compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters);
                 }
@@ -115,7 +121,8 @@ namespace ServiceComposer.AspNetCore
             {
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
-                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
+                    && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at GET {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);
@@ -145,7 +152,8 @@ namespace ServiceComposer.AspNetCore
             {
                 if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
                     componentsGroup, dataSources,
-                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out _))
+                    compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
+                    && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at POST {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);

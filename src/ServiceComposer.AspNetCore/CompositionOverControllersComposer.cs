@@ -30,11 +30,10 @@ namespace ServiceComposer.AspNetCore
                 return (false, null);
             }
 
-            var options = context.RequestServices.GetRequiredService<ViewModelCompositionOptions>().CompositionOverControllersOptions;
             var routes = context.RequestServices.GetRequiredService<CompositionOverControllersRoutes>();
 
             Debug.Assert(endpoint.RoutePattern.RawText != null, "endpoint.RoutePattern.RawText != null");
-            var rawTemplate = options.UseCaseInsensitiveRouteMatching
+            var rawTemplate = routes.UseCaseInsensitiveRouteMatching
                 ? endpoint.RoutePattern.RawText.ToLowerInvariant()
                 : endpoint.RoutePattern.RawText;
             var handlers = routes.HandlersForRoute(rawTemplate, context.Request.Method);
