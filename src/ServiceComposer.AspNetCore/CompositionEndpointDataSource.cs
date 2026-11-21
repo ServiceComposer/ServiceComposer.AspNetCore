@@ -14,11 +14,23 @@ namespace ServiceComposer.AspNetCore
         readonly object endpointsBuildLock = new();
         readonly List<Action<EndpointBuilder>> conventions = [];
         readonly List<CompositionEndpointBuilder> _endpointBuilders = [];
+        readonly List<Action> deferredMappings = [];
         IReadOnlyList<Endpoint> cachedEndpoints;
 
         public void AddEndpointBuilder(CompositionEndpointBuilder endpointBuilder)
         {
             _endpointBuilders.Add(endpointBuilder);
+        }
+
+        // Mapping composition handlers can require reading the endpoints of
+        // other data sources, e.g. to compose over controllers. Reading them
+        // builds them, and conventions added to those data sources afterward
+        // are ignored. Deferred mappings run the first time Endpoints is read,
+        // when routing builds its matcher, after the application finished
+        // mapping endpoints and adding conventions.
+        public void AddDeferredMapping(Action mapping)
+        {
+            deferredMappings.Add(mapping);
         }
 
         public override IChangeToken GetChangeToken()
@@ -42,6 +54,15 @@ namespace ServiceComposer.AspNetCore
                 {
                     lock (endpointsBuildLock)
                     {
+                        if (cachedEndpoints == null)
+                        {
+                            foreach (var mapping in deferredMappings)
+                            {
+                                mapping();
+                            }
+                            deferredMappings.Clear();
+                        }
+
                         cachedEndpoints ??= _endpointBuilders
                             .OrderBy(builder => builder.Order)
                             .Select(builder =>

@@ -24,6 +24,8 @@ public class UpgradeGuide
     
     public class CompositionOverControllers
     {
+        // The 1.x to 2.0 upgrade guide shows the API as it was then
+#pragma warning disable CS0618
         // begin-snippet: composition-over-controllers-case-sensitive
         public void ConfigureServices(IServiceCollection services)
         {
@@ -33,6 +35,7 @@ public class UpgradeGuide
             });
         }
         // end-snippet
+#pragma warning restore CS0618
     }
     
     // begin-snippet: composition-handler-api

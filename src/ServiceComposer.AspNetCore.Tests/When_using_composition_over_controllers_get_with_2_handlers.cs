@@ -75,7 +75,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseSensitiveRoute_TestGetIntegerHandler>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddRouting();
                     services.AddControllers()
@@ -118,7 +121,10 @@ namespace ServiceComposer.AspNetCore.Tests
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetStringHandler>();
                         options.RegisterCompositionHandler<CaseInsensitiveRoute_TestGetIntegerHandler>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers(useCaseInsensitiveRouteMatching: true);
+#pragma warning restore CS0618
                     });
                     services.AddRouting();
                     services.AddControllers()

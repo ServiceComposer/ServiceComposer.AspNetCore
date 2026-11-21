@@ -49,7 +49,10 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddRouting();
                     services.AddControllers();
@@ -88,7 +91,10 @@ namespace ServiceComposer.AspNetCore.Tests
                     {
                         options.AssemblyScanner.Disable();
                         options.RegisterCompositionHandler<TestGetHandler>();
+                        // Covers the obsolete API while it's a warning
+#pragma warning disable CS0618
                         options.EnableCompositionOverControllers();
+#pragma warning restore CS0618
                     });
                     services.AddRouting();
                     services.AddControllers();
