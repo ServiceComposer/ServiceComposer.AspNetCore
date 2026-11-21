@@ -11,6 +11,11 @@
      "matchUpdateTypes": ["minor", "major"],
      "enabled": false
    },{
+     "description": "Majors of these packages follow the target framework, which is moved in a ServiceComposer major",
+     "matchPackageNames": ["Microsoft.AspNetCore.*", "Microsoft.Extensions.*", "Microsoft.SourceLink.GitHub"],
+     "matchUpdateTypes": ["major"],
+     "enabled": false
+   },{
       "matchUpdateTypes": ["patch", "minor"],
       "platformAutomerge": true,
       "automerge": true
