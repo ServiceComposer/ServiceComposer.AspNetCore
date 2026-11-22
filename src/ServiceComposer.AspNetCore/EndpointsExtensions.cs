@@ -171,7 +171,7 @@ namespace ServiceComposer.AspNetCore
             IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(
-                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, logger);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
@@ -203,7 +203,7 @@ namespace ServiceComposer.AspNetCore
             IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(
-                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, logger);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
@@ -233,7 +233,7 @@ namespace ServiceComposer.AspNetCore
             IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(
-                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, logger);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
@@ -252,7 +252,7 @@ namespace ServiceComposer.AspNetCore
             IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(
-                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, logger);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
@@ -271,7 +271,7 @@ namespace ServiceComposer.AspNetCore
             IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(
-                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
+                compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, logger);
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
@@ -389,7 +389,7 @@ namespace ServiceComposer.AspNetCore
 
         static IEnumerable<IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)>>
             SelectComponentsGroupedByTemplate<TAttribute>(
-                CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching)
+                CompositionMetadataRegistry compositionMetadataRegistry, bool useCaseInsensitiveRouteMatching, ILogger logger)
             where TAttribute : HttpMethodAttribute
         {
             var getComponentsGroupedByTemplate = compositionMetadataRegistry.Components
@@ -413,9 +413,34 @@ namespace ServiceComposer.AspNetCore
                     return componentsAndTemplate;
                 })
                 .Where(component => component.Template != null)
-                .GroupBy(component => component.Template);
+                .GroupBy(component => component.Template)
+                .Where(componentsGroup => HasCompositionHandlers<TAttribute>(componentsGroup, logger))
+                .ToArray();
 
             return getComponentsGroupedByTemplate;
+        }
+
+        // A route whose components are only event subscribers or view model factories has nothing
+        // to compose: mapping it would make its requests run the composition only to return a 404,
+        // and, when composing over a controller, replace the controller response with a 404.
+        static bool HasCompositionHandlers<TAttribute>(
+            IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup,
+            ILogger logger)
+            where TAttribute : HttpMethodAttribute
+        {
+            if (componentsGroup.Any(component => typeof(ICompositionRequestsHandler).IsAssignableFrom(component.ComponentType)))
+            {
+                return true;
+            }
+
+            var httpMethods = componentsGroup.First().Metadata.OfType<TAttribute>().First().HttpMethods;
+            logger?.LogWarning("No composition handler is registered for {HttpMethods} /{Template}, so the route isn't mapped, " +
+                               "and these components never run for it: {Components}. Check the template for typos, or add a composition handler for the route.",
+                string.Join(", ", httpMethods),
+                componentsGroup.Key,
+                string.Join(", ", componentsGroup.Select(component => component.ComponentType.Name).Distinct()));
+
+            return false;
         }
     }
 }
