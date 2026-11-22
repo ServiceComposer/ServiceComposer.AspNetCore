@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
@@ -56,6 +57,43 @@ namespace ServiceComposer.AspNetCore
             {
                 activity?.Dispose();
             }
+        }
+
+        // Each handler runs behind its own filters: the attributes on its class, then the ones on
+        // its method, then the ICompositionRequestFilter<T> registered for it. Not calling next
+        // skips the handler only.
+        static Task RunHandlerWithFilters(ICompositionRequestsHandler handler, HttpRequest request, CompositionMetadataRegistry metadataRegistry)
+        {
+            var filters = GetFilters(handler.GetType(), request.HttpContext.RequestServices, metadataRegistry);
+            if (filters.Count == 0)
+            {
+                return RunHandlerWithSpan(handler, request);
+            }
+
+            CompositionRequestFilterDelegate pipeline = _ => new ValueTask(RunHandlerWithSpan(handler, request));
+            for (var i = filters.Count - 1; i >= 0; i--)
+            {
+                var filter = filters[i];
+                var next = pipeline;
+                pipeline = filterContext => filter.InvokeAsync(filterContext, next);
+            }
+
+            return pipeline(new CompositionRequestFilterContext(request.HttpContext, handler)).AsTask();
+        }
+
+        static List<ICompositionRequestFilter> GetFilters(Type handlerType, IServiceProvider services, CompositionMetadataRegistry metadataRegistry)
+        {
+            var filters = new List<ICompositionRequestFilter>();
+            if (metadataRegistry.Components.TryGetValue(handlerType, out var metadata))
+            {
+                // The class' attributes come first, then the method's
+                filters.AddRange(metadata.OfType<ICompositionRequestFilter>());
+            }
+
+            var typeBasedFilterType = typeof(ICompositionRequestFilter<>).MakeGenericType(handlerType);
+            filters.AddRange(services.GetServices(typeBasedFilterType).OfType<ICompositionRequestFilter>());
+
+            return filters;
         }
 
         // Walks up the factories: the route's endpoint scoped one, then the global one,
@@ -121,13 +159,9 @@ namespace ServiceComposer.AspNetCore
                 }
 
                 //TODO: if handlers == none we could shortcut again to 404 here
+                var metadataRegistry = context.RequestServices.GetRequiredService<CompositionMetadataRegistry>();
                 var pending = handlers.OfType<ICompositionRequestsHandler>()
-                    .Select(handler =>
-                    {
-                        // TODO: apply composition filter here not before
-                        // invoking the whole composition process
-                        return RunHandlerWithSpan(handler, request);
-                    })
+                    .Select(handler => RunHandlerWithFilters(handler, request, metadataRegistry))
                     .ToList();
 
                 if (pending.Count == 0)
