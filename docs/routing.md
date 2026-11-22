@@ -52,7 +52,7 @@ All the components declaring the same HTTP method and the same route template ar
 > [!WARNING]
 > Templates that match the same requests but are written differently, e.g., `/product/{id}` and `/product/{productId}`, or `/Product/{id}` and `/product/{id}`, aren't composed together. They become two endpoints matching the same requests, and the requests fail with an `AmbiguousMatchException`. Components meant to be composed together must use the same template.
 
-`POST`, `PUT`, `PATCH`, and `DELETE` routes are mapped unless write support is disabled with `options.DisableWriteSupport()`.
+`POST`, `PUT`, `PATCH`, and `DELETE` routes are mapped unless write support is disabled with `options.DisableWriteSupport()`. With write support disabled, requests to write routes get a `404 Not Found`, or a `405 Method Not Allowed` if a `GET` composition handler shares the path. Starting with v6.0.0, a warning listing the write routes that aren't mapped, and the components declaring them, is logged when the endpoints are built: write support is enabled by default, so components declaring write routes while it's disabled are most likely a configuration mistake.
 
 ### Route prefixes
 
