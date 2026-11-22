@@ -39,7 +39,7 @@ namespace ServiceComposer.AspNetCore
             // it'll fail and only the first one succeeds
             context.Request.EnableBuffering();
 
-            var argumentsByComponent = await ComponentsModelBinder.BindAll(handlers, context);
+            var (argumentsByComponent, _) = await ComponentsModelBinder.BindAll(handlers, context);
 
             var requestId = context.EnsureRequestIdIsSetup();
             var compositionContext = new CompositionContext
