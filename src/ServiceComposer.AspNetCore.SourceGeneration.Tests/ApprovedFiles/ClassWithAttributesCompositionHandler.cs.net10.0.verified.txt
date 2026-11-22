@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.Generated
 {
     [AuthorizeAttribute(Policy = "SomePolicy")]
+    [GeneratedCompositionHandler(typeof(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithAttributesCompositionHandler), "Get")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class ClassWithAttributesCompositionHandler_Get_int_id(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithAttributesCompositionHandler userHandler)
          : ICompositionRequestsHandler

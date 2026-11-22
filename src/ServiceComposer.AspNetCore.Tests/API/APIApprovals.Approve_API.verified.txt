@@ -56,11 +56,30 @@ namespace ServiceComposer.AspNetCore
     {
         public const string Key = "composed-request-id";
     }
+    public sealed class CompositionComponent
+    {
+        public System.Type ComponentType { get; }
+        public ServiceComposer.AspNetCore.CompositionComponentKind Kind { get; }
+        public System.Reflection.MethodInfo Method { get; }
+        public System.Collections.Generic.IReadOnlyList<object> MethodAttributes { get; }
+        public System.Collections.Generic.IReadOnlyList<object> TypeAttributes { get; }
+        public System.Type UserType { get; }
+    }
+    public enum CompositionComponentKind
+    {
+        RequestsHandler = 0,
+        EventsSubscriber = 1,
+        ViewModelFactory = 2,
+    }
     [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple=false, Inherited=false)]
     public sealed class CompositionComponentsProviderAttribute : System.Attribute
     {
         public CompositionComponentsProviderAttribute(System.Type providerType) { }
         public System.Type ProviderType { get; }
+    }
+    public sealed class CompositionEndpointComponents
+    {
+        public System.Collections.Generic.IReadOnlyList<ServiceComposer.AspNetCore.CompositionComponent> Components { get; }
     }
     public sealed class CompositionEndpointConventionBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder
     {
@@ -115,6 +134,13 @@ namespace ServiceComposer.AspNetCore
         protected Gatherer(string key) { }
         public string Key { get; }
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<T>> Gather(Microsoft.AspNetCore.Http.HttpContext context);
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class, Inherited=false)]
+    public sealed class GeneratedCompositionHandlerAttribute : System.Attribute
+    {
+        public GeneratedCompositionHandlerAttribute(System.Type userType, string methodName) { }
+        public string MethodName { get; }
+        public System.Type UserType { get; }
     }
     public static class HttpContextExtensions
     {

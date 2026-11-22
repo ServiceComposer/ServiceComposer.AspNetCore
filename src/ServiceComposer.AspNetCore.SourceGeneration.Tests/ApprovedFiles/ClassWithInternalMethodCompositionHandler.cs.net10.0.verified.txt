@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 #pragma warning disable SC0001
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.Generated
 {
+    [GeneratedCompositionHandler(typeof(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithInternalMethodCompositionHandler), "Post")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class ClassWithInternalMethodCompositionHandler_Post_int_id_int_c_string_x(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithInternalMethodCompositionHandler userHandler)
          : ICompositionRequestsHandler
