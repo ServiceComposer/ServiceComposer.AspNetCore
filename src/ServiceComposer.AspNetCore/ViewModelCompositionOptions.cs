@@ -403,10 +403,14 @@ namespace ServiceComposer.AspNetCore
                 throw new NotSupportedException(message);
             }
 
+            var classAttributes = componentType.GetCustomAttributes(inherit: true);
+            var methodAttributes = RouteTemplates.CombineWithClassRoutes(
+                classAttributes, method.GetCustomAttributes(inherit: true));
+
             // The class' attributes come first, so that, as for controllers,
             // the method's attributes win when endpoint metadata is read.
-            return componentType.GetCustomAttributes(inherit: true)
-                .Concat(method.GetCustomAttributes(inherit: true))
+            return classAttributes
+                .Concat(methodAttributes)
                 .ToArray();
         }
 

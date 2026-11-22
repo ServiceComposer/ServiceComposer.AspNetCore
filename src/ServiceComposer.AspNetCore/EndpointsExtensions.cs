@@ -358,9 +358,9 @@ namespace ServiceComposer.AspNetCore
                     var componentsAndTemplate = component.Value.OfType<TAttribute>()
                         .Select(a =>
                         {
-                            var template = a.Template.TrimStart('/');
+                            var template = RouteTemplates.Normalize(a.Template);
                             return (component.Key, component.Value, useCaseInsensitiveRouteMatching
-                                ? template.ToLowerInvariant()
+                                ? template?.ToLowerInvariant()
                                 : template);
                         }).ToArray();
 

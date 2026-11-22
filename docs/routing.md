@@ -47,15 +47,45 @@ The same attributes declare the routes of [contract-less composition handlers](c
 
 ### How components are composed
 
-All the components declaring the same HTTP method and the same route template are composed into a single endpoint. Templates are compared as text, ignoring a leading `/`. In the previous snippets, both handlers contribute to `GET /product/{id:int}`, and `ProductPriceHandler` is also the only handler of `GET /checkout/product/{id:int}`.
+All the components declaring the same HTTP method and the same route template are composed into a single endpoint. Templates are compared as text, ignoring a leading `/` or `~/`. In the previous snippets, both handlers contribute to `GET /product/{id:int}`, and `ProductPriceHandler` is also the only handler of `GET /checkout/product/{id:int}`.
 
 > [!WARNING]
 > Templates that match the same requests but are written differently, e.g., `/product/{id}` and `/product/{productId}`, or `/Product/{id}` and `/product/{id}`, aren't composed together. They become two endpoints matching the same requests, and the requests fail with an `AmbiguousMatchException`. Components meant to be composed together must use the same template.
 
 `POST`, `PUT`, `PATCH`, and `DELETE` routes are mapped unless write support is disabled with `options.DisableWriteSupport()`.
 
-> [!NOTE]
-> The `[Route]` attribute on a component class doesn't prefix the templates of its methods: it's not supported ([#148](https://github.com/ServiceComposer/ServiceComposer.AspNetCore/issues/148)).
+### Route prefixes
+
+_Available starting with v6.0.0_
+
+A `[Route]` attribute on the component class prefixes the templates of its method, following the same rules as [MVC controllers](https://learn.microsoft.com/aspnet/core/mvc/controllers/routing#combining-attribute-routes):
+
+<!-- snippet: routing-class-prefix -->
+<a id='snippet-routing-class-prefix'></a>
+```cs
+[Route("/api/products")]
+public class ProductsHandler : ICompositionRequestsHandler
+{
+    // GET /api/products/{id}
+    [HttpGet("{id:int}")]
+    // GET /api/products
+    [HttpGet]
+    // GET /catalog/{id}: absolute, not prefixed
+    [HttpGet("/catalog/{id:int}")]
+    public Task Handle(HttpRequest request)
+    {
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets/Routing/RoutingSnippets.cs#L54-L69' title='Snippet source file'>snippet source</a> | <a href='#snippet-routing-class-prefix' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+- A method template starting with `/` or `~/` is absolute: it isn't prefixed.
+- An `[Http*]` attribute without a template uses the class template.
+- With more than one `[Route]` attribute, each one prefixes each method template.
+
+The combined template is the one components are composed by: in the previous snippet, a handler declaring `[HttpGet("/api/products/{id:int}")]` is composed with `ProductsHandler`. Route prefixes work the same way for contract-less composition handlers, event subscribers, and endpoint scoped view model factories. Tokens such as `[controller]` and `[action]` aren't supported.
 
 ## Case sensitivity
 
