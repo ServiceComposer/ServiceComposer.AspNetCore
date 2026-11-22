@@ -62,6 +62,11 @@ namespace ServiceComposer.AspNetCore
         public CompositionComponentsProviderAttribute(System.Type providerType) { }
         public System.Type ProviderType { get; }
     }
+    public sealed class CompositionEndpointConventionBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder
+    {
+        public void Add(System.Action<Microsoft.AspNetCore.Builder.EndpointBuilder> convention) { }
+        public void Finally(System.Action<Microsoft.AspNetCore.Builder.EndpointBuilder> finallyConvention) { }
+    }
     public delegate System.Threading.Tasks.Task CompositionEventHandler<in TEvent>(TEvent @event, Microsoft.AspNetCore.Http.HttpRequest httpRequest);
     public static class CompositionHandler { }
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
@@ -101,7 +106,7 @@ namespace ServiceComposer.AspNetCore
     }
     public static class EndpointsExtensions
     {
-        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static ServiceComposer.AspNetCore.CompositionEndpointConventionBuilder MapCompositionHandlers(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         public static Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder WithCompositionOverControllers(this Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder builder, bool useCaseInsensitiveRouteMatching = true) { }
     }
     public abstract class Gatherer<T> : ServiceComposer.AspNetCore.IGatherer

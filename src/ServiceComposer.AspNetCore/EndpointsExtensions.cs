@@ -15,7 +15,7 @@ namespace ServiceComposer.AspNetCore
 {
     public static partial class EndpointsExtensions
     {
-        public static IEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
+        public static CompositionEndpointConventionBuilder MapCompositionHandlers(this IEndpointRouteBuilder endpoints)
         {
             if (endpoints == null)
             {
@@ -107,7 +107,7 @@ namespace ServiceComposer.AspNetCore
                 }
             });
 
-            return dataSource;
+            return new CompositionEndpointConventionBuilder(dataSource);
         }
 
         static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,
