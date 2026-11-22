@@ -86,6 +86,34 @@ public class Tester
     }
 
     [Fact]
+    public void Class_level_model_binding_attributes_on_contract_less_handlers_are_left_out()
+    {
+        const string source = """
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Mvc;
+            using ServiceComposer.AspNetCore;
+
+            namespace Sample;
+
+            [BindFromQuery<int>("page")]
+            [CompositionHandler]
+            class PagedCompositionHandler
+            {
+                [HttpGet("/items/{id}")]
+                public Task Get(int id) => Task.CompletedTask;
+            }
+            """;
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new CompositionHandlerWrapperGenerator());
+        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(source), out var outputCompilation, out var diagnostics);
+
+        // No new diagnostic in a patch release
+        Assert.Empty(diagnostics);
+        Assert.DoesNotContain("BindFromQuery", driver.GetRunResult().GeneratedTrees[0].ToString());
+        Assert.Empty(outputCompilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error));
+    }
+
+    [Fact]
     public async Task TestSourceGenerator()
     {
         var testFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.CompositionHandlers");
