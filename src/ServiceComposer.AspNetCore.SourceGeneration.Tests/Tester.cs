@@ -131,11 +131,15 @@ public class Tester
             
             GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, 
-                out _, 
+                out var outputCompilation, 
                 out var diagnostics);
             
             var runResult = driver.GetRunResult();
             Assert.Empty(diagnostics);
+            // The generated code must compile. The test files aren't complete programs, so errors
+            // in them, e.g. missing using directives, are ignored.
+            Assert.Empty(outputCompilation.GetDiagnostics()
+                .Where(d => d.Severity == DiagnosticSeverity.Error && runResult.GeneratedTrees.Contains(d.Location.SourceTree)));
             
             var generatedSource = runResult.GeneratedTrees[0].ToString();
 

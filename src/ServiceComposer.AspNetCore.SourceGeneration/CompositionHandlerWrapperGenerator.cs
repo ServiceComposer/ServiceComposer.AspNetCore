@@ -738,12 +738,13 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
                 if (excludedAttribute != null && attributeType.ContainingType.ToDisplayString() == excludedAttribute) continue;
                 if (skip != null && skip(attributeType.ContainingType)) continue;
 
-                var attributeName = attributeType.ContainingType.Name;
                 var attributeNamespace = attributeType.ContainingNamespace.ToDisplayString();
                 requiredNamespaces.Add(attributeNamespace);
                 var arguments = SerializeAttributeArguments(attribute, semanticModel, requiredNamespaces);
 
-                serializedAttributes.Add($"[{attributeName}{arguments}]");
+                // Fully qualified, so that attributes declared in nested types, or generic ones, resolve
+                var fullyQualifiedAttributeName = attributeType.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                serializedAttributes.Add($"[{fullyQualifiedAttributeName}{arguments}]");
             }
         }
 
@@ -771,7 +772,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             var symbolInfo = semanticModel.GetSymbolInfo(argument.Expression);
             if (symbolInfo.Symbol is IFieldSymbol enumField)
             {
-                var enumTypeName = enumField.ContainingType.Name;
+                var enumTypeName = enumField.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var enumTypeNamespace = enumField.ContainingNamespace.ToDisplayString();
                 requiredNamespaces.Add(enumTypeNamespace);
 
