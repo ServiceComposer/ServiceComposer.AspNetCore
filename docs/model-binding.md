@@ -188,6 +188,37 @@ var findValueByTypeSourceAndName = arguments.Argument<string>(name: "user", bind
 
 Arguments are segregated by component, to access them the arguments owner instance must be passed to the `GetArguments(owner)` method. Owners are restricted to a limited set of types: `ICompositionRequestsHandler`, `ICompositionEventsSubscriber`, and `ICompositionEventsHandler<T>`. 
 
+### Class-level binding attributes
+
+_Available starting with v6.0.0_
+
+The `Bind*` attributes can also decorate the component class, to bind the same models for all its routes. Class-level and method-level attributes both bind:
+
+<!-- snippet: class-level-model-binding -->
+<a id='snippet-class-level-model-binding'></a>
+```cs
+[BindFromRoute<int>(routeValueKey: "id")]
+public class OrderHandler : ICompositionRequestsHandler
+{
+    [HttpGet("/orders/{id}")]
+    [BindFromQuery<int>(queryParameterName: "page")]
+    public Task Handle(HttpRequest request)
+    {
+        var arguments = request.GetCompositionContext().GetArguments(this);
+        var id = arguments.Argument<int>("id", BindingSource.Path);
+        var page = arguments.Argument<int>("page", BindingSource.Query);
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets/ModelBinding/ClassLevelModelBinding.cs#L10-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-class-level-model-binding' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+- Arguments are bound once per name and binding source. If the class and the method declare the same name and source, the method's attribute wins, as for other attributes.
+- Class-level binding attributes apply to composition handlers and route-based event subscribers. [Generic event handlers](events.md#generic-event-handlers) aren't bound to a route: no model is bound for them, and `GetArguments(this)` returns `null`.
+- [Contract-less composition handlers](contract-less-composition-requests-handlers.md) don't support them: their method only gets its parameters. The source generator ignores them, with an `SC004` warning: declare a method parameter instead.
+
 ### Binding errors
 
 _Available starting with v6.0.0_
