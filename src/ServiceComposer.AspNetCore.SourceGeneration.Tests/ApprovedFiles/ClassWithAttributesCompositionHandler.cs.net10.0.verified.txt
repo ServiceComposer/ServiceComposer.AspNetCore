@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 #pragma warning disable SC0001
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.Generated
 {
-    [AuthorizeAttribute(Policy = "SomePolicy")]
+    [global::Microsoft.AspNetCore.Authorization.AuthorizeAttribute(Policy = "SomePolicy")]
     [GeneratedCompositionHandler(typeof(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithAttributesCompositionHandler), "Get")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class ClassWithAttributesCompositionHandler_Get_int_id(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithAttributesCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
-        [AllowAnonymousAttribute]
-        [HttpGetAttribute("/sample/{id}")]
+        [global::Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute]
+        [global::Microsoft.AspNetCore.Mvc.HttpGetAttribute("/sample/{id}")]
         [BindFromRoute<Int32>("id")]
         public Task Handle(HttpRequest request)
         {

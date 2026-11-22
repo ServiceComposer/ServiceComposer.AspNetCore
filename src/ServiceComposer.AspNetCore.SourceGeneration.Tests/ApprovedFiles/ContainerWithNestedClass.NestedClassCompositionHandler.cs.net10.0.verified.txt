@@ -15,8 +15,8 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
     class ContainerWithNestedClass_NestedClassCompositionHandler_Post_int_id_int_c(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ContainerWithNestedClass.NestedClassCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
-        [ResponseCacheAttribute(Duration = 10, Location = ResponseCacheLocation.Client)]
-        [HttpPostAttribute("/sample/{v}")]
+        [global::Microsoft.AspNetCore.Mvc.ResponseCacheAttribute(Duration = 10, Location = global::Microsoft.AspNetCore.Mvc.ResponseCacheLocation.Client)]
+        [global::Microsoft.AspNetCore.Mvc.HttpPostAttribute("/sample/{v}")]
         [BindFromRoute<Int32>("v")]
         [BindFromQuery<Int32>("c")]
         public Task Handle(HttpRequest request)

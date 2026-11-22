@@ -16,8 +16,8 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
     class ClassWithInternalMethodCompositionHandler_Post_int_id_int_c_string_x(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.ClassWithInternalMethodCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
-        [AuthorizeAttribute]
-        [HttpPostAttribute("/sample/{id}")]
+        [global::Microsoft.AspNetCore.Authorization.AuthorizeAttribute]
+        [global::Microsoft.AspNetCore.Mvc.HttpPostAttribute("/sample/{id}")]
         [BindFromRoute<Int32>("id")]
         [BindFromForm<Int32>("sampleC")]
         [BindFromForm<String>("sampleX")]
