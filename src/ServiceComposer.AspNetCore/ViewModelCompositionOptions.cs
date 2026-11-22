@@ -330,6 +330,8 @@ namespace ServiceComposer.AspNetCore
 
         public ResponseSerializationOptions ResponseSerialization { get; }
 
+        public ModelBindingOptions ModelBinding { get; } = new();
+
         public void RegisterCompositionHandler<T>()
         {
             RegisterCompositionComponents(typeof(T));

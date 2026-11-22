@@ -186,6 +186,40 @@ var findValueByTypeSourceAndName = arguments.Argument<string>(name: "user", bind
 
 Arguments are segregated by component, to access them the arguments owner instance must be passed to the `GetArguments(owner)` method. Owners are restricted to a limited set of types: `ICompositionRequestsHandler`, `ICompositionEventsSubscriber`, and `ICompositionEventsHandler<T>`. 
 
+### Binding errors
+
+_Available starting with v6.0.0_
+
+If a declaratively bound model has binding errors, e.g. a value that can't be converted to the model type, malformed JSON, or a missing required body, the request gets a `400 Bad Request` response, and no composition handler or endpoint filter runs. When several composition handlers of the route declare models, the errors of all of them are merged. Data annotations validation isn't run: binding errors only.
+
+The response body is a validation problem details, with the errors keyed by model name:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "id": [ "The value 'not-a-number' is not valid." ]
+  }
+}
+```
+
+If an `IProblemDetailsService` is registered, e.g. with `builder.Services.AddProblemDetails()`, it writes the response, so its customizations apply.
+
+To let the composition handlers run with the partially bound models instead, as before v6.0.0, disable it:
+
+<!-- snippet: disable-fail-on-binding-errors -->
+<a id='snippet-disable-fail-on-binding-errors'></a>
+```cs
+builder.Services.AddViewModelComposition(options =>
+{
+    options.ModelBinding.FailOnBindingErrors = false;
+});
+```
+<sup><a href='/src/Snippets/ModelBinding/FailOnBindingErrors.cs#L13-L18' title='Snippet source file'>snippet source</a> | <a href='#snippet-disable-fail-on-binding-errors' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
 ### Named arguments experimental API
 
 The API to search for arguments exposed by the composition context is experimental and, as such, subject to change. The `GetArguments(ownerComponent)` method is decorated with the `Experimental` attribute and will raise an `SC0001` warning. The warning can be suppressed with a regular pragma directive, e.g., `#pragma warning disable SC0001`.
