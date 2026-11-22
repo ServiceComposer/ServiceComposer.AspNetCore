@@ -21,9 +21,11 @@ The required steps are:
 - set `UseOutputFormatters` to `true`
 - Set up the MVC components by calling one of the following:
   - `AddControllers()`
-  - `AddControllersAndViews()`
+  - `AddControllersWithViews()`
   - `AddMvc()`
   - `AddRazorPages()`
+
+Starting with v6.0.0, if output formatters are enabled and the MVC components aren't set up, mapping the composition handlers throws an `InvalidOperationException` at startup. Before, the first request failed. The same applies to scatter-gather routes with `UseOutputFormatters` enabled.
 
 The above configuration uses the new `System.Text.Json` serializer as the default json serializer to format json responses. It's possible to plug-in the Newtonsoft Json.Net serializer output formatter by adding a package reference to the `Microsoft.AspNetCore.Mvc.NewtonsoftJson` package, and using the following configuration:
 
