@@ -18,6 +18,12 @@ public static class ScatterGatherEndpointBuilderExtensions
 {
     public static IEndpointConventionBuilder MapScatterGather(this IEndpointRouteBuilder builder, string template, ScatterGatherOptions options)
     {
+        if (options.UseOutputFormatters)
+        {
+            OutputFormattersServices.EnsureRegistered(builder.ServiceProvider,
+                $"{nameof(ScatterGatherOptions.UseOutputFormatters)} of the scatter-gather route {template}");
+        }
+
         return builder.MapGet(template, async context =>
         {
             var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ScatterGatherEndpointBuilderExtensions));
