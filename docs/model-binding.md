@@ -207,6 +207,8 @@ The response body is a validation problem details, with the errors keyed by mode
 
 If an `IProblemDetailsService` is registered, e.g. with `builder.Services.AddProblemDetails()`, it writes the response, so its customizations apply.
 
+With [composition over controllers](composition-over-controllers.md), the composition handlers' models are bound before the controller action runs, and binding errors return the same response without running the action. Endpoint filters added to the controller endpoints before `WithCompositionOverControllers()` see a result whose status code, through `IStatusCodeHttpResult`, is `400`. The controller action's own parameters are bound by MVC, as usual.
+
 To let the composition handlers run with the partially bound models instead, as before v6.0.0, disable it:
 
 <!-- snippet: disable-fail-on-binding-errors -->
