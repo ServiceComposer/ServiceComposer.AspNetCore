@@ -17,8 +17,8 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
     class AHandlerWithANestedClassCompositionHandler_Post_int_id_int_renamed_ServiceComposer_AspNetCore_SourceGeneration_Tests_TestFiles_CompositionHandlers_AHandlerWithANestedClassCompositionHandler_BodyClass_body(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.AHandlerWithANestedClassCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
-        [HttpPostAttribute("/sample/{id}")]
-        [AuthorizeAttribute]
+        [global::Microsoft.AspNetCore.Mvc.HttpPostAttribute("/sample/{id}")]
+        [global::Microsoft.AspNetCore.Authorization.AuthorizeAttribute]
         [BindFromRoute<Int32>("id")]
         [BindFromQuery<Int32>("x")]
         [BindFromBody<AHandlerWithANestedClassCompositionHandler.BodyClass>()]
