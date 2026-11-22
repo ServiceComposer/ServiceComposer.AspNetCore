@@ -362,6 +362,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
             }
         }
 
+        builder.AppendLine($"    [GeneratedCompositionHandler(typeof({userClassFullTypeName}), \"{userMethod.Identifier.Text}\")]");
         builder.AppendLine("    [EditorBrowsable(EditorBrowsableState.Never)]");
         builder.AppendLine($"    class {generatedClassName}({userClassFullTypeName} userHandler)");
         builder.AppendLine($"         : ICompositionRequestsHandler");

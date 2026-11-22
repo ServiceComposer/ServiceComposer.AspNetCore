@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 #pragma warning disable SC0001
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.Generated
 {
+    [GeneratedCompositionHandler(typeof(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.WithQueryBindingWithoutAttributeCompositionHandler), "Post")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class WithQueryBindingWithoutAttributeCompositionHandler_Post_int_id_int_c_string_v_ServiceComposer_AspNetCore_SourceGeneration_Tests_TestFiles_CompositionHandlers_WithQueryBindingWithoutAttributeBodyClass_body(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.WithQueryBindingWithoutAttributeCompositionHandler userHandler)
          : ICompositionRequestsHandler

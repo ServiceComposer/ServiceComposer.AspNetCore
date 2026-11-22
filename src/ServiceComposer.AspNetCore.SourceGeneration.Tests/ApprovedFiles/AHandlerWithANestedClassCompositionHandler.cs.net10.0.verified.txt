@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 #pragma warning disable SC0001
 namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.Generated
 {
+    [GeneratedCompositionHandler(typeof(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.AHandlerWithANestedClassCompositionHandler), "Post")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class AHandlerWithANestedClassCompositionHandler_Post_int_id_int_renamed_ServiceComposer_AspNetCore_SourceGeneration_Tests_TestFiles_CompositionHandlers_AHandlerWithANestedClassCompositionHandler_BodyClass_body(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.AHandlerWithANestedClassCompositionHandler userHandler)
          : ICompositionRequestsHandler

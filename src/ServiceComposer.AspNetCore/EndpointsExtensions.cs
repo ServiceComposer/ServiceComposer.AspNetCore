@@ -293,6 +293,9 @@ namespace ServiceComposer.AspNetCore
             };
             builder.Metadata.Add(methodMetadata);
 
+            builder.Metadata.Add(new CompositionEndpointComponents(
+                componentsGroup.Select(component => CompositionComponent.From(component.ComponentType)).ToArray()));
+
             // builds a list of metadata for each component in this endpoint
             foreach (var component in componentsGroup)
             {
