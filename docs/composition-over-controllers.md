@@ -54,6 +54,10 @@ Endpoint filters added later run inside composition, so `WithCompositionOverCont
 > [!NOTE]
 > ASP.NET Core runs endpoint filters on controller endpoints inside MVC action filters. Composition handlers run before the `OnActionExecuted` part of action filters, and don't run if an action filter short-circuits the request, for example with the automatic HTTP 400 response of `[ApiController]` controllers.
 
+## Model binding errors
+
+The composition handlers' models declared with the `Bind*` attributes are bound before the controller action runs. If they have binding errors, the request gets a `400 Bad Request` and neither the action nor the composition handlers run. See [binding errors](model-binding.md#binding-errors).
+
 ## Authorization
 
 On routes that compose over a controller, authorization metadata declared on composition handlers, such as `[Authorize]` or `[Authorize(Policy = "...")]`, is ignored. The request runs on the controller endpoint, and ASP.NET Core only evaluates the controller endpoint's authorization metadata, before the controller action and the composition handlers run.
