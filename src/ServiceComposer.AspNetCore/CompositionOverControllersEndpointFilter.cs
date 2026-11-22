@@ -33,10 +33,18 @@ namespace ServiceComposer.AspNetCore
                 return result;
             }
 
+            if (!CompositionOverControllersComposer.CanCarryViewModel(actionResult, out var controllerModel))
+            {
+                logger.LogDebug("Skipping composition over the controller at {Method} {Template}: its {ActionResultType} can't carry a view model.",
+                    httpContext.Request.Method, boundHandlers.RawTemplate, actionResult.GetType().Name);
+                return result;
+            }
+
             object viewModel;
             try
             {
-                viewModel = await CompositionOverControllersComposer.Compose(httpContext, boundHandlers, logger);
+                // The model the controller action returned, if any, is the view model the handlers compose into
+                viewModel = await CompositionOverControllersComposer.Compose(httpContext, boundHandlers, controllerModel, logger);
             }
             catch (ModelBindingBadRequestException ex)
             {
