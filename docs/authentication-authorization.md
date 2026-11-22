@@ -67,6 +67,8 @@ public class InventoryHandler : ICompositionRequestsHandler
 
 Both `[Authorize]` and `[Authorize(Policy = "WarehouseStaff")]` are collected and applied to the route, so callers must satisfy both requirements.
 
+`[AllowAnonymous]` on a handler doesn't lift the other handlers' requirements: if any handler of the route requires authorization, `[AllowAnonymous]` is ignored for that route. It only makes a route allow anonymous requests if no handler requires authorization, for example to opt the route out of an authorization fallback policy.
+
 ## Composition over controllers
 
 > [!WARNING]
