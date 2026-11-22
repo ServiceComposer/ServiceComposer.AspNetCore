@@ -52,44 +52,16 @@ public class Tester
             references.AddRange(frameworkReferences);
         }
         
-        string aspNetCorePath;
-        if (OperatingSystem.IsWindows())
+        // The ASP.NET Core shared framework is installed next to the .NET one the tests
+        // run on, e.g. <dotnet root>/shared/Microsoft.NETCore.App/10.0.x and
+        // <dotnet root>/shared/Microsoft.AspNetCore.App/10.0.x
+        var netCoreAppPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+        var aspNetCorePath = Path.GetFullPath(Path.Combine(netCoreAppPath, "..", "..", "Microsoft.AspNetCore.App"));
+        if (!Directory.Exists(aspNetCorePath))
         {
-            aspNetCorePath = Path.Combine(
-                Environment.GetEnvironmentVariable("ProgramFiles") ?? @"C:\Program Files",
-                "dotnet",
-                "shared",
-                "Microsoft.AspNetCore.App"
-            );
+            throw new DirectoryNotFoundException($"Could not find ASP.NET Core shared framework directory: {aspNetCorePath}");
         }
-        else if (OperatingSystem.IsMacOS())
-        {
-            aspNetCorePath = "/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App";
-            
-            // Check for homebrew installation if default location doesn't exist
-            if (!Directory.Exists(aspNetCorePath))
-            {
-                aspNetCorePath = "/opt/homebrew/share/dotnet/shared/Microsoft.AspNetCore.App";
-            }
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            // Check common Linux installation paths
-            var possiblePaths = new[]
-            {
-                "/usr/share/dotnet/shared/Microsoft.AspNetCore.App",
-                "/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App",
-                "/opt/dotnet/shared/Microsoft.AspNetCore.App"
-            };
-            
-            aspNetCorePath = possiblePaths.FirstOrDefault(Directory.Exists) ?? 
-                             throw new DirectoryNotFoundException("Could not find ASP.NET Core shared framework directory");
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Current operating system is not supported");
-        }
-        
+
         if (Directory.Exists(aspNetCorePath))
         {
             var targetFrameworkVersion = GetTargetFramework();
