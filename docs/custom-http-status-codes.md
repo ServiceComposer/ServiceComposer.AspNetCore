@@ -17,7 +17,7 @@ public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
     }
 }
 ```
-<sup><a href='/src/Snippets/SampleHandler/SampleHandler.cs#L22-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-handler-with-custom-status-code' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/SampleHandler/SampleHandler.cs#L34-L46' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-handler-with-custom-status-code' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 > [!NOTE]

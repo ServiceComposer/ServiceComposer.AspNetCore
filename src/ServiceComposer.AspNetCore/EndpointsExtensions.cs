@@ -224,9 +224,16 @@ namespace ServiceComposer.AspNetCore
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup)
         {
             return componentsGroup
-                .Select(c => (c.ComponentType, (IList<object>)c.Method.GetCustomAttributes(inherit: true)))
+                .Select(c => (c.ComponentType, GetComponentMetadata(c.ComponentType, c.Method)))
                 .ToArray();
         }
+
+        // The class' attributes come first, so that, as for controllers,
+        // the method's attributes win when endpoint metadata is read.
+        static IList<object> GetComponentMetadata(Type componentType, MethodInfo method) =>
+            componentType.GetCustomAttributes(inherit: true)
+                .Concat(method.GetCustomAttributes(inherit: true))
+                .ToArray();
 
         static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
@@ -248,7 +255,7 @@ namespace ServiceComposer.AspNetCore
             // builds a list of metadata for each component in this endpoint
             foreach (var component in componentsGroup)
             {
-                builder.ComponentsMetadata.Add((component.ComponentType, component.Method.GetCustomAttributes(inherit: true)));
+                builder.ComponentsMetadata.Add((component.ComponentType, GetComponentMetadata(component.ComponentType, component.Method)));
             }
             
             // flattens the metadata
