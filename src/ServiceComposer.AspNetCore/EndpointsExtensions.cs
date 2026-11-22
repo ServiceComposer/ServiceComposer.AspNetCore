@@ -30,6 +30,7 @@ namespace ServiceComposer.AspNetCore
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
 
             var logger = endpoints.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(EndpointsExtensions));
+            var applicationServices = endpoints.ServiceProvider;
 
             logger?.LogDebug("{ComponentCount} composition component(s) registered.", compositionMetadataRegistry.Components.Count);
 
@@ -71,7 +72,8 @@ namespace ServiceComposer.AspNetCore
                     compositionOverControllersOptions,
                     options.ResponseSerialization.DefaultResponseCasing,
                     options.ResponseSerialization.UseOutputFormatters,
-                    logger);
+                    logger,
+                    applicationServices);
                 if (options.IsWriteSupportEnabled)
                 {
                     MapPostComponents(
@@ -82,28 +84,32 @@ namespace ServiceComposer.AspNetCore
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
-                        logger);
+                        logger,
+                        applicationServices);
                     MapPutComponents(
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
-                        logger);
+                        logger,
+                        applicationServices);
                     MapPatchComponents(
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
-                        logger);
+                        logger,
+                        applicationServices);
                     MapDeleteComponents(
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
-                        logger);
+                        logger,
+                        applicationServices);
                 }
             });
 
@@ -116,7 +122,8 @@ namespace ServiceComposer.AspNetCore
             Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpGetAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -135,7 +142,7 @@ namespace ServiceComposer.AspNetCore
                 else
                 {
                     var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                        new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters, logger);
+                        new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters, logger, applicationServices);
                     compositionDataSource.AddEndpointBuilder(builder);
                 }
             }
@@ -147,7 +154,8 @@ namespace ServiceComposer.AspNetCore
             Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPostAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -166,7 +174,7 @@ namespace ServiceComposer.AspNetCore
                 else
                 {
                     var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                        new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters, logger);
+                        new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters, logger, applicationServices);
                     compositionDataSource.AddEndpointBuilder(builder);
                 }
             }
@@ -176,7 +184,8 @@ namespace ServiceComposer.AspNetCore
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -184,7 +193,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters, logger);
+                    new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters, logger, applicationServices);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -194,7 +203,8 @@ namespace ServiceComposer.AspNetCore
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -202,7 +212,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters, logger);
+                    new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters, logger, applicationServices);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -212,7 +222,8 @@ namespace ServiceComposer.AspNetCore
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -220,7 +231,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters, logger);
+                    new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters, logger, applicationServices);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -267,7 +278,8 @@ namespace ServiceComposer.AspNetCore
             HttpMethodMetadata methodMetadata,
             ResponseCasing defaultCasing,
             bool useOutputFormatters,
-            ILogger logger)
+            ILogger logger,
+            IServiceProvider applicationServices)
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
@@ -277,6 +289,7 @@ namespace ServiceComposer.AspNetCore
                 useOutputFormatters)
             {
                 DisplayName = componentsGroup.Key,
+                ApplicationServices = applicationServices,
             };
             builder.Metadata.Add(methodMetadata);
 
