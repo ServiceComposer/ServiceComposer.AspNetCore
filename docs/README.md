@@ -33,6 +33,10 @@ When handling composition requests, there are scenarios in which request handler
 
 By default, ServiceComposer uses C# `dynamic` object instances to serve view models to request handlers. It's possible to use [strongly typed view models](view-model-factory.md) by defining view model factories.
 
+### View model preview handlers
+
+View model preview handlers run for every composition request, before the composition handlers, to work on the view model of all the routes. For more information, refer to the [view model preview handlers](view-model-preview-handlers.md) section.
+
 ### ASP.Net Model Binding
 
 When handling composition requests, it is possible to leverage ASP.NET Model Binding to bind incoming form data, request bodies, query string parameters, or route data to strongly typed C# models. For more information on model binding, refer to the [Model Binding](model-binding.md) section.
