@@ -75,7 +75,7 @@ namespace ServiceComposer.AspNetCore
                     dataSource,
                     compositionOverControllerGetComponents,
                     compositionOverControllersOptions,
-                    options.ResponseSerialization.DefaultResponseCasing,
+                    options.ResponseSerialization.ExplicitResponseCasing,
                     options.ResponseSerialization.UseOutputFormatters,
                     logger,
                     applicationServices);
@@ -87,7 +87,7 @@ namespace ServiceComposer.AspNetCore
                         dataSource,
                         compositionOverControllerPostComponents,
                         compositionOverControllersOptions,
-                        options.ResponseSerialization.DefaultResponseCasing,
+                        options.ResponseSerialization.ExplicitResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
                         logger,
                         applicationServices);
@@ -95,7 +95,7 @@ namespace ServiceComposer.AspNetCore
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
-                        options.ResponseSerialization.DefaultResponseCasing,
+                        options.ResponseSerialization.ExplicitResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
                         logger,
                         applicationServices);
@@ -103,7 +103,7 @@ namespace ServiceComposer.AspNetCore
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
-                        options.ResponseSerialization.DefaultResponseCasing,
+                        options.ResponseSerialization.ExplicitResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
                         logger,
                         applicationServices);
@@ -111,7 +111,7 @@ namespace ServiceComposer.AspNetCore
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
-                        options.ResponseSerialization.DefaultResponseCasing,
+                        options.ResponseSerialization.ExplicitResponseCasing,
                         options.ResponseSerialization.UseOutputFormatters,
                         logger,
                         applicationServices);
@@ -125,7 +125,7 @@ namespace ServiceComposer.AspNetCore
             ICollection<EndpointDataSource> dataSources,
             CompositionEndpointDataSource compositionDataSource,
             Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerGetComponents,
-            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
@@ -157,7 +157,7 @@ namespace ServiceComposer.AspNetCore
             ICollection<EndpointDataSource> dataSources,
             CompositionEndpointDataSource compositionDataSource,
             Dictionary<string, (Type ComponentType, IList<object> Metadata)[]> compositionOverControllerPostComponents,
-            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
@@ -187,7 +187,7 @@ namespace ServiceComposer.AspNetCore
 
         static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
-            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
@@ -206,7 +206,7 @@ namespace ServiceComposer.AspNetCore
 
         static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
-            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
@@ -225,7 +225,7 @@ namespace ServiceComposer.AspNetCore
 
         static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
-            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
+            CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
@@ -281,7 +281,7 @@ namespace ServiceComposer.AspNetCore
         static CompositionEndpointBuilder CreateCompositionEndpointBuilder(
             IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup,
             HttpMethodMetadata methodMetadata,
-            ResponseCasing defaultCasing,
+            ResponseCasing? defaultCasing,
             bool useOutputFormatters,
             ILogger logger,
             IServiceProvider applicationServices)
