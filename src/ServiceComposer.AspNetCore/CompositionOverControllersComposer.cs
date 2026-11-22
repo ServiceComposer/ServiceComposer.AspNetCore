@@ -68,7 +68,7 @@ namespace ServiceComposer.AspNetCore
         /// <summary>
         /// Runs the bound composition handlers, returning the composed view model.
         /// </summary>
-        public static async Task<object> Compose(HttpContext context, BoundHandlers boundHandlers, ILogger logger)
+        public static async Task<object> Compose(HttpContext context, BoundHandlers boundHandlers, object controllerModel, ILogger logger)
         {
             var requestId = context.EnsureRequestIdIsSetup();
             var compositionContext = new CompositionContext
@@ -82,20 +82,52 @@ namespace ServiceComposer.AspNetCore
             var handlerTypes = boundHandlers.Handlers.Select(h => h.ComponentType).ToArray();
             logger.LogDebug("Composing over controller action at {Method} {Template} with {HandlerCount} handler(s).",
                 context.Request.Method, boundHandlers.RawTemplate, handlerTypes.Length);
-            return await CompositionHandler.HandleComposableRequest(context, compositionContext, handlerTypes);
+            return await CompositionHandler.HandleComposableRequest(context, compositionContext, handlerTypes, controllerModel);
         }
 
         /// <summary>
-        /// Sets the composed view model on the action result, unless the action already set one.
+        /// Whether the action result can carry the composed view model, and the model the controller
+        /// action set on it, if any. Results that can't carry a model, e.g. redirects, and error
+        /// results, e.g. <c>NotFound(problemDetails)</c>, aren't composed.
+        /// </summary>
+        public static bool CanCarryViewModel(IActionResult result, out object controllerModel)
+        {
+            switch (result)
+            {
+                case ViewResult { ViewData: not null } viewResult:
+                    controllerModel = viewResult.ViewData.Model;
+                    return true;
+                case PartialViewResult { ViewData: not null } partialViewResult:
+                    controllerModel = partialViewResult.ViewData.Model;
+                    return true;
+                case ObjectResult objectResult when objectResult.StatusCode is null or (>= 200 and < 300):
+                    controllerModel = objectResult.Value;
+                    return true;
+                default:
+                    controllerModel = null;
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Sets the composed view model on the action result. When the action set a model,
+        /// the handlers composed into it, so it's already the composed view model.
         /// </summary>
         public static void SetViewModel(IActionResult result, object viewModel)
         {
             switch (result)
             {
-                case ViewResult viewResult when viewResult.ViewData.Model == null:
+                case ViewResult { ViewData: not null } viewResult when viewResult.ViewData.Model == null:
                 {
                     //MVC
                     viewResult.ViewData.Model = viewModel;
+
+                    break;
+                }
+                case PartialViewResult { ViewData: not null } partialViewResult when partialViewResult.ViewData.Model == null:
+                {
+                    //MVC
+                    partialViewResult.ViewData.Model = viewModel;
 
                     break;
                 }

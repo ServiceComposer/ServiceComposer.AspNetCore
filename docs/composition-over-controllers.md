@@ -13,7 +13,7 @@ app.MapControllers()
     .WithCompositionOverControllers();
 app.MapCompositionHandlers();
 ```
-<sup><a href='/src/Snippets/CompositionOverController.cs#L14-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-enable-composition-over-controllers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionOverController.cs#L17-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-enable-composition-over-controllers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 If a route matches a controller endpoint and a set of composition handlers, ServiceComposer invokes the matching handlers after the controller action and before the view is rendered.
@@ -23,6 +23,54 @@ Composition over controllers supports both regular composition handlers (classes
 Composition over controllers can be used as a templating engine leveraging the excellent Razor engine. Optionally, it can be used to add ViewModel Composition support to MVC web application without introducing a separate composition gateway.
 
 `MapCompositionHandlers()` must be called too: it finds the composition handlers matching the routes of the controller endpoints. Composition handlers routes match controller routes ignoring case. To match them case-sensitively, call `WithCompositionOverControllers(useCaseInsensitiveRouteMatching: false)`. All controller endpoints must use the same setting.
+
+## Controller action results
+
+_Starting with v6.0.0_
+
+The controller action runs first, then the composition handlers matching its route. What they compose into depends on the action result:
+
+- If the action returns a model, the composition handlers compose into it: the controller acts as the [view model factory](view-model-factory.md) for the request.
+- If the action returns no model, e.g. `View()` or `new ObjectResult(null)`, the composition handlers compose into the view model created by the view model factories, as for composition endpoints, and the action result gets it.
+- If the action result can't carry a model, e.g. a redirect or `Ok()`, or is an error, e.g. `NotFound(problemDetails)`, the composition handlers don't run, and the response is the controller's.
+
+Results that carry a model are `ViewResult`, `PartialViewResult`, and `ObjectResult` with no status code or a 2xx one, including models returned directly by the action.
+
+In the following sample, the response contains both the name set by the controller and the price set by the composition handler:
+
+<!-- snippet: composition-over-controllers-controller-model -->
+<a id='snippet-composition-over-controllers-controller-model'></a>
+```cs
+[Route("/products")]
+public class ProductsController : ControllerBase
+{
+    [HttpGet("{id}")]
+    public IActionResult Get(int id)
+    {
+        dynamic product = new ExpandoObject();
+        product.Name = "Product name";
+
+        // Composition handlers compose into the returned model
+        return Ok(product);
+    }
+}
+
+public class ProductPriceHandler : ICompositionRequestsHandler
+{
+    [HttpGet("/products/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        var vm = request.GetComposedResponseModel();
+        vm.Price = 42m;
+
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets/CompositionOverController.cs#L46-L72' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-over-controllers-controller-model' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Composition handlers writing the view model through `dynamic`, e.g. `vm.Price = 42m`, need a model that supports dynamic members, such as `ExpandoObject`. With a typed model, they fail at runtime if the model's type doesn't have those members: use `GetComposedResponseModel<T>()` instead.
 
 ## Composition and endpoint filters
 
@@ -43,7 +91,7 @@ app.MapControllers()
     // Must be the last endpoint filter added
     .WithCompositionOverControllers();
 ```
-<sup><a href='/src/Snippets/CompositionOverController.cs#L27-L39' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-over-controllers-endpoint-filters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/CompositionOverController.cs#L30-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-over-controllers-endpoint-filters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 - Composition runs as an endpoint filter, right after the controller action. Endpoint filters added before `WithCompositionOverControllers()` wrap both the action and the composition handlers, the same way they wrap composition handlers on endpoints mapped with `MapCompositionHandlers()`. For example, a filter that opens a transaction before calling `next` and commits after it covers the work done by the composition handlers.
