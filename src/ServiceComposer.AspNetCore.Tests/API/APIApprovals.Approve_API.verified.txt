@@ -241,7 +241,7 @@ namespace ServiceComposer.AspNetCore
     }
     public interface IViewModelFactory
     {
-        object CreateViewModel(Microsoft.AspNetCore.Http.HttpContext httpContext, ServiceComposer.AspNetCore.ICompositionContext compositionContext);
+        object? CreateViewModel(Microsoft.AspNetCore.Http.HttpContext httpContext, ServiceComposer.AspNetCore.ICompositionContext compositionContext);
     }
     public interface IViewModelPreviewHandler
     {

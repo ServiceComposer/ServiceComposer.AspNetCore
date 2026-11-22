@@ -96,8 +96,12 @@ Like endpoint-scoped factories, global factories are auto-discovered by assembly
 
 ## Resolution order
 
+_Available starting with v6.0.0_
+
 View model factories are resolved, and used, in the following order:
 
-1. `IEndpointScopedViewModelFactory`: If an endpoint scoped factory is defined for the current route it'll be used to create a view model instance
-2. `IViewModelFactory`: If no endpoint scoped factory exist bound to the current route and a global view model factory is registered it'll be used
-3. If no global view model factory exist the default ServiceComposer factory creates a `dynamic` view model instance to use to serve the current request
+1. `IEndpointScopedViewModelFactory`: if an endpoint scoped factory is defined for the current route, it's used to create the view model instance.
+2. `IViewModelFactory`: if no endpoint scoped factory is defined for the current route, or it returns `null`, and a global view model factory is registered, the global factory is used.
+3. If no global view model factory is registered, or it returns `null`, ServiceComposer creates a `dynamic` view model instance to serve the current request.
+
+A factory returning `null` falls through to the next one, so an endpoint scoped factory can create a view model only for some requests, and leave the others to the global factory. A debug message is logged when a factory falls through.
