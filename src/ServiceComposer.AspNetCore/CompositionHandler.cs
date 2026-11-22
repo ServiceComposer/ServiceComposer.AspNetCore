@@ -76,14 +76,12 @@ namespace ServiceComposer.AspNetCore
                     .ToList());
 
                 var handlers = componentsTypes.Select(type => context.RequestServices.GetRequiredService(type)).ToArray();
-                //TODO: if handlers == none we could shortcut to 404 here
 
                 foreach (var subscriber in handlers.OfType<ICompositionEventsSubscriber>())
                 {
                     subscriber.Subscribe(compositionContext);
                 }
 
-                //TODO: if handlers == none we could shortcut again to 404 here
                 var pending = handlers.OfType<ICompositionRequestsHandler>()
                     .Select(handler =>
                     {
@@ -93,6 +91,7 @@ namespace ServiceComposer.AspNetCore
                     })
                     .ToList();
 
+                // Routes without composition handlers aren't mapped, see EndpointsExtensions
                 if (pending.Count == 0)
                 {
                     context.Response.StatusCode = StatusCodes.Status404NotFound;
