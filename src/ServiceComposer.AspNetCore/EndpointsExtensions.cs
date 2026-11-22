@@ -25,6 +25,11 @@ namespace ServiceComposer.AspNetCore
             var options = endpoints.ServiceProvider.GetRequiredService<ViewModelCompositionOptions>();
             options.ResponseSerialization.ValidateConfiguration(endpoints.ServiceProvider
                 .GetRequiredService<ILogger<ResponseSerializationOptions>>());
+            if (options.ResponseSerialization.UseOutputFormatters)
+            {
+                OutputFormattersServices.EnsureRegistered(endpoints.ServiceProvider,
+                    $"{nameof(ViewModelCompositionOptions.ResponseSerialization)}.{nameof(ResponseSerializationOptions.UseOutputFormatters)}");
+            }
 
             var compositionMetadataRegistry =
                 endpoints.ServiceProvider.GetRequiredService<CompositionMetadataRegistry>();
