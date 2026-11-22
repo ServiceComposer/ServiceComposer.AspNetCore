@@ -184,7 +184,16 @@ namespace ServiceComposer.AspNetCore
                 //   source-generated to use the the most appropriate filter
                 //   invocation context based on the number of arguments to bind
                 EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
-                var viewModel = await pipeline(invocationContext);
+                object viewModel;
+                try
+                {
+                    viewModel = await pipeline(invocationContext);
+                }
+                catch (ModelBindingBadRequestException ex) when (!context.Response.HasStarted)
+                {
+                    await ModelBindingProblem.WriteAsync(context, ex.ModelState);
+                    return;
+                }
                 
                 if (viewModel != null)
                 {

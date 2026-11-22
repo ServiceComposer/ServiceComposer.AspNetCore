@@ -144,7 +144,15 @@ namespace ServiceComposer.AspNetCore
                     catch (Exception ex)
                     {
                         var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(CompositionHandler));
-                        logger?.LogError(ex, "Composition failed for request {RequestId}.", compositionContext.RequestId);
+                        if (ex is ModelBindingBadRequestException)
+                        {
+                            // A client error, logged as minimal APIs log binding failures
+                            logger?.LogDebug(ex, "Model binding failed for request {RequestId}.", compositionContext.RequestId);
+                        }
+                        else
+                        {
+                            logger?.LogError(ex, "Composition failed for request {RequestId}.", compositionContext.RequestId);
+                        }
 
                         //TODO: refactor to Task.WhenAll
                         var errorHandlers = handlers.OfType<ICompositionErrorsHandler>();
