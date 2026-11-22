@@ -132,6 +132,36 @@ public class Tester
                 .UseFileName($"{Path.GetFileName(testFile)}.{shortFolderName}");
         }
     }
+    [Fact]
+    public void Class_level_model_binding_attributes_on_contract_less_handlers_are_ignored_with_a_warning()
+    {
+        const string source = """
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Mvc;
+            using ServiceComposer.AspNetCore;
+
+            namespace Sample;
+
+            [BindFromQuery<int>("page")]
+            [CompositionHandler]
+            class PagedCompositionHandler
+            {
+                [HttpGet("/items/{id}")]
+                public Task Get(int id) => Task.CompletedTask;
+            }
+            """;
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new CompositionHandlerWrapperGenerator());
+        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(source), out var outputCompilation, out var diagnostics);
+
+        var warning = Assert.Single(diagnostics);
+        Assert.Equal("SC004", warning.Id);
+        Assert.Equal(DiagnosticSeverity.Warning, warning.Severity);
+        Assert.Contains("PagedCompositionHandler", warning.GetMessage());
+        Assert.DoesNotContain("BindFromQuery", driver.GetRunResult().GeneratedTrees[0].ToString());
+        Assert.Empty(outputCompilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error));
+    }
+
     static string ReadComponentsProvidersTestFile(string fileName) =>
         File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.ComponentsProviders", fileName));
 

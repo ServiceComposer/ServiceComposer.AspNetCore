@@ -20,7 +20,12 @@ static class ComponentsModelBinder
         var modelState = new ModelStateDictionary();
         foreach (var componentMetadata in componentsMetadata)
         {
-            var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
+            // Arguments are looked up by name and binding source, so each pair is bound once. The
+            // method's attributes come after the class' ones, so the last declared, the method's, wins.
+            var modelAttributes = componentMetadata.Metadata
+                .OfType<BindModelAttribute>()
+                .GroupBy(attribute => (ModelName: attribute.ModelName ?? "", attribute.BindingSource))
+                .Select(group => group.Last());
 
             // A component can have more than one Http* attribute
             // If that's the case we don't want to have more than one
@@ -33,6 +38,12 @@ static class ComponentsModelBinder
 
             foreach (var modelAttribute in modelAttributes)
             {
+                // Already bound for the same component, composed into this endpoint more than once
+                if (arguments.Any(argument => (argument.Name ?? "") == (modelAttribute.ModelName ?? "") && argument.BindingSource == modelAttribute.BindingSource))
+                {
+                    continue;
+                }
+
                 if (modelAttribute.BindingSource == BindingSource.Services)
                 {
                     var service = context.RequestServices.GetRequiredService(modelAttribute.Type);
