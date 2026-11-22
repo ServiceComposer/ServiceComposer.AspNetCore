@@ -50,3 +50,20 @@ static class CaseSensitiveRouteMatchingSnippets
         // end-snippet
     }
 }
+
+// begin-snippet: routing-class-prefix
+[Route("/api/products")]
+public class ProductsHandler : ICompositionRequestsHandler
+{
+    // GET /api/products/{id}
+    [HttpGet("{id:int}")]
+    // GET /api/products
+    [HttpGet]
+    // GET /catalog/{id}: absolute, not prefixed
+    [HttpGet("/catalog/{id:int}")]
+    public Task Handle(HttpRequest request)
+    {
+        return Task.CompletedTask;
+    }
+}
+// end-snippet
