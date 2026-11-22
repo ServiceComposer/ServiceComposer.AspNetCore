@@ -17,6 +17,10 @@ New to ServiceComposer and ViewModel Composition? Start with the [getting starte
 
 ### Composition handlers
 
+#### Routing
+
+Composition handlers declare the routes they contribute to with the ASP.NET Core HTTP method attributes. For more information, including how routes are matched ignoring case, refer to the [routing](routing.md) section.
+
 #### Contract-less composition handlers
 
 Contract-less composition handlers allow writing composition handlers without implementing a specific interface, using a syntax similar to ASP.NET controller actions. For more information, refer to the [contract-less composition handlers](contract-less-composition-requests-handlers.md) section.
