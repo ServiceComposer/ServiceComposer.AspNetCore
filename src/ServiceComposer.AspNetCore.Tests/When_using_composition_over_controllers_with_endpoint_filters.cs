@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -169,17 +168,5 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Contains(nameof(EndpointsExtensions.MapCompositionHandlers), exception.Message);
         }
 
-        [Fact]
-        public void The_obsolete_global_switch_throws()
-        {
-            var options = new ViewModelCompositionOptions(new ServiceCollection());
-
-            // Calling it directly is a compilation error
-            var method = typeof(ViewModelCompositionOptions).GetMethod("EnableCompositionOverControllers");
-            var exception = Assert.Throws<TargetInvocationException>(() => method!.Invoke(options, [true]));
-
-            var notSupported = Assert.IsType<NotSupportedException>(exception.InnerException);
-            Assert.Contains(nameof(EndpointsExtensions.WithCompositionOverControllers), notSupported.Message);
-        }
     }
 }

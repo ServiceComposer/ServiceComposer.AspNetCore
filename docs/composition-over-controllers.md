@@ -59,7 +59,3 @@ Endpoint filters added later run inside composition, so `WithCompositionOverCont
 On routes that compose over a controller, authorization metadata declared on composition handlers, such as `[Authorize]` or `[Authorize(Policy = "...")]`, is ignored. The request runs on the controller endpoint, and ASP.NET Core only evaluates the controller endpoint's authorization metadata, before the controller action and the composition handlers run.
 
 Declare authorization on the controller or the action, or call `RequireAuthorization()` on the controller endpoints. It covers the composition handlers too. See [#1119](https://github.com/ServiceComposer/ServiceComposer.AspNetCore/issues/1119).
-
-## EnableCompositionOverControllers()
-
-`EnableCompositionOverControllers()` is obsolete, throws a `NotSupportedException`, and will be removed in version 7.0.0. It enabled composition over controllers for all controller endpoints, running composition handlers in an MVC result filter. See the [upgrade guide](upgrade-guides/5.x.x-6.0.0.md).
