@@ -12,19 +12,15 @@ partial class CompositionEndpointBuilder
     {
         lock (buildAndCacheEndpointFilterDelegatePipelineSyncLock)
         {
-            var compositionFiltersPipeline = BuildCompositionRequestFilterDelegatePipeline(serviceProvider);
-            
-            var factoryContext = new EndpointFilterFactoryContext
-            {
-                MethodInfo = compositionFiltersPipeline.Method,
-                ApplicationServices = serviceProvider
-            };
-
             EndpointFilterDelegate filteredInvocation = async context =>
             {
                 if (context.HttpContext.Response.StatusCode < 400)
                 {
-                    var viewModel = await compositionFiltersPipeline(new CompositionRequestFilterContext(context.HttpContext));
+                    // The composer is per-request: read it back from HttpContext.Items
+                    // here so the cached pipeline does not close over a stale composer.
+                    var composer = (RequestDelegate)context.HttpContext.Items[CurrentComposerKey]!;
+                    await composer(context.HttpContext);
+                    var viewModel = context.HttpContext.Request.GetComposedResponseModel();
 
                     var containsActionResult =
                         context.HttpContext.Items.ContainsKey(HttpRequestExtensions.ComposedActionResultKey);
@@ -44,6 +40,12 @@ partial class CompositionEndpointBuilder
                 }
 
                 return EmptyHttpResult.Instance;
+            };
+
+            var factoryContext = new EndpointFilterFactoryContext
+            {
+                MethodInfo = filteredInvocation.Method,
+                ApplicationServices = serviceProvider
             };
 
             //var terminatorFilterDelegate = filteredInvocation;

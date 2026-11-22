@@ -73,7 +73,7 @@ Endpoint filters allow intercepting all incoming HTTP requests before they reach
 
 ### Composition requests filters
 
-Composition request filters allow intercepting composition requests before they are dispatched to composition handlers. For more information, refer to the [Composition requests filters documentation](composition-filters.md).
+Composition request filters allow intercepting the invocation of specific composition handlers. For more information, refer to the [Composition requests filters documentation](composition-filters.md).
 
 ### Customizing ViewModel Composition options from dependent assemblies
 
