@@ -307,7 +307,7 @@ app.MapScatterGather(template: "api/scatter-gather", new ScatterGatherOptions()
 <sup><a href='/src/Snippets/ScatterGather/Startup.cs#L33-L45' title='Snippet source file'>snippet source</a> | <a href='#snippet-scatter-gather-ignore-errors' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-`IgnoreDownstreamRequestErrors` applies to all error conditions for that gatherer: HTTP error status codes, network timeouts, and any other exception thrown by the downstream call. It does not affect other gatherers in the same route.
+`IgnoreDownstreamRequestErrors` applies to all error conditions for that gatherer: HTTP error status codes, network timeouts, responses that can't be transformed, e.g., a body that isn't the expected JSON array, and any other exception thrown by the downstream call. Ignored errors are logged as warnings. The incoming request being aborted by the client isn't ignored. It does not affect other gatherers in the same route.
 
 When using configuration-based setup, the same option can be set per entry:
 
