@@ -89,19 +89,22 @@ namespace ServiceComposer.AspNetCore
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
-                        options.ResponseSerialization.UseOutputFormatters);
+                        options.ResponseSerialization.UseOutputFormatters,
+                        logger);
                     MapPatchComponents(
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
-                        options.ResponseSerialization.UseOutputFormatters);
+                        options.ResponseSerialization.UseOutputFormatters,
+                        logger);
                     MapDeleteComponents(
                         compositionMetadataRegistry,
                         dataSource,
                         compositionOverControllersOptions,
                         options.ResponseSerialization.DefaultResponseCasing,
-                        options.ResponseSerialization.UseOutputFormatters);
+                        options.ResponseSerialization.UseOutputFormatters,
+                        logger);
                 }
             });
 
@@ -133,7 +136,7 @@ namespace ServiceComposer.AspNetCore
                 else
                 {
                     var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                        new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters);
+                        new HttpMethodMetadata(new[] {HttpMethods.Get}), defaultCasing, useOutputFormatters, logger);
                     compositionDataSource.AddEndpointBuilder(builder);
                 }
             }
@@ -164,7 +167,7 @@ namespace ServiceComposer.AspNetCore
                 else
                 {
                     var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                        new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters);
+                        new HttpMethodMetadata(new[] {HttpMethods.Post}), defaultCasing, useOutputFormatters, logger);
                     compositionDataSource.AddEndpointBuilder(builder);
                 }
             }
@@ -173,7 +176,8 @@ namespace ServiceComposer.AspNetCore
         static void MapPatchComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPatchAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -181,7 +185,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters);
+                    new HttpMethodMetadata(new[] {HttpMethods.Patch}), defaultCasing, useOutputFormatters, logger);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -190,7 +194,8 @@ namespace ServiceComposer.AspNetCore
         static void MapPutComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpPutAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -198,7 +203,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters);
+                    new HttpMethodMetadata(new[] {HttpMethods.Put}), defaultCasing, useOutputFormatters, logger);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -207,7 +212,8 @@ namespace ServiceComposer.AspNetCore
         static void MapDeleteComponents(CompositionMetadataRegistry compositionMetadataRegistry,
             CompositionEndpointDataSource compositionDataSource,
             CompositionOverControllersOptions compositionOverControllersOptions, ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var componentsGroupedByTemplate = SelectComponentsGroupedByTemplate<HttpDeleteAttribute>(
                 compositionMetadataRegistry, compositionOverControllersOptions.UseCaseInsensitiveRouteMatching);
@@ -215,7 +221,7 @@ namespace ServiceComposer.AspNetCore
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
                 var builder = CreateCompositionEndpointBuilder(componentsGroup,
-                    new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters);
+                    new HttpMethodMetadata(new[] {HttpMethods.Delete}), defaultCasing, useOutputFormatters, logger);
 
                 compositionDataSource.AddEndpointBuilder(builder);
             }
@@ -268,7 +274,8 @@ namespace ServiceComposer.AspNetCore
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
             HttpMethodMetadata methodMetadata,
             ResponseCasing defaultCasing,
-            bool useOutputFormatters)
+            bool useOutputFormatters,
+            ILogger logger)
         {
             var builder = new CompositionEndpointBuilder(
                 RoutePatternFactory.Parse(componentsGroup.Key),
@@ -291,8 +298,27 @@ namespace ServiceComposer.AspNetCore
             // component allowing anonymous requests would disable the others' authorization. The most
             // restrictive requirements apply instead: IAllowAnonymous is left out if any component
             // requires authorization.
-            var anyComponentRequiresAuthorization = builder.ComponentsMetadata.Any(cm =>
-                cm.Metadata.OfType<IAuthorizeData>().Any() && !cm.Metadata.OfType<IAllowAnonymous>().Any());
+            var componentsRequiringAuthorization = builder.ComponentsMetadata
+                .Where(cm => cm.Metadata.OfType<IAuthorizeData>().Any() && !cm.Metadata.OfType<IAllowAnonymous>().Any())
+                .Select(cm => cm.ComponentType.Name)
+                .ToArray();
+            var anyComponentRequiresAuthorization = componentsRequiringAuthorization.Length > 0;
+            if (anyComponentRequiresAuthorization)
+            {
+                var componentsAllowingAnonymous = builder.ComponentsMetadata
+                    .Where(cm => cm.Metadata.OfType<IAllowAnonymous>().Any())
+                    .Select(cm => cm.ComponentType.Name)
+                    .ToArray();
+                if (componentsAllowingAnonymous.Length > 0)
+                {
+                    logger?.LogWarning("[AllowAnonymous] on {ComponentsAllowingAnonymous} is ignored for {HttpMethods} {Template}, " +
+                                       "since {ComponentsRequiringAuthorization} require authorization: the most restrictive requirements apply to the route.",
+                        string.Join(", ", componentsAllowingAnonymous),
+                        string.Join(", ", methodMetadata.HttpMethods),
+                        componentsGroup.Key,
+                        string.Join(", ", componentsRequiringAuthorization));
+                }
+            }
 
             // flattens the metadata
             foreach (var metadata in builder.ComponentsMetadata.SelectMany(cm=>cm.Metadata))
