@@ -26,7 +26,20 @@ namespace ServiceComposer.AspNetCore
             this.services = services;
         }
 
-        public ResponseCasing DefaultResponseCasing { get; set; } = defaultCasing;
+        ResponseCasing? explicitResponseCasing;
+
+        /// <summary>
+        /// The response casing, when no Accept-Casing header is sent. When set, it replaces the naming
+        /// policies of the minimal APIs JSON options, configured with <c>ConfigureHttpJsonOptions()</c>.
+        /// When not set, the minimal APIs JSON options naming policy applies, camel case by default.
+        /// </summary>
+        public ResponseCasing DefaultResponseCasing
+        {
+            get => explicitResponseCasing ?? defaultCasing;
+            set => explicitResponseCasing = value;
+        }
+
+        internal ResponseCasing? ExplicitResponseCasing => explicitResponseCasing;
 
         public void UseCustomJsonSerializerSettings(Func<HttpRequest, JsonSerializerOptions> jsonSerializerSettingsConfig)
         {
