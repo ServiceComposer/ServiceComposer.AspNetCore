@@ -312,7 +312,7 @@ namespace ServiceComposer.AspNetCore
                 if (componentsAllowingAnonymous.Length > 0)
                 {
                     logger?.LogWarning("[AllowAnonymous] on {ComponentsAllowingAnonymous} is ignored for {HttpMethods} {Template}, " +
-                                       "since {ComponentsRequiringAuthorization} require authorization: the most restrictive requirements apply to the route.",
+                                       "since authorization is required by {ComponentsRequiringAuthorization}: the most restrictive requirements apply to the route.",
                         string.Join(", ", componentsAllowingAnonymous),
                         string.Join(", ", methodMetadata.HttpMethods),
                         componentsGroup.Key,

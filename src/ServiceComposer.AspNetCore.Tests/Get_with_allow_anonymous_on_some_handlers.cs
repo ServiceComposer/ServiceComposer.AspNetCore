@@ -92,7 +92,7 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         const string IgnoredAllowAnonymousWarning = "[AllowAnonymous] on {ComponentsAllowingAnonymous} is ignored for {HttpMethods} {Template}, " +
-                                                    "since {ComponentsRequiringAuthorization} require authorization: the most restrictive requirements apply to the route.";
+                                                    "since authorization is required by {ComponentsRequiringAuthorization}: the most restrictive requirements apply to the route.";
 
         [Fact]
         public async Task Ignoring_allow_anonymous_logs_a_warning()
