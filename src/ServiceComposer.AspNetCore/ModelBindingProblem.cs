@@ -69,3 +69,12 @@ static class ModelBindingProblem
         return string.IsNullOrEmpty(error.ErrorMessage) ? DefaultErrorMessage : error.ErrorMessage;
     }
 }
+
+// Lets endpoint filters return the binding errors response, e.g. on controller endpoints.
+// Outer endpoint filters can read its status code, as for minimal APIs results.
+sealed class ModelBindingProblemResult(ModelStateDictionary modelState) : IResult, IStatusCodeHttpResult
+{
+    public int? StatusCode => StatusCodes.Status400BadRequest;
+
+    public Task ExecuteAsync(HttpContext httpContext) => ModelBindingProblem.WriteAsync(httpContext, modelState);
+}
