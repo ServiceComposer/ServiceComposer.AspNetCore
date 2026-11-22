@@ -261,6 +261,11 @@ namespace ServiceComposer.AspNetCore
         public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name) { }
         public static TArgument? Argument<TArgument>(this System.Collections.Generic.IList<ServiceComposer.AspNetCore.ModelBindingArgument>? arguments, string name, Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource bindingSource) { }
     }
+    public class ModelBindingOptions
+    {
+        public ModelBindingOptions() { }
+        public bool FailOnBindingErrors { get; set; }
+    }
     public enum ResponseCasing
     {
         CamelCase = 0,
@@ -302,6 +307,7 @@ namespace ServiceComposer.AspNetCore
     {
         public ServiceComposer.AspNetCore.AssemblyScanner AssemblyScanner { get; }
         public Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
+        public ServiceComposer.AspNetCore.ModelBindingOptions ModelBinding { get; }
         public ServiceComposer.AspNetCore.ResponseSerializationOptions ResponseSerialization { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public void AddServicesConfigurationHandler(System.Type serviceType, System.Action<System.Type, Microsoft.Extensions.DependencyInjection.IServiceCollection> configurationHandler) { }
