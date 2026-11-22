@@ -24,6 +24,15 @@ public class InventoryHandler : ICompositionRequestsHandler
 }
 // end-snippet
 
+// begin-snippet: handler-class-with-authorization
+[Authorize]
+public class OrdersHandler : ICompositionRequestsHandler
+{
+    [HttpGet("/orders/{id}")]
+    public Task Handle(HttpRequest request) { /* ... */ return Task.CompletedTask; }
+}
+// end-snippet
+
 static class AuthSetupSnippets
 {
     static void ShowSetup()
