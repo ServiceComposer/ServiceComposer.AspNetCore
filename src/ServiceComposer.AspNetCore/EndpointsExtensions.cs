@@ -116,9 +116,49 @@ namespace ServiceComposer.AspNetCore
                         logger,
                         applicationServices);
                 }
+                else
+                {
+                    WarnAboutUnmappedWriteRoutes(compositionMetadataRegistry, logger);
+                }
             });
 
             return new CompositionEndpointConventionBuilder(dataSource);
+        }
+
+        // Write support is enabled by default, so components declaring write routes while it's
+        // disabled are most likely a configuration mistake: without this, their routes silently
+        // get a 404, or a 405 if a GET composition handler shares the path.
+        static void WarnAboutUnmappedWriteRoutes(CompositionMetadataRegistry compositionMetadataRegistry, ILogger logger)
+        {
+            if (logger == null)
+            {
+                return;
+            }
+
+            var writeComponents = compositionMetadataRegistry.Components
+                .Select(component => (Type: component.Key, Attributes: component.Value
+                    .OfType<HttpMethodAttribute>()
+                    .Where(attribute => attribute is HttpPostAttribute or HttpPutAttribute or HttpPatchAttribute or HttpDeleteAttribute)
+                    .ToArray()))
+                .Where(component => component.Attributes.Length > 0)
+                .ToArray();
+
+            if (writeComponents.Length == 0)
+            {
+                return;
+            }
+
+            var unmappedWriteRoutes = writeComponents
+                .SelectMany(component => component.Attributes.SelectMany(attribute => attribute.HttpMethods.Select(method =>
+                    $"{method} /{RouteTemplates.Normalize(attribute.Template)} ({component.Type.Name})")))
+                .Distinct()
+                .OrderBy(route => route, StringComparer.Ordinal);
+
+            logger.LogWarning("Write support is disabled, so the write routes of {ComponentCount} composition component(s) aren't mapped, " +
+                              "and requests to them get a 404, or a 405 if a GET composition handler shares the path: {UnmappedWriteRoutes}. " +
+                              "Remove options.DisableWriteSupport(), or the components declaring them.",
+                writeComponents.Length,
+                string.Join(", ", unmappedWriteRoutes));
         }
 
         static void MapGetComponents(CompositionMetadataRegistry compositionMetadataRegistry,

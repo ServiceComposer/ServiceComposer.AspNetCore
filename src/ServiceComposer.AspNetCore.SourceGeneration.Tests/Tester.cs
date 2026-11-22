@@ -122,7 +122,7 @@ public class Tester
             // The generated code must compile. The test files aren't complete programs, so errors
             // in them, e.g. missing using directives, are ignored.
             Assert.Empty(outputCompilation.GetDiagnostics()
-                .Where(d => d.Severity == DiagnosticSeverity.Error && runResult.GeneratedTrees.Contains(d.Location.SourceTree)));
+                .Where(d => d.Severity == DiagnosticSeverity.Error && d.Location.SourceTree is { } tree && runResult.GeneratedTrees.Contains(tree)));
             
             var generatedSource = runResult.GeneratedTrees[0].ToString();
 
