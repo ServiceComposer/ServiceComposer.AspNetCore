@@ -33,7 +33,15 @@ namespace ServiceComposer.AspNetCore
                 return result;
             }
 
-            var viewModel = await CompositionOverControllersComposer.Compose(httpContext, boundHandlers, logger);
+            object viewModel;
+            try
+            {
+                viewModel = await CompositionOverControllersComposer.Compose(httpContext, boundHandlers, logger);
+            }
+            catch (ModelBindingBadRequestException ex)
+            {
+                return new ModelBindingProblemResult(ex.ModelState);
+            }
 
             // An action result set by a composition handler replaces the
             // controller one, so that outer filters see the actual outcome.
