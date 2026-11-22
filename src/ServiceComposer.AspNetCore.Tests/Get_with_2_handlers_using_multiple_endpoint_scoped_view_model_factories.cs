@@ -28,6 +28,12 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
 
+        class TestHandler : ICompositionRequestsHandler
+        {
+            [HttpGet("/sample/{id}")]
+            public System.Threading.Tasks.Task Handle(HttpRequest request) => System.Threading.Tasks.Task.CompletedTask;
+        }
+
         [Fact]
         public void Fails_when_factories_are_scoped_to_the_same_endpoint()
         {
@@ -43,6 +49,7 @@ namespace ServiceComposer.AspNetCore.Tests
                             options.AssemblyScanner.Disable();
                             options.RegisterEndpointScopedViewModelFactory<TestFactory>();
                             options.RegisterEndpointScopedViewModelFactory<TestFactory2>();
+                            options.RegisterCompositionHandler<TestHandler>();
                         });
                         services.AddRouting();
                     },
