@@ -342,8 +342,11 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         // is left out, otherwise the wrapper would be a contract-less composition handler itself.
         if (userMethod.Parent is ClassDeclarationSyntax userClass)
         {
+            // Class-level model binding attributes would bind arguments that the user's method,
+            // which only gets its own parameters, can't read: they're left out.
             var userClassAttributes = SerializeUserHandlerAttributeList(semanticModel, userClass.AttributeLists, requiredNamespaces,
-                excludedAttribute: "ServiceComposer.AspNetCore.CompositionHandlerAttribute");
+                excludedAttribute: "ServiceComposer.AspNetCore.CompositionHandlerAttribute",
+                skip: IsBindModelAttribute);
             foreach (var userClassAttribute in userClassAttributes)
             {
                 builder.AppendLine($"    {userClassAttribute}");
@@ -706,7 +709,21 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return boundParameters;
     }
 
-    List<string> SerializeUserHandlerAttributeList(SemanticModel semanticModel, SyntaxList<AttributeListSyntax> attributeLists, List<string> requiredNamespaces, string? excludedAttribute = null)
+    static bool IsBindModelAttribute(INamedTypeSymbol attributeType)
+    {
+        for (var type = attributeType.BaseType; type != null; type = type.BaseType)
+        {
+            if (type.ToDisplayString() == "ServiceComposer.AspNetCore.BindModelAttribute")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    List<string> SerializeUserHandlerAttributeList(SemanticModel semanticModel, SyntaxList<AttributeListSyntax> attributeLists, List<string> requiredNamespaces, string? excludedAttribute = null,
+        Func<INamedTypeSymbol, bool>? skip = null)
     {
         var serializedAttributes = new List<string>();
 
@@ -719,6 +736,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
 
                 if (attributeType?.ContainingType == null) continue;
                 if (excludedAttribute != null && attributeType.ContainingType.ToDisplayString() == excludedAttribute) continue;
+                if (skip != null && skip(attributeType.ContainingType)) continue;
 
                 var attributeName = attributeType.ContainingType.Name;
                 var attributeNamespace = attributeType.ContainingNamespace.ToDisplayString();
