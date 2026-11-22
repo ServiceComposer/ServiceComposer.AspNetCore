@@ -37,9 +37,9 @@ namespace ServiceComposer.AspNetCore
         /// <summary>
         /// Configures ServiceComposer to use the MVC defined output formatters.
         /// To use output formatters MVC service must be configured either by calling
-        /// services.AddControllers(), or services.AddControllersAndViews(), or
-        /// services.AddMvc(), or services.AddAddRazorPages().
-        /// Default value if <c>false</c>.
+        /// services.AddControllers(), or services.AddControllersWithViews(), or
+        /// services.AddMvc(), or services.AddRazorPages(): mapping the composition
+        /// endpoints throws otherwise. Default value is <c>false</c>.
         /// </summary>
         public bool UseOutputFormatters { get; set; }
     }
