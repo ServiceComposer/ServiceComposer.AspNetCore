@@ -16,8 +16,8 @@ namespace ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.Compositio
     class WithQueryBindingWithoutAttributeCompositionHandler_Post_int_id_int_c_string_v_ServiceComposer_AspNetCore_SourceGeneration_Tests_TestFiles_CompositionHandlers_WithQueryBindingWithoutAttributeBodyClass_body(ServiceComposer.AspNetCore.SourceGeneration.Tests.TestFiles.CompositionHandlers.WithQueryBindingWithoutAttributeCompositionHandler userHandler)
          : ICompositionRequestsHandler
     {
-        [ResponseCacheAttribute(Duration = 10, Location = ResponseCacheLocation.Client)]
-        [HttpPostAttribute("/sample/{v}")]
+        [global::Microsoft.AspNetCore.Mvc.ResponseCacheAttribute(Duration = 10, Location = global::Microsoft.AspNetCore.Mvc.ResponseCacheLocation.Client)]
+        [global::Microsoft.AspNetCore.Mvc.HttpPostAttribute("/sample/{v}")]
         [BindFromRoute<Int32>("v")]
         [BindFromQuery<Int32>("c")]
         [BindFromQuery<String>("v")]
