@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,11 +17,30 @@ namespace ServiceComposer.AspNetCore
     /// </summary>
     static class CompositionOverControllersComposer
     {
-        public static async Task<(bool Composed, object ViewModel)> TryCompose(HttpContext context, ILogger logger)
+        /// <summary>
+        /// The composition handlers matching the route of the current controller action, with their bound models.
+        /// </summary>
+        internal sealed class BoundHandlers(
+            (Type ComponentType, IList<object> Metadata)[] handlers,
+            IDictionary<Type, IList<ModelBindingArgument>> arguments,
+            ModelStateDictionary modelState,
+            string rawTemplate)
+        {
+            public (Type ComponentType, IList<object> Metadata)[] Handlers { get; } = handlers;
+            public IDictionary<Type, IList<ModelBindingArgument>> Arguments { get; } = arguments;
+            public ModelStateDictionary ModelState { get; } = modelState;
+            public string RawTemplate { get; } = rawTemplate;
+        }
+
+        /// <summary>
+        /// Binds the models of the composition handlers matching the route of the current
+        /// controller action, or returns <c>null</c> if no handler matches.
+        /// </summary>
+        public static async Task<BoundHandlers> TryBind(HttpContext context)
         {
             if (context.GetEndpoint() is not RouteEndpoint endpoint)
             {
-                return (false, null);
+                return null;
             }
 
             var routes = context.RequestServices.GetRequiredService<CompositionOverControllersRoutes>();
@@ -29,9 +51,9 @@ namespace ServiceComposer.AspNetCore
                 : endpoint.RoutePattern.RawText;
             var handlers = routes.HandlersForRoute(rawTemplate, context.Request.Method);
 
-            if (!handlers.Any())
+            if (handlers.Length == 0)
             {
-                return (false, null);
+                return null;
             }
 
             // We need the body to be seekable otherwise if more than one
@@ -39,23 +61,28 @@ namespace ServiceComposer.AspNetCore
             // it'll fail and only the first one succeeds
             context.Request.EnableBuffering();
 
-            var argumentsByComponent = await ComponentsModelBinder.BindAll(handlers, context);
+            var (arguments, modelState) = await ComponentsModelBinder.BindAll(handlers, context);
+            return new BoundHandlers(handlers, arguments, modelState, rawTemplate);
+        }
 
+        /// <summary>
+        /// Runs the bound composition handlers, returning the composed view model.
+        /// </summary>
+        public static async Task<object> Compose(HttpContext context, BoundHandlers boundHandlers, ILogger logger)
+        {
             var requestId = context.EnsureRequestIdIsSetup();
             var compositionContext = new CompositionContext
             (
                 requestId,
                 context.Request,
                 context.RequestServices.GetRequiredService<CompositionMetadataRegistry>(),
-                argumentsByComponent
+                boundHandlers.Arguments
             );
 
-            var handlerTypes = handlers.Select(h => h.ComponentType).ToArray();
+            var handlerTypes = boundHandlers.Handlers.Select(h => h.ComponentType).ToArray();
             logger.LogDebug("Composing over controller action at {Method} {Template} with {HandlerCount} handler(s).",
-                context.Request.Method, rawTemplate, handlerTypes.Length);
-            var viewModel = await CompositionHandler.HandleComposableRequest(context, compositionContext, handlerTypes);
-
-            return (true, viewModel);
+                context.Request.Method, boundHandlers.RawTemplate, handlerTypes.Length);
+            return await CompositionHandler.HandleComposableRequest(context, compositionContext, handlerTypes);
         }
 
         /// <summary>

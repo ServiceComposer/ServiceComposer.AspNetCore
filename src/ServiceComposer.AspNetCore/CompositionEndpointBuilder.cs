@@ -145,7 +145,14 @@ namespace ServiceComposer.AspNetCore
                 // it'll fail and only the first one succeeds
                 context.Request.EnableBuffering();
                 
-                var argumentsByComponent = await GetAllComponentsArguments(context);
+                var (argumentsByComponent, bindingErrors) = await GetAllComponentsArguments(context);
+                if (bindingErrors.ErrorCount > 0 && ModelBindingProblem.FailOnBindingErrors(context))
+                {
+                    // As minimal APIs do, before any endpoint filter runs
+                    await ModelBindingProblem.WriteAsync(context, bindingErrors);
+                    return;
+                }
+
                 var flatArguments = argumentsByComponent
                     .SelectMany(kvp => kvp.Value)
                     .Select(arg=>arg.Value)
@@ -177,7 +184,16 @@ namespace ServiceComposer.AspNetCore
                 //   source-generated to use the the most appropriate filter
                 //   invocation context based on the number of arguments to bind
                 EndpointFilterInvocationContext invocationContext = new DefaultEndpointFilterInvocationContext(context, flatArguments);
-                var viewModel = await pipeline(invocationContext);
+                object viewModel;
+                try
+                {
+                    viewModel = await pipeline(invocationContext);
+                }
+                catch (ModelBindingBadRequestException ex) when (!context.Response.HasStarted)
+                {
+                    await ModelBindingProblem.WriteAsync(context, ex.ModelState);
+                    return;
+                }
                 
                 if (viewModel != null)
                 {

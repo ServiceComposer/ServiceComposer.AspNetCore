@@ -11,12 +11,6 @@ namespace ServiceComposer.AspNetCore
     {
         public async ValueTask<object> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
         {
-            var result = await next(context);
-            if (result is not IActionResult actionResult)
-            {
-                return result;
-            }
-
             var httpContext = context.HttpContext;
             var routes = httpContext.RequestServices.GetRequiredService<CompositionOverControllersRoutes>();
             if (!routes.IsInitialized)
@@ -26,10 +20,27 @@ namespace ServiceComposer.AspNetCore
                     $"after mapping the controllers.");
             }
 
-            var (composed, viewModel) = await CompositionOverControllersComposer.TryCompose(httpContext, logger);
-            if (!composed)
+            // The handlers' models are bound before the action, so that binding errors short-circuit it
+            var boundHandlers = await CompositionOverControllersComposer.TryBind(httpContext);
+            if (boundHandlers is { ModelState.ErrorCount: > 0 } && ModelBindingProblem.FailOnBindingErrors(httpContext))
+            {
+                return new ModelBindingProblemResult(boundHandlers.ModelState);
+            }
+
+            var result = await next(context);
+            if (boundHandlers == null || result is not IActionResult actionResult)
             {
                 return result;
+            }
+
+            object viewModel;
+            try
+            {
+                viewModel = await CompositionOverControllersComposer.Compose(httpContext, boundHandlers, logger);
+            }
+            catch (ModelBindingBadRequestException ex)
+            {
+                return new ModelBindingProblemResult(ex.ModelState);
             }
 
             // An action result set by a composition handler replaces the

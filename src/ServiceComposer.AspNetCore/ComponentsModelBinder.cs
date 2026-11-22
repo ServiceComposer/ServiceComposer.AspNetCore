@@ -11,11 +11,13 @@ namespace ServiceComposer.AspNetCore;
 
 static class ComponentsModelBinder
 {
-    internal static async Task<IDictionary<Type, IList<ModelBindingArgument>>> BindAll(
+    // Returns the binding errors of all the components too, merged
+    internal static async Task<(IDictionary<Type, IList<ModelBindingArgument>> Arguments, ModelStateDictionary ModelState)> BindAll(
         IEnumerable<(Type ComponentType, IList<object> Metadata)> componentsMetadata,
         HttpContext context)
     {
         var result = new Dictionary<Type, IList<ModelBindingArgument>>();
+        var modelState = new ModelStateDictionary();
         foreach (var componentMetadata in componentsMetadata)
         {
             var modelAttributes = componentMetadata.Metadata.OfType<BindModelAttribute>();
@@ -45,11 +47,11 @@ static class ComponentsModelBinder
                     context.Request,
                     modelAttribute.ModelName ?? "",
                     modelAttribute.BindingSource);
-                //TODO: throw if binding failed
+                ModelBindingProblem.AddErrors(modelState, bindingResult.ModelState);
                 arguments.Add(new ModelBindingArgument(modelAttribute.ModelName!, bindingResult.Model, modelAttribute.BindingSource));
             }
         }
 
-        return result;
+        return (result, modelState);
     }
 }
