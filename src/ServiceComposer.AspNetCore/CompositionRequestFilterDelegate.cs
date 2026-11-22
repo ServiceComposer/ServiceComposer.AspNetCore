@@ -2,4 +2,7 @@ using System.Threading.Tasks;
 
 namespace ServiceComposer.AspNetCore;
 
-public delegate ValueTask<object> CompositionRequestFilterDelegate(CompositionRequestFilterContext context);
+/// <summary>
+/// The next step of a composition handler's filter pipeline: the next filter, or the composition handler itself.
+/// </summary>
+public delegate ValueTask CompositionRequestFilterDelegate(CompositionRequestFilterContext context);

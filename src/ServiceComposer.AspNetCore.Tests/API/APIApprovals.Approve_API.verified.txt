@@ -97,13 +97,14 @@ namespace ServiceComposer.AspNetCore
     public abstract class CompositionRequestFilterAttribute : System.Attribute, ServiceComposer.AspNetCore.ICompositionRequestFilter
     {
         protected CompositionRequestFilterAttribute() { }
-        public abstract System.Threading.Tasks.ValueTask<object> InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
+        public abstract System.Threading.Tasks.ValueTask InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
     }
     public sealed class CompositionRequestFilterContext
     {
+        public ServiceComposer.AspNetCore.ICompositionRequestsHandler Handler { get; }
         public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; }
     }
-    public delegate System.Threading.Tasks.ValueTask<object> CompositionRequestFilterDelegate(ServiceComposer.AspNetCore.CompositionRequestFilterContext context);
+    public delegate System.Threading.Tasks.ValueTask CompositionRequestFilterDelegate(ServiceComposer.AspNetCore.CompositionRequestFilterContext context);
     public static class CompositionTelemetry
     {
         public const string ScatterGatherSourceName = "ServiceComposer.AspNetCore.ScatterGather";
@@ -222,7 +223,7 @@ namespace ServiceComposer.AspNetCore
     }
     public interface ICompositionRequestFilter
     {
-        System.Threading.Tasks.ValueTask<object> InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
+        System.Threading.Tasks.ValueTask InvokeAsync(ServiceComposer.AspNetCore.CompositionRequestFilterContext context, ServiceComposer.AspNetCore.CompositionRequestFilterDelegate next);
     }
     public interface ICompositionRequestFilter<T> : ServiceComposer.AspNetCore.ICompositionRequestFilter { }
     public interface ICompositionRequestsHandler

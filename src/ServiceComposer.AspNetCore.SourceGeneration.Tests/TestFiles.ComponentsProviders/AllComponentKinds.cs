@@ -48,13 +48,13 @@ class EndpointScopedViewModelFactory : IEndpointScopedViewModelFactory
 
 class RequestFilter : ICompositionRequestFilter<RequestsHandler>, ICompositionRequestFilter<InternalRequestsHandler>
 {
-    public ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next) => next(context);
+    public ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next) => next(context);
 }
 
 // Filters applied as attributes are not registered in the container.
 class RequestFilterAttribute : CompositionRequestFilterAttribute
 {
-    public override ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next) => next(context);
+    public override ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next) => next(context);
 }
 
 class OptionsCustomization : IViewModelCompositionOptionsCustomization

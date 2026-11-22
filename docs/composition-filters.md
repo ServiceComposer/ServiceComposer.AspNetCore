@@ -17,7 +17,7 @@ Create an attribute that inherits from `CompositionRequestFilterAttribute` like 
 ```cs
 public class SampleCompositionFilterAttribute : CompositionRequestFilterAttribute
 {
-    public override ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+    public override ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
     {
         return next(context);
     }
@@ -27,9 +27,9 @@ public class SampleCompositionFilterAttribute : CompositionRequestFilterAttribut
 <!-- endSnippet -->
 
 > [!NOTE]
-> The `InvokeAsync` implementation is responsible to invoke the next filter in the pipeline.
+> The `InvokeAsync` implementation is responsible to invoke the next filter in the pipeline. Not invoking it skips the intercepted composition handler.
 
-Apply the attribute to the composition handlers to intercept:
+Apply the attribute to the composition handlers to intercept, on their method or their class:
 
 <!-- snippet: handler-with-composition-filter -->
 <a id='snippet-handler-with-composition-filter'></a>
@@ -56,7 +56,7 @@ Create a class that implements the `ICompositionRequestFilter<T>` interface, whe
 ```cs
 public class SampleCompositionFilter : ICompositionRequestFilter<SampleHandler>
 {
-    public ValueTask<object> InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+    public ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
     {
         return next(context);
     }
@@ -70,6 +70,80 @@ The above snippet defines a filter intercepting requests to the `SampleHandler` 
 > [!NOTE]
 > Filters defined as classes implementing the `ICompositionRequestFilter<T>` interface will be automatically registered in DI as transient, and can use DI to resolve dependencies.
 
+## How composition filters run
+
+_Starting with v6.0.0_
+
+Each composition handler runs behind its own filters, right before it. For a route with several composition handlers:
+
+- The filters of a composition handler wrap that handler only: the other handlers of the route run behind their own filters, or none.
+- A filter not invoking `next` skips its composition handler only. The other handlers still run, and the response is still the composed view model. To replace the response, set an action result with `SetActionResult`. To fail the request, throw an exception. To stop the request before any composition handler runs, use an [endpoint filter](endpoint-filters.md).
+- A composition handler's filters run in this order: the attributes on its class, the attributes on its method, then the classes implementing `ICompositionRequestFilter<T>` for it, in registration order.
+- Composition handlers run concurrently, and so do their filters. Filters of different handlers that share state, such as the view model, need to be safe to run concurrently.
+- `CompositionRequestFilterContext.Handler` is the composition handler the filter is invoked for.
+- Filters also run when composition handlers [compose over controllers](composition-over-controllers.md).
+
+Before v6.0.0, all the composition filters of a route wrapped the whole composition. See the [upgrade guide](upgrade-guides/5.x.x-6.0.0.md#composition-filters-run-per-composition-handler).
+
+## Accessing the view model and the action result
+
+Filters access the composed view model through the request, as composition handlers do. A filter can change it before invoking `next`, for example to set defaults, and after, to read or change what its composition handler composed:
+
+<!-- snippet: composition-filter-view-model -->
+<a id='snippet-composition-filter-view-model'></a>
+```cs
+public class ProductPriceFilterAttribute : CompositionRequestFilterAttribute
+{
+    public override async ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+    {
+        var vm = context.HttpContext.Request.GetComposedResponseModel();
+
+        // Before the handler runs
+        vm.Currency = "EUR";
+
+        await next(context);
+
+        // After the handler ran: read and change what it composed
+        vm.FormattedPrice = $"{vm.Price:0.00} {vm.Currency}";
+    }
+}
+```
+<sup><a href='/src/Snippets/CompositionFilters/ViewModelAndActionResultFilters.cs#L22-L38' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-view-model' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The view model is shared by all the composition handlers of the request, and they and their filters run concurrently. See [threading and shared resources](thread-safety.md#the-shared-view-model).
+
+A filter can replace the composed response with an action result, for example to reject an invalid request on behalf of its composition handler. The following filter sets a `400 Bad Request` result and skips its handler:
+
+<!-- snippet: composition-filter-action-result -->
+<a id='snippet-composition-filter-action-result'></a>
+```cs
+public class ValidateProductIdFilterAttribute : CompositionRequestFilterAttribute
+{
+    public override ValueTask InvokeAsync(CompositionRequestFilterContext context, CompositionRequestFilterDelegate next)
+    {
+        var request = context.HttpContext.Request;
+        if (!int.TryParse(request.RouteValues["id"]?.ToString(), out _))
+        {
+            var problems = new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                { "Id", ["The supplied id is not a valid product identifier."] }
+            });
+
+            // Replaces the composed response, and skips the handler
+            request.SetActionResult(new BadRequestObjectResult(problems));
+            return ValueTask.CompletedTask;
+        }
+
+        return next(context);
+    }
+}
+```
+<sup><a href='/src/Snippets/CompositionFilters/ViewModelAndActionResultFilters.cs#L40-L61' title='Snippet source file'>snippet source</a> | <a href='#snippet-composition-filter-action-result' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The other composition handlers of the route still run, but the response is the action result. As for composition handlers, setting an action result requires [output formatters](action-results.md), and the first action result set wins: later calls to `SetActionResult` are ignored.
+
 ## When to use composition filters vs endpoint filters
 
 ServiceComposer provides two filter extension points. Choosing the right one depends on the scope of interception needed.
@@ -77,7 +151,7 @@ ServiceComposer provides two filter extension points. Choosing the right one dep
 **Use [endpoint filters](endpoint-filters.md) when:**
 
 - The logic applies to the entire composed request regardless of which handlers are involved (e.g. request logging, timing, global validation).
-- You want to short-circuit the whole composition before any handler runs.
+- You want to short-circuit the whole composition before any handler runs, or to change the response.
 - The logic is independent of specific handler types.
 
 **Use composition filters when:**
