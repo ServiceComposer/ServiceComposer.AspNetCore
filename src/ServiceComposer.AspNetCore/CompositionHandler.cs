@@ -58,13 +58,50 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
+        // Walks up the factories: the route's endpoint scoped one, then the global one,
+        // then the default dynamic view model. A factory returning null falls through.
+        static object CreateViewModel(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes)
+        {
+            var endpointScopedFactoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t));
+            if (endpointScopedFactoryType != null)
+            {
+                var endpointScopedFactory = (IViewModelFactory)context.RequestServices.GetRequiredService(endpointScopedFactoryType);
+                var viewModel = endpointScopedFactory.CreateViewModel(context, compositionContext);
+                if (viewModel != null)
+                {
+                    return viewModel;
+                }
+
+                LogFactoryFallThrough(context, endpointScopedFactoryType);
+            }
+
+            var globalFactory = context.RequestServices.GetService<IViewModelFactory>();
+            if (globalFactory != null)
+            {
+                var viewModel = globalFactory.CreateViewModel(context, compositionContext);
+                if (viewModel != null)
+                {
+                    return viewModel;
+                }
+
+                LogFactoryFallThrough(context, globalFactory.GetType());
+            }
+
+            return new ExpandoObject();
+        }
+
+        static void LogFactoryFallThrough(HttpContext context, Type factoryType)
+        {
+            var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(CompositionHandler));
+            logger?.LogDebug("View model factory {ViewModelFactory} returned null for {Method} {Path}, falling back to the next factory.",
+                factoryType.Name, context.Request.Method, context.Request.Path.Value);
+        }
+
         internal static async Task<object> HandleComposableRequest(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes)
         {
             var request = context.Request;
 
-            var factoryType = componentsTypes.SingleOrDefault(t => typeof(IEndpointScopedViewModelFactory).IsAssignableFrom(t)) ?? typeof(IViewModelFactory);
-            var viewModelFactory = (IViewModelFactory)context.RequestServices.GetService(factoryType); 
-            var viewModel = viewModelFactory != null ? viewModelFactory.CreateViewModel(context, compositionContext) : new ExpandoObject();
+            var viewModel = CreateViewModel(context, compositionContext, componentsTypes);
 
             try
             {
