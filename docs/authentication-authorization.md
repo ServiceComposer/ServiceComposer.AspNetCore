@@ -18,9 +18,24 @@ public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
 <sup><a href='/src/Snippets/SampleHandler/SampleHandler.cs#L10-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-handler-with-authorization' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
+Attributes on the handler class apply too, as on a controller, also for contract-less composition handlers. `[AllowAnonymous]` on the method opts it out of `[Authorize]` on its class:
+
+<!-- snippet: handler-class-with-authorization -->
+<a id='snippet-handler-class-with-authorization'></a>
+```cs
+[Authorize]
+public class OrdersHandler : ICompositionRequestsHandler
+{
+    [HttpGet("/orders/{id}")]
+    public Task Handle(HttpRequest request) { /* ... */ return Task.CompletedTask; }
+}
+```
+<sup><a href='/src/Snippets/Authentication/AuthenticationSnippets.cs#L27-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-handler-class-with-authorization' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
 ## How it works
 
-ServiceComposer registers composition endpoints using ASP.NET Core's endpoint routing system. Any endpoint metadata attributes — `[Authorize]`, `[AllowAnonymous]`, `[RequireAuthorization]`, custom policy attributes — are collected from all handlers registered for a route and merged onto the composed endpoint.
+ServiceComposer registers composition endpoints using ASP.NET Core's endpoint routing system. Any endpoint metadata attributes — `[Authorize]`, `[AllowAnonymous]`, `[RequireAuthorization]`, custom policy attributes — are collected from all handlers registered for a route, from their classes and their methods, and merged onto the composed endpoint.
 
 This means authorization is evaluated **before** composition handlers execute, as part of the standard ASP.NET Core middleware pipeline. If the request is not authorized, it is rejected and no composition handlers run.
 
@@ -75,5 +90,5 @@ app.UseAuthorization();
 app.MapCompositionHandlers();
 app.Run();
 ```
-<sup><a href='/src/Snippets/Authentication/AuthenticationSnippets.cs#L31-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-auth-middleware-setup' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snippets/Authentication/AuthenticationSnippets.cs#L40-L51' title='Snippet source file'>snippet source</a> | <a href='#snippet-auth-middleware-setup' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
