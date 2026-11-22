@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -278,9 +279,21 @@ namespace ServiceComposer.AspNetCore
                 builder.ComponentsMetadata.Add((component.ComponentType, component.Metadata.ToArray()));
             }
             
+            // Authorization skips the whole endpoint if it has any IAllowAnonymous metadata, so a
+            // component allowing anonymous requests would disable the others' authorization. The most
+            // restrictive requirements apply instead: IAllowAnonymous is left out if any component
+            // requires authorization.
+            var anyComponentRequiresAuthorization = builder.ComponentsMetadata.Any(cm =>
+                cm.Metadata.OfType<IAuthorizeData>().Any() && !cm.Metadata.OfType<IAllowAnonymous>().Any());
+
             // flattens the metadata
             foreach (var metadata in builder.ComponentsMetadata.SelectMany(cm=>cm.Metadata))
             {
+                if (anyComponentRequiresAuthorization && metadata is IAllowAnonymous)
+                {
+                    continue;
+                }
+
                 builder.Metadata.Add(metadata);
             }
 
