@@ -33,8 +33,9 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
 
     /// <summary>
     /// When <c>true</c>, any exception thrown during the downstream call — including network
-    /// failures and non-2xx HTTP responses — is silently swallowed and an empty result is
-    /// returned, allowing the other gatherers to contribute to the composed response.
+    /// failures, timeouts, non-2xx HTTP responses, and responses that can't be transformed — is
+    /// logged as a warning and an empty result is returned, allowing the other gatherers to
+    /// contribute to the composed response. The incoming request being aborted isn't ignored.
     /// Default value is <c>false</c> (errors propagate and fail the entire request).
     /// </summary>
     public bool IgnoreDownstreamRequestErrors { get; set; }
@@ -118,7 +119,10 @@ public class HttpGatherer(string key, string destinationUrl) : Gatherer<JsonNode
 
             return await TransformResponse(response);
         }
-        catch(HttpRequestException ex) when (IgnoreDownstreamRequestErrors)
+        // As documented, any failure of the downstream call is ignored: HTTP error status codes, but
+        // also timeouts (TaskCanceledException) and responses that can't be transformed, e.g. not
+        // JSON. The incoming request being aborted isn't a downstream failure, so it isn't ignored.
+        catch (Exception ex) when (IgnoreDownstreamRequestErrors && !context.RequestAborted.IsCancellationRequested)
         {
             _logger ??= context.RequestServices.GetService<ILogger<HttpGatherer>>();
             _logger?.LogWarning(ex, "Ignoring downstream request error for gatherer {GathererKey} at {DestinationUrl}.", Key, destination);
