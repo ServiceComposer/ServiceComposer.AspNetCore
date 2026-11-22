@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ServiceComposer.AspNetCore
 {
@@ -22,9 +23,12 @@ namespace ServiceComposer.AspNetCore
         // and have the innermost pipeline delegate read it back from there.
         internal const string CurrentComposerKey = "__ServiceComposer.CurrentComposer";
 
-        readonly Dictionary<ResponseCasing, JsonSerializerOptions> casingToSettingsMappings = new();
         readonly RoutePattern routePattern;
-        readonly ResponseCasing defaultResponseCasing;
+        readonly ResponseCasing? explicitResponseCasing;
+        // Derived from the application's minimal APIs JSON options on the first request
+        JsonSerializerOptions httpJsonSerializerOptions;
+        JsonSerializerOptions pascalCaseSerializerOptions;
+        JsonSerializerOptions camelCaseSerializerOptions;
         readonly Type[] componentsTypes;
         readonly bool useOutputFormatters;
         EndpointFilterDelegate cachedPipeline;
@@ -32,20 +36,13 @@ namespace ServiceComposer.AspNetCore
         public int Order { get; }
         public IList<(Type ComponentType, IList<object> Metadata)> ComponentsMetadata { get; } = new List<(Type ComponentType, IList<object> Metadata)>();
 
-        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing defaultResponseCasing, bool useOutputFormatters)
+        public CompositionEndpointBuilder(RoutePattern routePattern, Type[] componentsTypes, int order, ResponseCasing? explicitResponseCasing, bool useOutputFormatters)
         {
             Validate(routePattern, componentsTypes);
 
-            casingToSettingsMappings.Add(ResponseCasing.PascalCase, new JsonSerializerOptions());
-            casingToSettingsMappings.Add(ResponseCasing.CamelCase, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
-            });
-
             this.routePattern = routePattern;
             Order = order;
-            this.defaultResponseCasing = defaultResponseCasing;
+            this.explicitResponseCasing = explicitResponseCasing;
             this.componentsTypes = componentsTypes;
             this.useOutputFormatters = useOutputFormatters;
         }
@@ -63,7 +60,7 @@ namespace ServiceComposer.AspNetCore
 
         JsonSerializerOptions GetSettings(HttpContext context)
         {
-            var casing = defaultResponseCasing;
+            var casing = explicitResponseCasing;
             if (context.Request.Headers.TryGetValue("Accept-Casing", out var requestedCasing))
             {
                 switch (requestedCasing)
@@ -83,21 +80,60 @@ namespace ServiceComposer.AspNetCore
                 }
             }
 
-            JsonSerializerOptions customSettings = null;
             var customSettingProvider = context.RequestServices.GetService<Func<HttpRequest, JsonSerializerOptions>>();
-            if (customSettingProvider != null)
+            var customSettings = customSettingProvider?.Invoke(context.Request);
+            if (customSettings != null)
             {
-                customSettings = customSettingProvider(context.Request);
-                if (customSettings != null && casing == ResponseCasing.CamelCase && customSettings.PropertyNamingPolicy != JsonNamingPolicy.CamelCase)
+                if ((casing ?? ResponseCasing.CamelCase) == ResponseCasing.CamelCase && customSettings.PropertyNamingPolicy != JsonNamingPolicy.CamelCase)
                 {
                     throw new ArgumentException($"Current HttpRequest is requesting camel case serialization. The supplied custom " +
                                                 $"settings are not using as PropertyNamingPolicy JsonNamingPolicy.CamelCase. Either " +
                                                 $"configure custom settings to use JsonNamingPolicy.CamelCase as PropertyNamingPolicy " +
                                                 $"or change the request casing to be pascal case.");
                 }
+
+                return customSettings;
             }
 
-            return customSettings ?? casingToSettingsMappings[casing];
+            // An explicit casing only replaces the naming policies: the rest of the
+            // application's JSON options, e.g. converters, still apply
+            return casing switch
+            {
+                ResponseCasing.PascalCase => pascalCaseSerializerOptions ??= WithNamingPolicy(GetHttpJsonSerializerOptions(context), null),
+                ResponseCasing.CamelCase => camelCaseSerializerOptions ??= WithNamingPolicy(GetHttpJsonSerializerOptions(context), JsonNamingPolicy.CamelCase),
+                _ => httpJsonSerializerOptions ??= WithDictionaryKeyPolicyFallback(GetHttpJsonSerializerOptions(context))
+            };
+        }
+
+        // The options configured with ConfigureHttpJsonOptions(), as for minimal APIs
+        static JsonSerializerOptions GetHttpJsonSerializerOptions(HttpContext context)
+        {
+            return context.RequestServices.GetService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>()?.Value.SerializerOptions
+                   ?? new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        }
+
+        static JsonSerializerOptions WithNamingPolicy(JsonSerializerOptions source, JsonNamingPolicy namingPolicy)
+        {
+            return new JsonSerializerOptions(source)
+            {
+                PropertyNamingPolicy = namingPolicy,
+                DictionaryKeyPolicy = namingPolicy
+            };
+        }
+
+        // The dynamic view model is an ExpandoObject, serialized as a dictionary: without a
+        // dictionary key policy, its members wouldn't follow the property naming policy
+        static JsonSerializerOptions WithDictionaryKeyPolicyFallback(JsonSerializerOptions source)
+        {
+            if (source.DictionaryKeyPolicy != null || source.PropertyNamingPolicy == null)
+            {
+                return source;
+            }
+
+            return new JsonSerializerOptions(source)
+            {
+                DictionaryKeyPolicy = source.PropertyNamingPolicy
+            };
         }
 
         public override Endpoint Build()
