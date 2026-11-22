@@ -337,6 +337,19 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         builder.AppendLine($"namespace {generatedClassNamespace}");
         builder.AppendLine("{");
 
+        // The wrapper is the type ServiceComposer registers, so it carries the user class'
+        // attributes, e.g. [Authorize], for them to become endpoint metadata. [CompositionHandler]
+        // is left out, otherwise the wrapper would be a contract-less composition handler itself.
+        if (userMethod.Parent is ClassDeclarationSyntax userClass)
+        {
+            var userClassAttributes = SerializeUserHandlerAttributeList(semanticModel, userClass.AttributeLists, requiredNamespaces,
+                excludedAttribute: "ServiceComposer.AspNetCore.CompositionHandlerAttribute");
+            foreach (var userClassAttribute in userClassAttributes)
+            {
+                builder.AppendLine($"    {userClassAttribute}");
+            }
+        }
+
         builder.AppendLine("    [EditorBrowsable(EditorBrowsableState.Never)]");
         builder.AppendLine($"    class {generatedClassName}({userClassFullTypeName} userHandler)");
         builder.AppendLine($"         : ICompositionRequestsHandler");
@@ -693,7 +706,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         return boundParameters;
     }
 
-    List<string> SerializeUserHandlerAttributeList(SemanticModel semanticModel, SyntaxList<AttributeListSyntax> attributeLists, List<string> requiredNamespaces)
+    List<string> SerializeUserHandlerAttributeList(SemanticModel semanticModel, SyntaxList<AttributeListSyntax> attributeLists, List<string> requiredNamespaces, string? excludedAttribute = null)
     {
         var serializedAttributes = new List<string>();
 
@@ -705,6 +718,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
                 var attributeType = symbolInfo.Symbol as IMethodSymbol;
 
                 if (attributeType?.ContainingType == null) continue;
+                if (excludedAttribute != null && attributeType.ContainingType.ToDisplayString() == excludedAttribute) continue;
 
                 var attributeName = attributeType.ContainingType.Name;
                 var attributeNamespace = attributeType.ContainingNamespace.ToDisplayString();

@@ -17,3 +17,21 @@ public class SampleHandlerWithAuthorization : ICompositionRequestsHandler
 ```
 <sup><a href='/src/Snippets/SampleHandler/SampleHandler.cs#L10-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample-handler-with-authorization' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+Attributes on the handler class apply too, as on a controller, also for contract-less composition handlers. `[AllowAnonymous]` on the method opts it out of `[Authorize]` on its class:
+
+<!-- snippet: handler-class-with-authorization -->
+<a id='snippet-handler-class-with-authorization'></a>
+```cs
+[Authorize]
+public class OrdersHandler : ICompositionRequestsHandler
+{
+    [HttpGet("/orders/{id}")]
+    public Task Handle(HttpRequest request)
+    {
+        return Task.CompletedTask;
+    }
+}
+```
+<sup><a href='/src/Snippets/SampleHandler/SampleHandler.cs#L22-L32' title='Snippet source file'>snippet source</a> | <a href='#snippet-handler-class-with-authorization' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->

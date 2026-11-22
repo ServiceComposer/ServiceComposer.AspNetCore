@@ -19,6 +19,18 @@ namespace Snippets.SampleHandler
     }
     // end-snippet
 
+    // begin-snippet: handler-class-with-authorization
+    [Authorize]
+    public class OrdersHandler : ICompositionRequestsHandler
+    {
+        [HttpGet("/orders/{id}")]
+        public Task Handle(HttpRequest request)
+        {
+            return Task.CompletedTask;
+        }
+    }
+    // end-snippet
+
     // begin-snippet: sample-handler-with-custom-status-code
     public class SampleHandlerWithCustomStatusCode : ICompositionRequestsHandler
     {
