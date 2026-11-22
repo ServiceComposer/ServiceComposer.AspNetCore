@@ -64,6 +64,18 @@ static class ModelBindingProblem
         await context.Response.WriteAsJsonAsync(problem, typeof(HttpValidationProblemDetails), options: null, contentType: "application/problem+json");
     }
 
+    internal static ModelBindingBadRequestException CreateException(Type modelType, ModelStateDictionary modelState)
+    {
+        var errors = new ModelStateDictionary();
+        AddErrors(errors, modelState);
+
+        var details = string.Join("; ", errors
+            .Where(kvp => kvp.Value is { Errors.Count: > 0 })
+            .Select(kvp => $"{(kvp.Key == "" ? "(body)" : kvp.Key)}: {string.Join(" ", kvp.Value!.Errors.Select(GetErrorMessage))}"));
+
+        return new ModelBindingBadRequestException(errors, $"Binding {modelType.Name} failed: {details}");
+    }
+
     static string GetErrorMessage(ModelError error)
     {
         return string.IsNullOrEmpty(error.ErrorMessage) ? DefaultErrorMessage : error.ErrorMessage;
@@ -77,4 +89,11 @@ sealed class ModelBindingProblemResult(ModelStateDictionary modelState) : IResul
     public int? StatusCode => StatusCodes.Status400BadRequest;
 
     public Task ExecuteAsync(HttpContext httpContext) => ModelBindingProblem.WriteAsync(httpContext, modelState);
+}
+
+// Thrown by Bind<T>() on binding errors. Composition turns it into the binding errors response.
+sealed class ModelBindingBadRequestException(ModelStateDictionary modelState, string message)
+    : BadHttpRequestException(message, StatusCodes.Status400BadRequest)
+{
+    public ModelStateDictionary ModelState { get; } = modelState;
 }

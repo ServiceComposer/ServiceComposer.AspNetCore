@@ -117,6 +117,8 @@ public async Task Handle(HttpRequest request)
 
 For more information and options when using model binding, refer to the [Microsoft official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0).
 
+Starting with v6.0.0, if binding the model has errors, `Bind<T>()` throws a `BadHttpRequestException` with status code `400`. Composition turns it into the same `400 Bad Request` response as [declarative model binding errors](#binding-errors), also with [composition over controllers](composition-over-controllers.md). The exception still reaches the endpoint filters and the `ICompositionErrorsHandler` composition handlers, and it's logged at the debug level, not as an error. To inspect the binding errors instead, use `TryBind<T>()`, which doesn't throw. Setting `options.ModelBinding.FailOnBindingErrors` to `false` restores the previous behavior: `Bind<T>()` returns the partially bound model.
+
 ### TryBind to access the model state dictionary
 
 _Available starting with v2.2.0_
