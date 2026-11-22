@@ -105,3 +105,5 @@ View model factories are resolved, and used, in the following order:
 3. If no global view model factory is registered, or it returns `null`, ServiceComposer creates a `dynamic` view model instance to serve the current request.
 
 A factory returning `null` falls through to the next one, so an endpoint scoped factory can create a view model only for some requests, and leave the others to the global factory. A debug message is logged when a factory falls through.
+
+To work on the view model of every route once it's created, before the composition handlers run, use a [view model preview handler](view-model-preview-handlers.md).

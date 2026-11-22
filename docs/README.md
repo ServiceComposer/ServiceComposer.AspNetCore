@@ -17,6 +17,10 @@ New to ServiceComposer and ViewModel Composition? Start with the [getting starte
 
 ### Composition handlers
 
+#### Routing
+
+Composition handlers declare the routes they contribute to with the ASP.NET Core HTTP method attributes. For more information, including how routes are matched ignoring case, refer to the [routing](routing.md) section.
+
 #### Contract-less composition handlers
 
 Contract-less composition handlers allow writing composition handlers without implementing a specific interface, using a syntax similar to ASP.NET controller actions. For more information, refer to the [contract-less composition handlers](contract-less-composition-requests-handlers.md) section.
@@ -25,6 +29,10 @@ Contract-less composition handlers allow writing composition handlers without im
 
 ServiceComposer can enhance existing MVC web applications by adding composition support to Controllers. For more information, refer to the [composition over controllers](composition-over-controllers.md) section.
 
+### Single item and list composition
+
+Composing a single item only needs composition handlers, while composing a list also needs events. For more information, refer to the [single item and list composition](single-item-and-list-composition.md) section.
+
 ### Events handling
 
 When handling composition requests, there are scenarios in which request handlers need to offload some composition concerns to other handlers. That can be done by [publishing events](events.md).
@@ -32,6 +40,10 @@ When handling composition requests, there are scenarios in which request handler
 ### Strongly typed view models
 
 By default, ServiceComposer uses C# `dynamic` object instances to serve view models to request handlers. It's possible to use [strongly typed view models](view-model-factory.md) by defining view model factories.
+
+### View model preview handlers
+
+View model preview handlers run for every composition request, before the composition handlers, to work on the view model of all the routes. For more information, refer to the [view model preview handlers](view-model-preview-handlers.md) section.
 
 ### ASP.Net Model Binding
 
