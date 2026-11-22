@@ -39,7 +39,7 @@ public class EventPublishingHandler : ICompositionRequestsHandler
 
 ## Subscribing to events
 
-ServiceComposer offers two APIs to subscribe to events.
+ServiceComposer offers two APIs to subscribe to events: generic event handlers, the recommended default, and route-based subscribers, for when the handling depends on the route. See [when using which](#when-using-which).
 
 ### Generic event handlers
 
@@ -60,11 +60,13 @@ public class GenericEventHandler : ICompositionEventsHandler<AnEvent>
 <sup><a href='/src/Snippets/Events/GenericEventHandler.cs#L7-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-generic-event-handler' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
-`ICompositionEventsHandler<TEvent>` instances are discovered at assembly scanning time and registered in the DI container as transient components. Hence, event handlers support dependency injection.
+`ICompositionEventsHandler<TEvent>` instances are discovered at assembly scanning time and registered in the DI container as transient components. Hence, event handlers support constructor dependency injection, and are plain classes that are easy to unit test.
+
+A generic event handler is invoked every time the event is published, whatever the route of the request: the event type is the contract between the publisher and the handlers.
 
 ### Route-based subscribers
 
-A more granular way to subscribe to events is by creating a class that implements the `ICompositionEventsSubscriber`:
+When the same event needs different handling depending on the route, subscribe to it by creating a class that implements the `ICompositionEventsSubscriber`:
 
 <!-- snippet: route-based-event-handler -->
 <a id='snippet-route-based-event-handler'></a>
@@ -92,4 +94,13 @@ At runtime, when an HTTP request that matches the route pattern is handled, all 
 
 ## When using which
 
-Generic event handlers, classes implementing `ICompositionEventsHandler<TEvent>`, are invoked every time an event they subscribe to is published, regardless of the currently handled route. If the same event is used in multiple scenarios, e.g., when doing an HTTP GET and a POST, and different behaviors are required, it's better to implement a route-based event handler that can easily, through the route attribute, differentiate to which type of request it reacts to.
+Use generic event handlers, classes implementing `ICompositionEventsHandler<TEvent>`, by default:
+
+- **The event type is the only contract.** A generic handler is invoked whenever the event is published. If the route of the publishing handler changes, or another route starts publishing the same event, it keeps working.
+- **Less ceremony.** A `Handle` method with constructor injection, instead of a `Subscribe` method, a lambda, and route attributes. It's also easier to unit test.
+- **Familiar.** It's the same shape as other .NET handler interfaces, such as NServiceBus `IHandleMessages<T>` or MediatR notification handlers.
+
+Use route-based subscribers, classes implementing `ICompositionEventsSubscriber`, when the same event is published on several routes and needs different handling on each of them, e.g., an HTTP GET and a POST. Their route attributes make that explicit. Before using them, consider whether two different events express the difference more clearly.
+
+> [!WARNING]
+> Route-based subscribers repeat the route template of the publishing handler. If it changes, or another route publishes the event, they silently stop being invoked: nothing fails.
