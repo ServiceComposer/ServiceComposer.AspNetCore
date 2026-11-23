@@ -1,0 +1,8 @@
+# Configures the pull request list GitHub generates for release notes.
+# See RELEASING.md, "Release notes".
+changelog:
+  exclude:
+    labels:
+      - skip-release-notes
+    authors:
+      - ServiceComposer-bot
