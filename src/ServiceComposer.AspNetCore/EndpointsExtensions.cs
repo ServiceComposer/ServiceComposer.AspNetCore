@@ -124,8 +124,8 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
-                    componentsGroup, dataSources,
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameRoute(
+                    componentsGroup, HttpMethods.Get, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
                     && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
@@ -155,8 +155,8 @@ namespace ServiceComposer.AspNetCore
 
             foreach (var componentsGroup in componentsGroupedByTemplate)
             {
-                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameTemplate(
-                    componentsGroup, dataSources,
+                if (compositionOverControllersOptions.IsEnabled && ThereIsAlreadyAnEndpointForTheSameRoute(
+                    componentsGroup, HttpMethods.Post, dataSources,
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
                     && compositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
@@ -227,32 +227,35 @@ namespace ServiceComposer.AspNetCore
             }
         }
 
-        static bool ThereIsAlreadyAnEndpointForTheSameTemplate(
+        // Finds the endpoint, e.g. a controller action, already mapped for the same template and
+        // HTTP method, in any endpoint data source but the composition ones.
+        static bool ThereIsAlreadyAnEndpointForTheSameRoute(
             IGrouping<string, (Type ComponentType, MethodInfo Method, string Template)> componentsGroup,
+            string httpMethod,
             ICollection<EndpointDataSource> dataSources,
             bool useCaseInsensitiveRouteMatching, out Endpoint endpoint)
         {
-            foreach (var dataSource in dataSources)
-            {
-                if (dataSource.GetType() == typeof(CompositionEndpointDataSource))
+            endpoint = dataSources
+                .Where(dataSource => dataSource is not CompositionEndpointDataSource)
+                .SelectMany(dataSource => dataSource.Endpoints)
+                .OfType<RouteEndpoint>()
+                .FirstOrDefault(e =>
                 {
-                    continue;
-                }
-
-                endpoint = dataSource.Endpoints.OfType<RouteEndpoint>()
-                    .SingleOrDefault(e =>
+                    var rawTemplate = useCaseInsensitiveRouteMatching
+                        ? e.RoutePattern.RawText?.ToLowerInvariant()
+                        : e.RoutePattern.RawText;
+                    if (rawTemplate != componentsGroup.Key)
                     {
-                        var rawTemplate = useCaseInsensitiveRouteMatching
-                            ? e.RoutePattern.RawText.ToLowerInvariant()
-                            : e.RoutePattern.RawText;
-                        return rawTemplate == componentsGroup.Key;
-                    });
+                        return false;
+                    }
 
-                return endpoint != null;
-            }
+                    // Endpoints without HTTP method metadata accept any method
+                    var methods = e.Metadata.GetMetadata<IHttpMethodMetadata>()?.HttpMethods;
+                    return methods == null || methods.Count == 0
+                        || methods.Contains(httpMethod, StringComparer.OrdinalIgnoreCase);
+                });
 
-            endpoint = null;
-            return false;
+            return endpoint != null;
         }
 
         static (Type ComponentType, IList<object> Metadata)[] ExtractComponentsWithMetadata(
