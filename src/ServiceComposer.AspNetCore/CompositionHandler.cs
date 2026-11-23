@@ -135,11 +135,13 @@ namespace ServiceComposer.AspNetCore
                 factoryType.Name, context.Request.Method, context.Request.Path.Value);
         }
 
-        internal static async Task<object> HandleComposableRequest(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes)
+        // A view model, e.g. the model a controller action returned when composing over controllers,
+        // replaces the one the view model factories would create
+        internal static async Task<object> HandleComposableRequest(HttpContext context, CompositionContext compositionContext, Type[] componentsTypes, object viewModel = null)
         {
             var request = context.Request;
 
-            var viewModel = CreateViewModel(context, compositionContext, componentsTypes);
+            viewModel ??= CreateViewModel(context, compositionContext, componentsTypes);
 
             try
             {
