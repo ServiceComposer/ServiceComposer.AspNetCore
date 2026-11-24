@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,9 +87,20 @@ namespace ServiceComposer.AspNetCore
         }
 
         /// <summary>
+        /// Whether the action result is an error, e.g. <c>NotFound(problemDetails)</c> or <c>Forbid()</c>.
+        /// Error results aren't composed.
+        /// </summary>
+        public static bool IsErrorResult(IActionResult result) => result switch
+        {
+            IStatusCodeActionResult { StatusCode: >= 400 } => true,
+            ChallengeResult or ForbidResult => true,
+            _ => false
+        };
+
+        /// <summary>
         /// Whether the action result can carry the composed view model, and the model the controller
-        /// action set on it, if any. Results that can't carry a model, e.g. redirects, and error
-        /// results, e.g. <c>NotFound(problemDetails)</c>, aren't composed.
+        /// action set on it, if any. Results that can't carry a model, e.g. redirects, are composed,
+        /// and the composed view model is discarded.
         /// </summary>
         public static bool CanCarryViewModel(IActionResult result, out object controllerModel)
         {

@@ -56,6 +56,24 @@ namespace ServiceComposer.AspNetCore.Tests
             {
                 return Redirect("/elsewhere");
             }
+
+            [HttpPost("post-redirect/{id}")]
+            public IActionResult PostAndRedirect(int id)
+            {
+                return RedirectToAction(nameof(NoModel), new { id });
+            }
+
+            [HttpGet("ok/{id}")]
+            public IActionResult OkWithoutModel(int id)
+            {
+                return Ok();
+            }
+
+            [HttpGet("not-found-without-body/{id}")]
+            public IActionResult NotFoundWithoutBody(int id)
+            {
+                return NotFound();
+            }
         }
     }
 
@@ -72,6 +90,9 @@ namespace ServiceComposer.AspNetCore.Tests
             [HttpGet("/api/controller-results/no-model/{id}")]
             [HttpGet("/api/controller-results/not-found/{id}")]
             [HttpGet("/api/controller-results/redirect/{id}")]
+            [HttpGet("/api/controller-results/ok/{id}")]
+            [HttpGet("/api/controller-results/not-found-without-body/{id}")]
+            [HttpPost("/api/controller-results/post-redirect/{id}")]
             public Task Handle(HttpRequest request)
             {
                 Interlocked.Increment(ref invocations.Count);
@@ -181,7 +202,18 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Results_that_cannot_carry_a_model_are_not_composed()
+        public async Task Error_results_without_a_body_are_not_composed()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.GetAsync("/api/controller-results/not-found-without-body/1");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(0, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Redirects_are_composed_and_the_response_is_the_redirect()
         {
             var (client, invocations) = CreateClient();
 
@@ -189,7 +221,31 @@ namespace ServiceComposer.AspNetCore.Tests
 
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
             Assert.Equal("/elsewhere", response.Headers.Location?.ToString());
-            Assert.Equal(0, invocations.Count);
+            Assert.Equal(1, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Post_handlers_run_before_the_controller_redirects()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.PostAsync("/api/controller-results/post-redirect/1", null);
+
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+            Assert.Equal("/api/controller-results/no-model/1", response.Headers.Location?.ToString());
+            Assert.Equal(1, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Results_without_a_model_are_composed_and_the_response_is_the_controllers()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.GetAsync("/api/controller-results/ok/1");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(string.Empty, await response.Content.ReadAsStringAsync());
+            Assert.Equal(1, invocations.Count);
         }
     }
 }
