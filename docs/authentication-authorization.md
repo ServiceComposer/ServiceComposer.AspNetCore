@@ -71,8 +71,7 @@ Both `[Authorize]` and `[Authorize(Policy = "WarehouseStaff")]` are collected an
 
 ## Composition over controllers
 
-> [!WARNING]
-> With [composition over controllers](composition-over-controllers.md), authorization metadata declared on composition handlers is ignored on routes that also match a controller: only the controller endpoint's authorization metadata is evaluated. Declare authorization on the controller or the action, or call `RequireAuthorization()` on the controller endpoints. See [composition over controllers authorization](composition-over-controllers.md#authorization).
+With [composition over controllers](composition-over-controllers.md), the authorization attributes of composition handlers apply to the controller endpoints they compose over, together with the controller's and the action's. See [composition over controllers authorization](composition-over-controllers.md#authorization).
 
 ## Setup
 
