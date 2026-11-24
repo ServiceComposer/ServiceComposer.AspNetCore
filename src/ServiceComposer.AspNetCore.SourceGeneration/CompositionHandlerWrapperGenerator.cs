@@ -157,11 +157,19 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var symbolInfo = semanticModel.GetSymbolInfo(type);
         var symbol = symbolInfo.Symbol;
 
-        if (symbol is INamedTypeSymbol namedTypeSymbol)
+        if (symbol is INamedTypeSymbol { IsGenericType: false } namedTypeSymbol)
         {
             return (GetClassNameIncludingParentClasses(namedTypeSymbol), namedTypeSymbol.ContainingNamespace.ToDisplayString());
         }
-        
+
+        // Generic types, e.g. List<T> or int?, and arrays are written fully qualified,
+        // so that their type arguments and element types need no using directives
+        var typeSymbol = semanticModel.GetTypeInfo(type).Type;
+        if (typeSymbol is not null and not IErrorTypeSymbol)
+        {
+            return (typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), null);
+        }
+
         return (null, null);
     }
 
@@ -310,14 +318,30 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var typeAndName = method.Method.ParameterList.Parameters.Select(p =>
         {
             var symbolInfo = semanticModel.GetSymbolInfo(p.Type!);
-            var symbol = symbolInfo.Symbol;
 
-            var fullName = symbol!.ToDisplayString();
-            return $"{fullName.Replace('.', '_')}_{p.Identifier.Text}";
+            // The symbol is null if the type doesn't resolve, e.g. a missing using directive:
+            // the compiler reports that, so the name only has to be valid
+            var fullName = symbolInfo.Symbol?.ToDisplayString() ?? p.Type!.ToString();
+            return $"{ToIdentifier(fullName)}_{p.Identifier.Text}";
         });
 
         var flattenUserClassesHierarchy = string.Join("_", method.UserClassesHierarchy);
         return $"{flattenUserClassesHierarchy}_{method.Method.Identifier.Text}_{string.Join("_", typeAndName)}".TrimEnd('_');
+    }
+
+    /// <summary>
+    /// Replaces the characters that can't be part of an identifier, e.g. the dots of a namespace,
+    /// or the angle brackets, commas, and spaces of a generic type, with underscores.
+    /// </summary>
+    static string ToIdentifier(string typeName)
+    {
+        var builder = new StringBuilder(typeName.Length);
+        foreach (var c in typeName)
+        {
+            builder.Append(char.IsLetterOrDigit(c) || c == '_' ? c : '_');
+        }
+
+        return builder.ToString();
     }
 
     internal static string GetWrapperNamespace(CompositionHandlerMethodInfo method) => $"{method.Namespace}.Generated";
@@ -428,7 +452,7 @@ public class CompositionHandlerWrapperGenerator : IIncrementalGenerator
         var code = builder.ToString();
 
         var usingsBuilder = new StringBuilder();
-        foreach (var rn in requiredNamespaces.Distinct().OrderBy(n => n))
+        foreach (var rn in requiredNamespaces.Where(n => !string.IsNullOrEmpty(n)).Distinct().OrderBy(n => n))
         {
             usingsBuilder.AppendLine($"using {rn};");
         }
