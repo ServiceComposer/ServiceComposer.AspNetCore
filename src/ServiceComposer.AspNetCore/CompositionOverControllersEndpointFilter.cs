@@ -68,6 +68,11 @@ namespace ServiceComposer.AspNetCore
             {
                 CompositionOverControllersComposer.SetViewModel(actionResult, viewModel);
             }
+            else
+            {
+                logger.LogDebug("The controller action at {Method} {Template} returned a {ActionResultType}, which can't carry a view model: the composed view model is discarded.",
+                    httpContext.Request.Method, boundHandlers.RawTemplate, actionResult.GetType().Name);
+            }
 
             return actionResult;
         }
