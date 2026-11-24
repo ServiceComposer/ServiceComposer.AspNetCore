@@ -77,3 +77,5 @@ app.MapCompositionHandlers().Add(endpointBuilder =>
 
 The endpoint's own metadata merges the attributes of all its components, classes first, then methods.
 
+Controller endpoints that composition handlers compose over carry a `CompositionEndpointComponents` item too, for conventions added after `WithCompositionOverControllers()`. See [composition over controllers authorization](composition-over-controllers.md#authorization).
+
