@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using MELT;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
@@ -56,6 +59,24 @@ namespace ServiceComposer.AspNetCore.Tests
             {
                 return Redirect("/elsewhere");
             }
+
+            [HttpPost("post-redirect/{id}")]
+            public IActionResult PostAndRedirect(int id)
+            {
+                return RedirectToAction(nameof(NoModel), new { id });
+            }
+
+            [HttpGet("ok/{id}")]
+            public IActionResult OkWithoutModel(int id)
+            {
+                return Ok();
+            }
+
+            [HttpGet("not-found-without-body/{id}")]
+            public IActionResult NotFoundWithoutBody(int id)
+            {
+                return NotFound();
+            }
         }
     }
 
@@ -72,6 +93,9 @@ namespace ServiceComposer.AspNetCore.Tests
             [HttpGet("/api/controller-results/no-model/{id}")]
             [HttpGet("/api/controller-results/not-found/{id}")]
             [HttpGet("/api/controller-results/redirect/{id}")]
+            [HttpGet("/api/controller-results/ok/{id}")]
+            [HttpGet("/api/controller-results/not-found-without-body/{id}")]
+            [HttpPost("/api/controller-results/post-redirect/{id}")]
             public Task Handle(HttpRequest request)
             {
                 Interlocked.Increment(ref invocations.Count);
@@ -93,7 +117,7 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
 
-        static (HttpClient Client, HandlerInvocations Invocations) CreateClient()
+        static (HttpClient Client, HandlerInvocations Invocations) CreateClient(ILoggerFactory loggerFactory = null)
         {
             var invocations = new HandlerInvocations();
             var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
@@ -109,6 +133,10 @@ namespace ServiceComposer.AspNetCore.Tests
                     });
                     services.AddRouting();
                     services.AddControllers().AddNewtonsoftJson();
+                    if (loggerFactory != null)
+                    {
+                        services.Replace(ServiceDescriptor.Singleton(loggerFactory));
+                    }
                 },
                 configure: app =>
                 {
@@ -181,7 +209,18 @@ namespace ServiceComposer.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task Results_that_cannot_carry_a_model_are_not_composed()
+        public async Task Error_results_without_a_body_are_not_composed()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.GetAsync("/api/controller-results/not-found-without-body/1");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(0, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Redirects_are_composed_and_the_response_is_the_redirect()
         {
             var (client, invocations) = CreateClient();
 
@@ -189,7 +228,45 @@ namespace ServiceComposer.AspNetCore.Tests
 
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
             Assert.Equal("/elsewhere", response.Headers.Location?.ToString());
-            Assert.Equal(0, invocations.Count);
+            Assert.Equal(1, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Post_handlers_run_before_the_controller_redirects()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.PostAsync("/api/controller-results/post-redirect/1", null);
+
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+            Assert.Equal("/api/controller-results/no-model/1", response.Headers.Location?.ToString());
+            Assert.Equal(1, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Logs_that_the_composed_view_model_is_discarded_as_debug()
+        {
+            var loggerFactory = TestLoggerFactory.Create(options => options.SetMinimumLevel(LogLevel.Debug));
+            var (client, _) = CreateClient(loggerFactory);
+
+            await client.GetAsync("/api/controller-results/redirect/1");
+
+            Assert.DoesNotContain(loggerFactory.Sink.LogEntries, l => l.LogLevel >= LogLevel.Warning);
+            Assert.Contains(loggerFactory.Sink.LogEntries, l =>
+                l.LogLevel == LogLevel.Debug
+                && l.Message.Contains("returned a RedirectResult, which can't carry a view model: the composed view model is discarded."));
+        }
+
+        [Fact]
+        public async Task Results_without_a_model_are_composed_and_the_response_is_the_controllers()
+        {
+            var (client, invocations) = CreateClient();
+
+            var response = await client.GetAsync("/api/controller-results/ok/1");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(string.Empty, await response.Content.ReadAsStringAsync());
+            Assert.Equal(1, invocations.Count);
         }
     }
 }
