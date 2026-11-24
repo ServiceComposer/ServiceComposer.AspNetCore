@@ -32,9 +32,10 @@ The controller action runs first, then the composition handlers matching its rou
 
 - If the action returns a model, the composition handlers compose into it: the controller acts as the [view model factory](view-model-factory.md) for the request.
 - If the action returns no model, e.g. `View()` or `new ObjectResult(null)`, the composition handlers compose into the view model created by the view model factories, as for composition endpoints, and the action result gets it.
-- If the action result can't carry a model, e.g. a redirect or `Ok()`, or is an error, e.g. `NotFound(problemDetails)`, the composition handlers don't run, and the response is the controller's.
+- If the action result can't carry a model, e.g. a redirect or `Ok()`, the composition handlers run, and the response is the controller's: the view model they compose into is discarded. Handlers with side effects, e.g. `POST` handlers composing over an action that redirects, run as for any other result.
+- If the action result is an error, e.g. `NotFound(problemDetails)`, `Forbid()`, or any result with a 4xx or 5xx status code, the composition handlers don't run, and the response is the controller's.
 
-Results that carry a model are `ViewResult`, `PartialViewResult`, and `ObjectResult` with no status code or a 2xx one, including models returned directly by the action.
+Results that carry a model are `ViewResult`, `PartialViewResult`, and `ObjectResult` with no status code or a 2xx one, including models returned directly by the action. When the composition handlers run, an action result set by one of them with `SetActionResult` replaces the controller's.
 
 In the following sample, the response contains both the name set by the controller and the price set by the composition handler:
 
