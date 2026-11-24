@@ -180,6 +180,7 @@ namespace ServiceComposer.AspNetCore
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
                     && CompositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
+                    EnsureComponentsMetadataIsApplied(componentsGroup, HttpMethods.Get, existingEndpoint);
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at GET {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);
                     compositionOverControllerGetComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
@@ -212,6 +213,7 @@ namespace ServiceComposer.AspNetCore
                     compositionOverControllersOptions.UseCaseInsensitiveRouteMatching, out var existingEndpoint)
                     && CompositionOverControllersOptions.CanComposeOver(existingEndpoint))
                 {
+                    EnsureComponentsMetadataIsApplied(componentsGroup, HttpMethods.Post, existingEndpoint);
                     logger?.LogDebug("{ComponentCount} composition component(s) registered to compose over the controller at POST {Template}.",
                         componentsGroup.Count(), componentsGroup.Key);
                     compositionOverControllerPostComponents[componentsGroup.Key] = ExtractComponentsWithMetadata(componentsGroup);
@@ -296,10 +298,7 @@ namespace ServiceComposer.AspNetCore
                 .OfType<RouteEndpoint>()
                 .FirstOrDefault(e =>
                 {
-                    var rawTemplate = useCaseInsensitiveRouteMatching
-                        ? e.RoutePattern.RawText?.ToLowerInvariant()
-                        : e.RoutePattern.RawText;
-                    if (rawTemplate != componentsGroup.Key)
+                    if (!TemplateMatches(e.RoutePattern, componentsGroup.Key, useCaseInsensitiveRouteMatching))
                     {
                         return false;
                     }
@@ -311,6 +310,41 @@ namespace ServiceComposer.AspNetCore
                 });
 
             return endpoint != null;
+        }
+
+        static bool TemplateMatches(RoutePattern routePattern, string template, bool useCaseInsensitiveRouteMatching)
+        {
+            var rawTemplate = useCaseInsensitiveRouteMatching
+                ? routePattern.RawText?.ToLowerInvariant()
+                : routePattern.RawText;
+            return rawTemplate == template;
+        }
+
+        // WithCompositionOverControllers() adds the components' metadata to the controller endpoint
+        // when it's built. If it didn't, e.g. because the templates were matched differently, the
+        // components' authorization requirements wouldn't be enforced: fail instead.
+        static void EnsureComponentsMetadataIsApplied(
+            IGrouping<string, (Type ComponentType, IReadOnlyList<object> Metadata, string Template)> componentsGroup,
+            string httpMethod,
+            Endpoint controllerEndpoint)
+        {
+            var appliedComponents = controllerEndpoint.Metadata
+                .OfType<CompositionEndpointComponents>()
+                .SelectMany(components => components.Components)
+                .Select(component => component.ComponentType)
+                .ToHashSet();
+            var missingComponents = componentsGroup
+                .Select(component => component.ComponentType)
+                .Where(componentType => !appliedComponents.Contains(componentType))
+                .Select(componentType => componentType.Name)
+                .ToArray();
+            if (missingComponents.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    $"The metadata of {string.Join(", ", missingComponents)}, composing over the controller endpoint " +
+                    $"{controllerEndpoint.DisplayName} at {httpMethod} /{componentsGroup.Key}, couldn't be applied to the controller endpoint, " +
+                    "so their authorization requirements wouldn't be enforced.");
+            }
         }
 
         static (Type ComponentType, IList<object> Metadata)[] ExtractComponentsWithMetadata(

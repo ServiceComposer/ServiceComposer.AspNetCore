@@ -108,6 +108,12 @@ The composition handlers' models declared with the `Bind*` attributes are bound 
 
 ## Authorization
 
-On routes that compose over a controller, authorization metadata declared on composition handlers, such as `[Authorize]` or `[Authorize(Policy = "...")]`, is ignored. The request runs on the controller endpoint, and ASP.NET Core only evaluates the controller endpoint's authorization metadata, before the controller action and the composition handlers run.
+_Available starting with v6.0.0_
 
-Declare authorization on the controller or the action, or call `RequireAuthorization()` on the controller endpoints. It covers the composition handlers too. See [#1119](https://github.com/ServiceComposer/ServiceComposer.AspNetCore/issues/1119).
+Requests composing over a controller run on the controller endpoint. `WithCompositionOverControllers()` adds the metadata of the composition handlers, event subscribers, and view model factories composing over each controller endpoint to it, so their authorization attributes, such as `[Authorize]` or `[Authorize(Policy = "...")]`, are enforced before the controller action runs, together with the controller's and the action's. Callers must satisfy all of them.
+
+As on composition endpoints, `[AllowAnonymous]` doesn't lift other requirements: if the controller, the action, or any component of the route requires authorization, `[AllowAnonymous]` is ignored for the route, also on the controller or the action, and a warning is logged when the endpoints are built. See [authentication and authorization](authentication-authorization.md).
+
+Where ASP.NET Core uses a single metadata item of a type, the controller endpoint's own metadata wins over the components'. Conventions added after `WithCompositionOverControllers()` see the components' metadata, and a `CompositionEndpointComponents` item listing them. See [reading a route's components](endpoint-filters.md#reading-a-routes-components).
+
+If the components' metadata can't be applied to the controller endpoint they compose over, e.g. because a convention removed it, the application fails at startup.
