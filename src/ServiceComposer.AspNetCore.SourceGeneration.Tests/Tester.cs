@@ -205,6 +205,19 @@ public class Tester
     }
 
     [Fact]
+    public void Components_provider_registers_contract_less_handlers_with_generic_parameter_types()
+    {
+        var source = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "TestFiles.CompositionHandlers", "GenericParameterTypesCompositionHandler.cs"));
+
+        var (runResult, outputCompilation, diagnostics) = RunComponentsProviderGenerator(source);
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(outputCompilation.GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error && d.Location.SourceTree is { } tree && runResult.GeneratedTrees.Contains(tree)));
+        Assert.Contains(runResult.GeneratedTrees, t => t.FilePath.EndsWith("GeneratedCompositionComponentsProvider.g.cs"));
+    }
+
+    [Fact]
     public void No_components_provider_is_generated_for_assemblies_without_components()
     {
         var (runResult, _, diagnostics) = RunComponentsProviderGenerator(ReadComponentsProvidersTestFile("NoComponents.cs"));
