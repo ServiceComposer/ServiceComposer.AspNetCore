@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using MELT;
 using Newtonsoft.Json.Linq;
 using ServiceComposer.AspNetCore.Testing;
 using Xunit;
@@ -114,7 +117,7 @@ namespace ServiceComposer.AspNetCore.Tests
             }
         }
 
-        static (HttpClient Client, HandlerInvocations Invocations) CreateClient()
+        static (HttpClient Client, HandlerInvocations Invocations) CreateClient(ILoggerFactory loggerFactory = null)
         {
             var invocations = new HandlerInvocations();
             var client = new SelfContainedWebApplicationFactoryWithWebHost<Dummy>
@@ -130,6 +133,10 @@ namespace ServiceComposer.AspNetCore.Tests
                     });
                     services.AddRouting();
                     services.AddControllers().AddNewtonsoftJson();
+                    if (loggerFactory != null)
+                    {
+                        services.Replace(ServiceDescriptor.Singleton(loggerFactory));
+                    }
                 },
                 configure: app =>
                 {
@@ -234,6 +241,20 @@ namespace ServiceComposer.AspNetCore.Tests
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
             Assert.Equal("/api/controller-results/no-model/1", response.Headers.Location?.ToString());
             Assert.Equal(1, invocations.Count);
+        }
+
+        [Fact]
+        public async Task Logs_that_the_composed_view_model_is_discarded_as_debug()
+        {
+            var loggerFactory = TestLoggerFactory.Create(options => options.SetMinimumLevel(LogLevel.Debug));
+            var (client, _) = CreateClient(loggerFactory);
+
+            await client.GetAsync("/api/controller-results/redirect/1");
+
+            Assert.DoesNotContain(loggerFactory.Sink.LogEntries, l => l.LogLevel >= LogLevel.Warning);
+            Assert.Contains(loggerFactory.Sink.LogEntries, l =>
+                l.LogLevel == LogLevel.Debug
+                && l.Message.Contains("returned a RedirectResult, which can't carry a view model: the composed view model is discarded."));
         }
 
         [Fact]
