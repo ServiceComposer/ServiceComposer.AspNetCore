@@ -33,12 +33,17 @@ namespace ServiceComposer.AspNetCore
                 return result;
             }
 
-            if (!CompositionOverControllersComposer.CanCarryViewModel(actionResult, out var controllerModel))
+            if (CompositionOverControllersComposer.IsErrorResult(actionResult))
             {
-                logger.LogDebug("Skipping composition over the controller at {Method} {Template}: its {ActionResultType} can't carry a view model.",
+                logger.LogDebug("Skipping composition over the controller at {Method} {Template}: its {ActionResultType} is an error.",
                     httpContext.Request.Method, boundHandlers.RawTemplate, actionResult.GetType().Name);
                 return result;
             }
+
+            // Results that can't carry a model, e.g. redirects, are still composed, so that
+            // handlers with side effects, e.g. POST handlers before a redirect, run.
+            // The composed view model is discarded.
+            var canCarryViewModel = CompositionOverControllersComposer.CanCarryViewModel(actionResult, out var controllerModel);
 
             object viewModel;
             try
@@ -59,7 +64,11 @@ namespace ServiceComposer.AspNetCore
                 return handlerActionResult;
             }
 
-            CompositionOverControllersComposer.SetViewModel(actionResult, viewModel);
+            if (canCarryViewModel)
+            {
+                CompositionOverControllersComposer.SetViewModel(actionResult, viewModel);
+            }
+
             return actionResult;
         }
     }
